@@ -37,9 +37,11 @@ uint64_t get_s_time(void)
 void set_deadline(uint64_t deadline)
 {
 	uint16_t cpu = get_pcpu_id();
-	if (deadline < get_tick()) {
+	uint64_t ticks = get_tick();
+
+	if (deadline < ticks) {
 		pr_dbg("deadline not correct");
-		return;
+		deadline = ticks + us_to_ticks(MIN_TIMER_PERIOD_US);
 	}
 
 	writeq_relaxed(deadline, (void *)CLINT_MTIMECMP(cpu));
@@ -180,8 +182,6 @@ static void timer_deadline_handler(uint16_t pcpu_id)
 				timer->timeout = get_tick() + timer->period_in_cycle;
 				(void)local_add_timer(cpu_timer, timer);
 			}
-		} else {
-			break;
 		}
 	}
 
