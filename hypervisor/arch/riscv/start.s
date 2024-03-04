@@ -5,20 +5,29 @@
 	.globl _start
 _start:
 	csrr a0, mhartid
-	li t0, 0x0f
-	csrw pmpcfg0, t0
-	li t0, 0xffffffff
-	csrw pmpaddr0, t0
 
 	jal init_mstack
 	call reset_mtimer
 	csrw mip, 0x0
 .if !CONFIG_MACRN
+	li t0, 0x08
+	csrw pmpcfg0, t0
+	li t0, 0xffffffff
+	csrw pmpaddr0, t0
+
 	li t0, 0x9aa
-.else
-	li t0, 0x19aa
-.endif
 	csrs mstatus, t0
+.else
+	li t0, 0x0f08
+	csrw pmpcfg0, t0
+	li t0, 0x20000000
+	csrw pmpaddr0, t0
+	li t0, 0xffffffff
+	csrw pmpaddr1, t0
+
+	li t0, 0x19aa
+	csrs mstatus, t0
+.endif
 
 	call init_mtrap
 
@@ -70,9 +79,9 @@ _vkernel:
 #	ecall
 	lw a0, g_vcpus
 	call smp_start_cpus
-#	call get_tick
-#	la a0, _vkernel_msg
-#	call printk
+	call get_tick
+	la a0, _vkernel_msg
+	call early_printk
 	li a0, 0x100
 	csrc sstatus, a0
 	la a0, guest

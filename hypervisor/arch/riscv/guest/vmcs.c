@@ -170,10 +170,8 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	value64 = 0x200000800;
 	cpu_csr_set(mstatus, value64);
 	ctx->run_ctx.cpu_gp_regs.regs.status = value64;
-/*
-	value64 = 0xf0bfff;
-	cpu_csr_write(hedeleg, value64);
-*/
+	value64 = 0xf0b55f;
+	cpu_csr_write(medeleg, value64);
 }
 #endif
 
