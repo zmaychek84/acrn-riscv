@@ -523,7 +523,13 @@ static int32_t mmio_default_access_handler(struct io_request *io_req,
 
 	return 0;
 }
-
+#ifdef CONFIG_RISCV
+static inline int32_t
+hv_emulate_pio(struct acrn_vcpu *vcpu, struct io_request *io_req)
+{
+	return -1;
+}
+#else
 /**
  * Try handling the given request by any port I/O handler registered in the
  * hypervisor.
@@ -587,6 +593,7 @@ hv_emulate_pio(struct acrn_vcpu *vcpu, struct io_request *io_req)
 
 	return status;
 }
+#endif
 
 /**
  * Use registered MMIO handlers on the given request if it falls in the range of

@@ -28,7 +28,11 @@
 
 #include <asm/guest/vm.h>
 #include "vpci_priv.h"
+#ifdef CONFIG_RISCV
+#include <asm/guest/s2vm.h>
+#else
 #include <asm/guest/ept.h>
+#endif
 #include <asm/guest/virq.h>
 #include <logmsg.h>
 #include <hash.h>

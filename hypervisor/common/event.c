@@ -3,7 +3,11 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#ifdef CONFIG_RISCV
+#include <asm/current.h>
+#else
 #include <asm/cpu.h>
+#endif
 #include <schedule.h>
 #include <event.h>
 #include <logmsg.h>

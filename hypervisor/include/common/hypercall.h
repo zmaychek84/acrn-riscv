@@ -13,6 +13,7 @@
 #ifndef HYPERCALL_H
 #define HYPERCALL_H
 
+#ifndef CONFIG_RISCV
 bool is_hypercall_from_ring0(void);
 
 /**
@@ -600,5 +601,202 @@ int32_t hcall_create_vcpu(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uin
  * @}
  */
 /* End of acrn_hypercall */
+#else /* CONFIG_RISCV */
+static inline int32_t hcall_service_vm_offline_cpu(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_get_api_version(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_create_vm(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_destroy_vm(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_reset_vm(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_start_vm(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_pause_vm(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_set_vcpu_regs(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_set_irqline(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_inject_msi(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_set_ioreq_buffer(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_notify_ioreq_finish(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_set_vm_memory_regions(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_write_protect_page(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_gpa_to_hpa(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_assign_pcidev(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_deassign_pcidev(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_assign_mmiodev(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static int32_t hcall_deassign_mmiodev(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static int32_t hcall_add_vdev(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_remove_vdev(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_set_ptdev_intr_info(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_reset_ptdev_intr_info(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+		uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_get_cpu_pm_state(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_vm_intr_monitor(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_world_switch(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_initialize_trusty(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_save_restore_sworld_ctx(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+		uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_handle_tee_vcpu_boot_done(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+		uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_switch_ee(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+		uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_set_callback_vector(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_setup_sbuf(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_asyncio_assign(__unused struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+		 __unused uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_asyncio_deassign(__unused struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+		 __unused uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_setup_hv_npk_log(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_get_hw_info(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_profiling_ops(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+
+static inline int32_t hcall_create_vcpu(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+{
+	return -1;
+}
+#endif /* CONFIG_RISCV */
 
 #endif /* HYPERCALL_H*/

@@ -12,8 +12,14 @@
 #include <console.h>
 #include <asm/per_cpu.h>
 #include <asm/vmx.h>
+#ifndef CONFIG_RISCV
 #include <asm/cpuid.h>
 #include <asm/ioapic.h>
+#include <asm/host_pm.h>
+#else
+#include <asm/lib/string.h>
+#include <asm/plicreg.h>
+#endif
 #include <ptdev.h>
 #include <asm/guest/vm.h>
 #include <sprintf.h>
@@ -21,7 +27,6 @@
 #include <version.h>
 #include <shell.h>
 #include <asm/guest/vmcs.h>
-#include <asm/host_pm.h>
 
 #define TEMP_STR_SIZE		60U
 #define MAX_STR_SIZE		256U
@@ -857,6 +862,7 @@ static int32_t shell_list_vcpu(__unused int32_t argc, __unused char **argv)
 	return 0;
 }
 
+#ifndef CONFIG_RISCV
 #define DUMPREG_SP_SIZE	32
 /* the input 'data' must != NULL and indicate a vcpu structure pointer */
 static void dump_vcpu_reg(void *data)
@@ -1007,6 +1013,10 @@ static int32_t shell_vcpu_dumpreg(int32_t argc, char **argv)
 out:
 	return status;
 }
+
+#else
+static int32_t shell_vcpu_dumpreg(int32_t argc, char **argv) { return 0; }
+#endif
 
 static int32_t shell_dump_host_mem(int32_t argc, char **argv)
 {
@@ -1261,6 +1271,63 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 	}
 }
 
+static int32_t shell_loglevel(int32_t argc, char **argv)
+{
+	char str[MAX_STR_SIZE] = {0};
+
+	switch (argc) {
+	case 4:
+		npk_loglevel = (uint16_t)strtol_deci(argv[3]);
+		/* falls through */
+	case 3:
+		mem_loglevel = (uint16_t)strtol_deci(argv[2]);
+		/* falls through */
+	case 2:
+		console_loglevel = (uint16_t)strtol_deci(argv[1]);
+		break;
+	case 1:
+		snprintf(str, MAX_STR_SIZE, "console_loglevel: %u, "
+			"mem_loglevel: %u, npk_loglevel: %u\r\n",
+			console_loglevel, mem_loglevel, npk_loglevel);
+		shell_puts(str);
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
+#ifdef CONFIG_RISCV
+static void get_ptdev_info(char *str_arg, size_t str_max)
+{
+	return 0;
+}
+static int32_t shell_show_ptdev_info(__unused int32_t argc, __unused char **argv)
+{
+	return 0;
+}
+static void get_vioapic_info(char *str_arg, size_t str_max, uint16_t vmid)
+{
+	return 0;
+}
+static int32_t shell_show_vioapic_info(int32_t argc, char **argv)
+{
+	return 0;
+}
+static int32_t get_ioapic_info(char *str_arg, size_t str_max_len)
+{
+	return 0;
+}
+static int32_t shell_show_ioapic_info(__unused int32_t argc, __unused char **argv)
+{
+	return 0;
+}
+static int32_t shell_cpuid(int32_t argc, char **argv) { return 0; }
+static int32_t shell_reboot(__unused int32_t argc, __unused char **argv) { return 0; }
+static int32_t shell_rdmsr(int32_t argc, char **argv) { return 0; }
+static int32_t shell_wrmsr(int32_t argc, char **argv) { return 0; }
+#else
 static void get_ptdev_info(char *str_arg, size_t str_max)
 {
 	char *str = str_arg;
@@ -1465,6 +1532,7 @@ overflow:
 	return 0;
 }
 
+
 static int32_t shell_show_ioapic_info(__unused int32_t argc, __unused char **argv)
 {
 	int32_t err = 0;
@@ -1473,33 +1541,6 @@ static int32_t shell_show_ioapic_info(__unused int32_t argc, __unused char **arg
 	shell_puts(shell_log_buf);
 
 	return err;
-}
-
-static int32_t shell_loglevel(int32_t argc, char **argv)
-{
-	char str[MAX_STR_SIZE] = {0};
-
-	switch (argc) {
-	case 4:
-		npk_loglevel = (uint16_t)strtol_deci(argv[3]);
-		/* falls through */
-	case 3:
-		mem_loglevel = (uint16_t)strtol_deci(argv[2]);
-		/* falls through */
-	case 2:
-		console_loglevel = (uint16_t)strtol_deci(argv[1]);
-		break;
-	case 1:
-		snprintf(str, MAX_STR_SIZE, "console_loglevel: %u, "
-			"mem_loglevel: %u, npk_loglevel: %u\r\n",
-			console_loglevel, mem_loglevel, npk_loglevel);
-		shell_puts(str);
-		break;
-	default:
-		return -EINVAL;
-	}
-
-	return 0;
 }
 
 static int32_t shell_cpuid(int32_t argc, char **argv)
@@ -1575,7 +1616,6 @@ static int32_t shell_rdmsr(int32_t argc, char **argv)
 
 	return ret;
 }
-
 static int32_t shell_wrmsr(int32_t argc, char **argv)
 {
 	uint16_t pcpu_id = 0;
@@ -1615,3 +1655,4 @@ static int32_t shell_wrmsr(int32_t argc, char **argv)
 
 	return ret;
 }
+#endif

@@ -7,10 +7,14 @@
 #include <types.h>
 #include <errno.h>
 #include <asm/io.h>
+#ifdef CONFIG_RISCV
+#include <asm/csr.h>
+#else
 #include <asm/msr.h>
-#include <asm/apicreg.h>
 #include <asm/cpuid.h>
 #include <asm/cpu_caps.h>
+#endif
+#include <asm/apicreg.h>
 #include <softirq.h>
 #include <trace.h>
 #include <asm/irq.h>

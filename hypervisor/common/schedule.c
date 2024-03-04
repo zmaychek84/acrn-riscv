@@ -9,7 +9,9 @@
 #include <asm/lib/bits.h>
 #include <asm/cpu.h>
 #include <asm/per_cpu.h>
+#ifndef CONFIG_RISCV
 #include <asm/lapic.h>
+#endif
 #include <schedule.h>
 #include <sprintf.h>
 #include <asm/irq.h>
