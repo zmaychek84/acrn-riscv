@@ -13,7 +13,11 @@ _start:
 	jal init_mstack
 	call reset_mtimer
 	csrw mip, 0x0
+.if !CONFIG_MACRN
 	li t0, 0x9aa
+.else
+	li t0, 0x19aa
+.endif
 	csrs mstatus, t0
 
 	call init_mtrap
@@ -34,7 +38,9 @@ _start:
 
 	.globl _boot
 _boot:
+.if !CONFIG_MACRN
 	jal init_stack
+.endif
 	bnez a0, secondary
 	call kernel_init
 1:

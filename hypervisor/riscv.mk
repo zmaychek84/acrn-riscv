@@ -125,11 +125,22 @@ OBJCOPY ?= riscv64-unknown-linux-gnu-objcopy
 
 CFLAGS += -DCONFIG_RETPOLINE
 
+CONFIG_MACRN := 1
+
+ifdef CONFIG_MACRN
+CFLAGS += -DCONFIG_MACRN
+ASFLAGS += -DCONFIG_MACRN
+endif
+
 # platform boot component
 BOOT_S_SRCS += arch/riscv/start.s
 BOOT_S_SRCS += arch/riscv/intr.s
 BOOT_S_SRCS += arch/riscv/mmu.s
+ifdef CONFIG_MACRN
+BOOT_S_SRCS += arch/riscv/guest/pmp.s
+else
 BOOT_S_SRCS += arch/riscv/guest/virt.s
+endif
 BOOT_S_SRCS += arch/riscv/sched.s
 
 BOOT_C_SRCS += arch/riscv/mtrap.c
@@ -155,7 +166,9 @@ BOOT_C_SRCS += arch/riscv/lib/memory.c
 BOOT_C_SRCS += arch/riscv/guest/vmcs.c
 BOOT_C_SRCS += arch/riscv/guest/vm.c
 BOOT_C_SRCS += arch/riscv/guest/vio.c
+ifndef CONFIG_MACRN
 BOOT_C_SRCS += arch/riscv/guest/s2vm.c
+endif
 BOOT_C_SRCS += arch/riscv/guest/vcpu.c
 BOOT_C_SRCS += arch/riscv/guest/vcsr.c
 BOOT_C_SRCS += arch/riscv/guest/virq.c

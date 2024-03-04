@@ -18,8 +18,7 @@ struct acrn_vm;
 struct acrn_vcpu;
 
 typedef void (*pge_handler)(uint64_t *pgentry, uint64_t size);
-extern void walk_ept_table(struct acrn_vm *vm, pge_handler cb);
-
+#ifndef CONFIG_MACRN
 extern void setup_virt_paging(void);
 extern uint64_t local_gpa2hpa(struct acrn_vm *vm, uint64_t gpa, uint32_t *size);
 extern uint64_t gpa2hpa(struct acrn_vm *vm, uint64_t gpa);
@@ -30,5 +29,27 @@ extern void s2pt_del_mr(struct acrn_vm *vm, uint64_t *pml4_page, uint64_t gpa, u
 extern void s2pt_modify_mr(struct acrn_vm *vm, uint64_t *vpn3_page, uint64_t gpa,
 				uint64_t size, uint64_t prot_set, uint64_t prot_clr);
 extern void s2vm_restore_state(struct acrn_vcpu *vcpu);
+#else
+static inline void setup_virt_paging(void) {}
+static inline uint64_t local_gpa2hpa(struct acrn_vm *vm, uint64_t gpa, uint32_t *size)
+{
+	return gpa;
+}
+static inline uint64_t gpa2hpa(struct acrn_vm *vm, uint64_t gpa)
+{
+	return gpa;
+}
+
+static inline int s2pt_init(struct acrn_vm *vm)
+{
+	return 0;
+}
+static inline void s2pt_add_mr(struct acrn_vm *vm, uint64_t *pml4_page, uint64_t hpa,
+			uint64_t gpa, uint64_t size, uint64_t prot_orig) {}
+static inline void s2pt_del_mr(struct acrn_vm *vm, uint64_t *pml4_page, uint64_t gpa, uint64_t size) {}
+static inline void s2pt_modify_mr(struct acrn_vm *vm, uint64_t *vpn3_page, uint64_t gpa,
+				uint64_t size, uint64_t prot_set, uint64_t prot_clr) {}
+static inline void s2vm_restore_state(struct acrn_vcpu *vcpu) {}
+#endif
 
 #endif /* __RISCV_S2VM_H__ */

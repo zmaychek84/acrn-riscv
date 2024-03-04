@@ -73,6 +73,9 @@ static void mtimer_handler(void)
 		"sw %2, 0(%1)"
 		:: "r"(val), "r"(addr), "r"(CLINT_DISABLE_TIMER): "memory"
 	);
+#ifdef CONFIG_MACRN
+	//hv_timer_handler();
+#endif
 }
 
 static void mexti_handler(void)

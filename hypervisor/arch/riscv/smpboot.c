@@ -150,7 +150,9 @@ void start_secondary(uint32_t cpuid)
 
 	/* Now report this CPU is up */
 	set_bit(cpuid, &cpu_online_map);
+#ifndef CONFIG_MACRN
 	switch_satp(init_satp);
+#endif
 	pr_info("%s cpu = %d\n", __func__, cpuid);
 	init_trap();
 	pr_dbg("init traps");
