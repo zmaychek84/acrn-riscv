@@ -40,7 +40,7 @@ emulate_pio_complete(struct acrn_vcpu *vcpu, const struct io_request *io_req)
 	pr_fatal("Wrong state, should not reach here!\n");
 }
 
-int32_t s2pt_violation_vmexit_handler(struct acrn_vcpu *vcpu)
+int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 {
 	int ret;
 	int32_t status = -1;
@@ -60,11 +60,13 @@ int32_t s2pt_violation_vmexit_handler(struct acrn_vcpu *vcpu)
 	/* Specify if read or write operation */
 	switch (exit_qual) {
 	case HX_EXIT_PF_GUEST_STORE:
+	case HX_EXIT_STORE_ACCESS:
 		/* Write operation */
 		mmio_req->direction = ACRN_IOREQ_DIR_WRITE;
 		mmio_req->value = 0UL;
 		break;
 	case HX_EXIT_PF_GUEST_LOAD:
+	case HX_EXIT_LOAD_ACCESS:
 		/* Read operation */
 		mmio_req->direction = ACRN_IOREQ_DIR_READ;
 		break;

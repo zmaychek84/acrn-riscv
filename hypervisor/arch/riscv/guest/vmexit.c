@@ -52,6 +52,52 @@ static const struct vm_exit_dispatch interrupt_dispatch_table[NR_HX_EXIT_IRQ_REA
 };
 
 /* VM Dispatch table for Exit condition handling */
+#ifdef CONFIG_MACRN
+static const struct vm_exit_dispatch exception_dispatch_table[NR_HX_EXIT_REASONS] = {
+	[HX_EXIT_INS_MISALIGN] = {
+		.handler = exception_vmexit_handler},
+	[HX_EXIT_INS_ACCESS] = {
+		.handler = exception_vmexit_handler},
+	[HX_EXIT_INS_ILLEGAL] = {
+		.handler = exception_vmexit_handler},
+	[HX_EXIT_BREAKPOINT] = {
+		.handler = exception_vmexit_handler},
+	[HX_EXIT_LOAD_MISALIGN] = {
+		.handler = exception_vmexit_handler},
+	[HX_EXIT_LOAD_ACCESS] = {
+		.handler = mmio_access_vmexit_handler},
+	[HX_EXIT_STORE_MISALIGN] = {
+		.handler = exception_vmexit_handler},
+	[HX_EXIT_STORE_ACCESS] = {
+		.handler = mmio_access_vmexit_handler},
+	[HX_EXIT_ECALL_U] = {
+		.handler = unhandled_vmexit_handler},
+	[HX_EXIT_ECALL_HS] = {
+		.handler = vmcall_vmexit_handler},
+	[HX_EXIT_ECALL_VS] = {
+		.handler = unhandled_vmexit_handler},
+	[HX_EXIT_ECALL_M] = {
+		.handler = unhandled_vmexit_handler},
+	[HX_EXIT_PF_INS] = {
+		.handler = pf_ins_vmexit_handler},
+	[HX_EXIT_PF_LOAD] = {
+		.handler = pf_load_vmexit_handler},
+	[HX_EXIT_RESV] = {
+		.handler = undefined_vmexit_handler},
+	[HX_EXIT_PF_STORE] = {
+		.handler = pf_store_vmexit_handler},
+	[HX_EXIT_REASON_INVLPG] = {
+		.handler = unhandled_vmexit_handler},
+	[HX_EXIT_PF_GUEST_INS] = {
+		.handler = undefined_vmexit_handler},
+	[HX_EXIT_PF_GUEST_LOAD] = {
+		.handler = undefined_vmexit_handler},
+	[HX_EXIT_VIRT_INS] = {
+		.handler = hlt_vmexit_handler},
+	[HX_EXIT_PF_GUEST_STORE] = {
+		.handler = undefined_vmexit_handler},
+};
+#else
 static const struct vm_exit_dispatch exception_dispatch_table[NR_HX_EXIT_REASONS] = {
 	[HX_EXIT_INS_MISALIGN] = {
 		.handler = exception_vmexit_handler},
@@ -86,14 +132,15 @@ static const struct vm_exit_dispatch exception_dispatch_table[NR_HX_EXIT_REASONS
 	[HX_EXIT_REASON_INVLPG] = {
 		.handler = unhandled_vmexit_handler},
 	[HX_EXIT_PF_GUEST_INS] = {
-		.handler = s2pt_violation_vmexit_handler},
+		.handler = mmio_access_vmexit_handler},
 	[HX_EXIT_PF_GUEST_LOAD] = {
-		.handler = s2pt_violation_vmexit_handler},
+		.handler = mmio_access_vmexit_handler},
 	[HX_EXIT_VIRT_INS] = {
 		.handler = hlt_vmexit_handler},
 	[HX_EXIT_PF_GUEST_STORE] = {
-		.handler = s2pt_violation_vmexit_handler},
+		.handler = mmio_access_vmexit_handler},
 };
+#endif
 
 #define HX_VMEXIT_TYPE_MASK 0x8000000000000000
 #define HX_VMEXIT_REASON_MASK 0xFFFFFFFF

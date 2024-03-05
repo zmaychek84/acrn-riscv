@@ -29,7 +29,7 @@
 #define PIO_RESET_REG_IDX		(CF9_PIO_IDX + 1U)
 #define EMUL_PIO_IDX_MAX		(PIO_RESET_REG_IDX + 1U)
 
-extern int32_t s2pt_violation_vmexit_handler(struct acrn_vcpu *vcpu);
+extern int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu);
 extern void emulate_pio_complete(struct acrn_vcpu *vcpu, const struct io_request *io_req);
 extern void allow_guest_pio_access(struct acrn_vm *vm, uint16_t port_address, uint32_t nbytes);
 extern void deny_guest_pio_access(struct acrn_vm *vm, uint16_t port_address, uint32_t nbytes);
