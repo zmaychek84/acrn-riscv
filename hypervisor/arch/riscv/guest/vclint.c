@@ -409,19 +409,21 @@ static bool vclint_clint_write_access_may_valid(uint32_t offset)
 int32_t clint_access_vmexit_handler(struct acrn_vcpu *vcpu)
 {
 	int32_t err;
-	uint32_t offset;
-	uint64_t qual, access_type = TYPE_INST_READ;
+	uint32_t offset, ins;
+	uint64_t pc, qual, access_type = TYPE_INST_READ;
 	struct acrn_vclint *vclint;
 	struct acrn_mmio_request *mmio;
 
+	pc = vcpu_get_gpreg(vcpu, CPU_REG_IP);
+	ins = *(uint32_t *)pc;
 	qual = vcpu->arch.exit_qualification;
 
-	if (decode_instruction(vcpu) >= 0) {
+	if (decode_instruction(vcpu, ins) >= 0) {
 		vclint = vcpu_vclint(vcpu);
 		mmio = &vcpu->req.reqs.mmio_request;
 		offset = mmio->address;
 		if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
-			err = emulate_instruction(vcpu);
+			err = emulate_instruction(vcpu, ins);
 			if (err == 0) {
 				if (vclint->ops->clint_write_access_may_valid(offset)) {
 					(void)vclint_write(vclint, offset, mmio->value);
@@ -433,7 +435,7 @@ int32_t clint_access_vmexit_handler(struct acrn_vcpu *vcpu)
 			} else {
 				mmio->value = 0UL;
 			}
-			err = emulate_instruction(vcpu);
+			err = emulate_instruction(vcpu, ins);
 		}
 	} else {
 		pr_err("%s, unhandled access\n", __func__);

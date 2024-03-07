@@ -46,6 +46,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 	int32_t status = -1;
 	uint64_t exit_qual;
 	uint64_t gpa;
+	uint32_t ins;
 	struct io_request *io_req = &vcpu->req;
 	struct acrn_mmio_request *mmio_req = &io_req->reqs.mmio_request;
 	struct run_context *ctx =
@@ -53,7 +54,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 
 	/* Handle page fault from guest */
 	exit_qual = vcpu->arch.exit_qualification;
-	//gpa = ctx->cpu_gp_regs.regs.ip;
+	ins = *(uint32_t *)(ctx->cpu_gp_regs.regs.ip);
 	gpa = ctx->cpu_gp_regs.regs.tval;
 	io_req->io_type = ACRN_IOREQ_TYPE_MMIO;
 
@@ -78,7 +79,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 	}
 
 	mmio_req->address = gpa;
-	ret = decode_instruction(vcpu);
+	ret = decode_instruction(vcpu, ins);
 	if (ret > 0) {
 		mmio_req->size = (uint64_t)ret;
 		if (mmio_req->address > CLINT_MEM_ADDR && mmio_req->address + ret < CLINT_MEM_REGION) {
@@ -94,7 +95,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 
 		/* Determine value being written. */
 		if (mmio_req->direction == ACRN_IOREQ_DIR_WRITE) {
-			status = emulate_instruction(vcpu);
+			status = emulate_instruction(vcpu, ins);
 			if (status != 0) {
 				ret = -EFAULT;
 			}
