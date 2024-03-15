@@ -18,6 +18,8 @@
 #include <asm/board.h>
 #include <asm/defconfig.h>
 
+#ifndef CONFIG_MACRN
+
 #define DEFINE_BOOT_PAGE_TABLE(name)										\
 pgtable_t __aligned(PAGE_SIZE) __attribute__((__section__(".data.page_aligned"))) name[PG_TABLE_ENTRIES]
 
@@ -35,8 +37,6 @@ DEFINE_PAGE_TABLES(acrn_vpn0, VPN1_PAGE_NUM);
 
 /* Non-boot CPUs use this to find the correct pagetables. */
 uint64_t init_satp;
-
-uint64_t phys_offset;
 
 static inline pgtable_t pte_of_acrnaddr(uint64_t va, bool table)
 {
@@ -65,7 +65,6 @@ static void __init map_hv(unsigned long boot_phys_offset)
 	int i, j;
 
 	phys_offset = boot_phys_offset;
-
 	p = (void *)acrn_vpn3;
 	p[0] = pte_of_acrnaddr((uint64_t)acrn_vpn2, true);
 	p = (void *)acrn_vpn2;
@@ -128,13 +127,6 @@ static void __init map_mem(void)
 */
 }
 
-void __init setup_pagetables(unsigned long boot_phys_offset)
-{
-	map_hv(boot_phys_offset);
-
-	map_mem();
-}
-
 static void clear_table(void *table)
 {
 	clear_page(table);
@@ -156,4 +148,24 @@ int init_secondary_pagetables(int cpu)
 	clean_dcache(init_satp);
 
 	return 0;
+}
+
+#else /* CONFIG_MACRN */
+
+static void __init map_hv(unsigned long boot_phys_offset)
+{
+	phys_offset = boot_phys_offset;
+}
+
+static void __init map_mem(void)
+{
+}
+
+#endif
+
+uint64_t phys_offset;
+void __init setup_mem(unsigned long boot_phys_offset)
+{
+	map_hv(boot_phys_offset);
+	map_mem();
 }

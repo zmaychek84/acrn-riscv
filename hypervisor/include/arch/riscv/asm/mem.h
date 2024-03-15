@@ -18,9 +18,27 @@ typedef uint64_t paddr_t;
 #define maddr_to_mfn(ma)    paddr_to_pfn(ma)
 #define gfn_to_gaddr(gfn)   pfn_to_paddr(gfn)
 
-extern void setup_pagetables(unsigned long boot_phys_offset);
+extern paddr_t phys_offset;
+static inline void *hpa2hva(uint64_t hpa)
+{
+	if ( !is_kernel(hpa - phys_offset) )
+		return (void *)hpa;
+	else
+		return (void *)(hpa - phys_offset);
+}
+
+static inline uint64_t hva2hpa(const void *va)
+{
+	if ( !is_kernel(va) )
+		return (uint64_t)va;
+	else
+		return (uint64_t)va + phys_offset;
+}
+
+#ifndef CONFIG_MACRN
 extern int init_secondary_pagetables(int cpu);
 extern void switch_satp(uint64_t satp);
-extern void clear_fixmap_pagetable(void);
+#endif
+extern void setup_mem(unsigned long boot_phys_offset);
 
 #endif /* __RISCV_MEM_H__ */

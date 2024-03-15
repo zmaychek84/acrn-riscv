@@ -1,17 +1,17 @@
 layout regs
 target remote localhost:1235
-#b start_acrn
-#b create_vm
-#b create_vcpu
+b start_acrn
+b create_vm
+b create_vcpu
 #b init_host_state
-#b start_sos_vm
-#b kernel_load
+b kernel_load
 #b arch_switch_to
+b mtimer_handler
 b vmx_vmrun
 b _vkernel
 #b mmu_jump
 b guest
-#b mtrap_handler
+b mtrap_handler
 #b strap_handler
 #b vstrap_handler
 #b idle
@@ -26,6 +26,7 @@ b vm_exit
 #b do_swi
 #b sswi_handler
 #b start_vm
+b prepare_sos_vm
 b start_sos_vm
 #b make_schedule_request
 #b send_single_swi
@@ -37,6 +38,9 @@ b load_guest_state
 b save_guest_state
 b init_host_state
 b run_vcpu
+b hv_emulate_mmio
+b mmio_access_vmexit_handler
+b init_vm_sw_load
 display/x $sstatus
 display/x $mstatus
 display/x $hstatus

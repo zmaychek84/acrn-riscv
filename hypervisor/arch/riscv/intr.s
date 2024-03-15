@@ -75,11 +75,11 @@ kernel_init:
 	csrw sie, t0
 	li t0, 0xC0000
 	csrw sstatus, t0
-	li a1, 0
-	li a2, 0
 	call init_trap
 	#call setup_mmu
 .endif
+	li a0, 0
+	li a1, 0
 	call start_acrn
 	sret
 

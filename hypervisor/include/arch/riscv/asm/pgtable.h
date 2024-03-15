@@ -99,7 +99,6 @@ pgtable_t __aligned(PAGE_SIZE) name[PG_TABLE_ENTRIES * (nr)]
 #include <asm/init.h>
 #include <asm/mem.h>
 
-extern paddr_t phys_offset;
 struct page {
 	uint8_t contents[PAGE_SIZE];
 } __aligned(PAGE_SIZE);
@@ -209,22 +208,6 @@ static inline uint64_t round_vpn1_up(uint64_t val)
 static inline uint64_t round_vpn1_down(uint64_t val)
 {
 	return (val & VPN1_MASK);
-}
-
-static inline void *hpa2hva(uint64_t hpa)
-{
-	if ( !is_kernel(hpa - phys_offset) )
-		return (void *)hpa;
-	else
-		return (void *)(hpa - phys_offset);
-}
-
-static inline uint64_t hva2hpa(const void *va)
-{
-	if ( !is_kernel(va) )
-		return (uint64_t)va;
-	else
-		return (uint64_t)va + phys_offset;
 }
 
 static inline uint64_t vpn3_index(uint64_t address)

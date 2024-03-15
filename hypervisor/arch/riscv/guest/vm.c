@@ -29,8 +29,8 @@ struct acrn_vm_config vm_configs;
 struct acrn_vm *sos_vm = &vm_array[0];
 struct acrn_vm *uos_vm = &vm_array[1];
 
-#define ZIMAGE64_MAGIC_V0 0x14000008
-#define ZIMAGE64_MAGIC_V1 0x644d5241 /* "ARM\x64" */
+#define RV64_ZIMAGE_MAGIC0 0x5643534952
+#define RV64_ZIMAGE_MAGIC1 0x05435352
 
 #define MASK_2M 0xFFFFFFFFFFE00000
 
@@ -75,44 +75,44 @@ static void kernel_load(struct kernel_info *info)
 	void *kernel_hva;
 	int rc;
 
-	//load_addr = info->mem_start_gpa + info->text_offset;
-	load_addr = info->text_offset;
+	load_addr = info->mem_start_gpa + info->text_offset;
+	//load_addr = info->text_offset;
 	info->entry = load_addr;
 
 	pr_info("Loading kernel from %lx to %lx - %lx",
 		   paddr, load_addr, load_addr + len);
-
+#ifndef CONFIG_MACRN
 	kernel_hva = hpa2hva(paddr);
 
 	rc = copy_to_gpa(sos_vm, kernel_hva, load_addr, len);
 	if ( rc != 0 )
 		pr_err("Unable to copy the kernel in the memory\n");
+#endif
 }
-
 
 static int kernel_header_parse(struct kernel_info *info)
 {
-#if 0
-	/* linux/Documentation/arm64/booting.txt */
+	/* linux/Documentation/arch/riscv/boot-image-header.rst*/
+	info->text_offset = 0;
+	return 0;
 	struct {
-		uint32_t magic0;
-		uint32_t res0;
+		uint32_t code0;
+		uint32_t code1;
 		uint64_t text_offset;  /* Image load offset */
-		uint64_t res1;
+		uint64_t image_size;
+		uint64_t flags;
+		uint32_t version;
+		uint32_t res1;
 		uint64_t res2;
-		/* zImage V1 only from here */
-		uint64_t res3;
-		uint64_t res4;
-		uint64_t res5;
+		uint64_t magic0;
 		uint32_t magic1;
-		uint32_t res6;
+		uint32_t res3;
 	} zimage;
 	void *addr = hpa2hva(info->kernel_addr);
 
 	memcpy_s(&zimage, sizeof(zimage), addr, sizeof(zimage));
-
-	if ( zimage.magic0 != ZIMAGE64_MAGIC_V0 &&
-		 zimage.magic1 != ZIMAGE64_MAGIC_V1 )
+	if (zimage.magic0 != RV64_ZIMAGE_MAGIC0 &&
+		 zimage.magic1 != RV64_ZIMAGE_MAGIC1)
 		return -EINVAL;
 
 	/*
@@ -122,8 +122,7 @@ static int kernel_header_parse(struct kernel_info *info)
 
 	info->text_offset = zimage.text_offset;
 	pr_info("zimage addr %lx text_offset %x", addr, info->text_offset);
-#endif
-	info->text_offset = (paddr_t)_boot;
+	//info->text_offset = (paddr_t)_boot;
 	return 0;
 }
 
@@ -143,10 +142,13 @@ static void init_vm_sw_load(struct acrn_vm *vm)
 void prepare_sos_vm(void)
 {
 	sos_vm->vm_id = 0;
+
+#ifndef CONFIG_MACRN
 	// init stage 2 memory operations.
 	init_s2pt_mem_ops(&sos_vm->arch_vm.s2pt_mem_ops, sos_vm->vm_id);
 	sos_vm->arch_vm.s2ptp = sos_vm->arch_vm.s2pt_mem_ops.get_pml4_page(sos_vm->arch_vm.s2pt_mem_ops.info);
 	pr_info("%s stage 2 transation table location: 0x%lx ", __func__, (uint64_t *)(sos_vm->arch_vm.s2ptp));
+#endif
 	init_vm_sw_load(sos_vm);
 }
 
@@ -157,10 +159,12 @@ void prepare_sos_vm(void)
 void prepare_uos_vm(void)
 {
 	uos_vm->vm_id = 1;
+#ifndef CONFIG_MACRN
 	// init stage 2 memory operations.
 	init_s2pt_mem_ops(&uos_vm->arch_vm.s2pt_mem_ops, uos_vm->vm_id);
 	uos_vm->arch_vm.s2ptp = uos_vm->arch_vm.s2pt_mem_ops.get_pml4_page(uos_vm->arch_vm.s2pt_mem_ops.info);
 	pr_info("%s stage 2 transation table location: 0x%lx ", __func__, (uint64_t *)(uos_vm->arch_vm.s2ptp));
+#endif
 }
 
 static void dtb_load(struct dtb_info *info)
@@ -171,12 +175,13 @@ static void dtb_load(struct dtb_info *info)
 	pr_info("Loading DTB to 0x%llx - 0x%llx\n",
 			info->dtb_start_gpa, info->dtb_start_gpa + info->dtb_size_gpa);
 
-	return;
+//	pr_info("DTB dump: %x %x %x ", *(uint64_t *)dtb_hva, *(uint64_t *)(dtb_hva +8), *(uint64_t *)(dtb_hva+16) );
 
-	pr_info("DTB dump: %x %x %x ", *(uint64_t *)dtb_hva, *(uint64_t *)(dtb_hva +8), *(uint64_t *)(dtb_hva+16) );
+#ifndef CONFIG_MACRN
 	rc = copy_to_gpa(sos_vm, (void *)dtb_hva, info->dtb_start_gpa, info->dtb_size_gpa);
 	if ( rc != 0 )
 		pr_err("Unable to copy the kernel in the memory\n");
+#endif
 }
 
 static void allocate_guest_memory(struct acrn_vm *vm, struct kernel_info *info)
@@ -208,6 +213,7 @@ static int map_irq_to_vm(struct acrn_vm *vm, unsigned int irq)
 	return 0;
 }
 
+#ifndef CONFIG_MACRN
 static void passthru_devices_to_sos(void)
 {
 	// Map all the devices to guest 0x8000000 - 0xb000000
@@ -219,7 +225,14 @@ static void passthru_devices_to_sos(void)
 		map_irq_to_vm(sos_vm, irq);
 	}
 }
-
+#else
+static void passthru_devices_to_sos(void)
+{
+	for (int irq = 32; irq < 992; irq++) {
+		map_irq_to_vm(sos_vm, irq);
+	}
+}
+#endif
 
 int create_vm(struct acrn_vm *vm)
 {

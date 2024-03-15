@@ -29,7 +29,8 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 	set_current(&idle_vcpu[cpu]);
 	set_pcpu_id(cpu); /* needed early, for smp_processor_id() */
 	init_logmsg();
-	setup_pagetables(boot_phys_offset);
+
+	setup_mem(boot_phys_offset);
 	dcache_line_bytes = read_dcache_line_bytes();
 
 	pr_info("start acrn, boot_phys_offset = 0x%lx\n", boot_phys_offset);

@@ -13,6 +13,7 @@
 #include <hypercall.h>
 #include <trace.h>
 #include <logmsg.h>
+#include "sbi.h"
 
 static int32_t dispatch_sos_hypercall(struct acrn_vcpu *vcpu, uint64_t hypcall_id)
 {
@@ -220,7 +221,7 @@ int32_t vmcall_vmexit_handler(struct acrn_vcpu *vcpu)
 
 
 	if (vmcall_type != VMCALL_TYPE_HYPERCALL)
-		return ecall_vmexit_handler(vcpu);
+		return sbi_ecall_handler(vcpu);
 
 	hypcall_id = vcpu_get_gpreg(vcpu, CPU_REG_A6);
 	

@@ -212,6 +212,7 @@ static int32_t hlt_vmexit_handler(struct acrn_vcpu *vcpu)
 	return 0;
 }
 
+/*
 int32_t ecall_vmexit_handler(struct acrn_vcpu *vcpu)
 {
 	uint64_t rax, rbx, rcx, rdx;
@@ -229,6 +230,7 @@ int32_t ecall_vmexit_handler(struct acrn_vcpu *vcpu)
 
 	return 0;
 }
+*/
 
 bool has_rt_vm(void)
 {

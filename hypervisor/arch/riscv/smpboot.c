@@ -80,9 +80,11 @@ int __cpu_up(unsigned int cpu)
 
 	pr_dbg("Bringing up CPU%d", cpu);
 
+#ifndef CONFIG_MACRN
 	rc = init_secondary_pagetables(cpu);
 	if ( rc < 0 )
 		return rc;
+#endif
 
 	/* Tell the remote CPU which stack to boot on. */
 	init_data.stack = (unsigned char *)&idle_vcpu[cpu].stack;
