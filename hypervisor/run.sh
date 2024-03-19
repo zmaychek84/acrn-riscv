@@ -12,3 +12,4 @@ set -x
 #qemu-system-riscv64 -smp 4 -bios build/acrn.elf -M virt -m 4G,slots=3,maxmem=8G -kernel ./Image -nographic
 #qemu-system-riscv64 -smp 4 -bios build/acrn.elf -gdb tcp::1235 -S -serial stdio -M virt -m 4G,slots=3,maxmem=8G -kernel ./hc.elf
 qemu-system-riscv64 -smp 4 -bios build/acrn.elf -gdb tcp::1235 -S -serial stdio -M virt -m 4G,slots=3,maxmem=8G -kernel ./vmlinux
+#qemu-system-riscv64 -smp 4 -bios build/acrn.elf -gdb tcp::1235 -S -serial stdio -M virt -m 4G,slots=3,maxmem=8G -kernel ./Image

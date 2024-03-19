@@ -1,5 +1,6 @@
 layout regs
 target remote localhost:1235
+add-symbol-file ./build/acrn.elf 0x80000000
 b start_acrn
 b create_vm
 b create_vcpu
@@ -41,6 +42,17 @@ b run_vcpu
 b hv_emulate_mmio
 b mmio_access_vmexit_handler
 b init_vm_sw_load
+b clear_bss_done
+#add-symbol-file vmlinux 0xffffffff80000000
+b sbi_init
+b _start_kernel
+b setup_vm
+#b relocate_enable_mmu
+b soc_early_init
+b start_kernel
+b setup_arch
+b paging_init
+b setup_trap_vector
 display/x $sstatus
 display/x $mstatus
 display/x $hstatus
