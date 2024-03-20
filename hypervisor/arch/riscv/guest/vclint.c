@@ -372,8 +372,12 @@ void vcpu_inject_intr(struct acrn_vcpu *vcpu, bool guest_irq_enabled, bool injec
 	uint32_t vector = 0U;
 
 	if (guest_irq_enabled && (!injected)) {
-		if (vclint_find_deliverable_intr(vclint, &vector)) {
+		if (vclint_find_deliverable_intr(vcpu, &vector)) {
+#ifdef CONFIG_MACRN
+			cpu_csr_write(sip, vector);
+#else
 			cpu_csr_write(hvip, vector);
+#endif
 		}
 	}
 }

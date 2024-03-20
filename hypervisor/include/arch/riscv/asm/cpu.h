@@ -376,6 +376,14 @@ static inline void clac(void)
 	addi sp, sp, 0x128
 	.endm
 
+	.macro cpu_disable_mirq
+	csrci mstatus, 0x2
+	.endm
+
+	.macro cpu_enable_mirq
+	csrsi mstatus, 0x2
+	.endm
+
 	.macro cpu_disable_irq
 	csrci sstatus, 0x2
 	.endm

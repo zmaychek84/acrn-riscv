@@ -11,7 +11,7 @@
 
 	.globl vmx_vmrun
 vmx_vmrun:
-	cpu_disable_irq
+	cpu_disable_mirq
 	cpu_mctx_save
 	sd sp, 0(a0)
 	addi a0, a0, 0x8
@@ -113,6 +113,6 @@ vm_exit:
 	csrw mtvec, t1
 	ld sp, -0x8(a0)
 	cpu_mctx_restore
-	cpu_enable_irq
+	cpu_enable_mirq
 	li a0, 0
 	ret
