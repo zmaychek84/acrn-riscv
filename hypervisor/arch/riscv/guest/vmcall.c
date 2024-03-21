@@ -218,8 +218,9 @@ int32_t vmcall_vmexit_handler(struct acrn_vcpu *vcpu)
 	/* hypercall ID from guest*/
 	uint64_t vmcall_type = vcpu_get_gpreg(vcpu, CPU_REG_A7);
 	uint64_t hypcall_id;
+	uint64_t pc = vcpu_get_gpreg(vcpu, CPU_REG_IP);
 
-
+	vcpu_set_gpreg(vcpu, CPU_REG_IP, pc + 4);
 	if (vmcall_type != VMCALL_TYPE_HYPERCALL)
 		return sbi_ecall_handler(vcpu);
 
