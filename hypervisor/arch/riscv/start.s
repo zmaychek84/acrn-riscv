@@ -6,6 +6,11 @@
 _start:
 	csrr a0, mhartid
 
+	csrr t0, menvcfg
+	li t1, 0x8000000000000000
+	or t0, t0, t1
+	csrw menvcfg, t1
+	csrwi mcounteren, 0x7
 	jal init_mstack
 	call reset_mtimer
 	csrw mip, 0x0
@@ -81,7 +86,7 @@ _vkernel:
 	call smp_start_cpus
 	call get_tick
 	la a0, _vkernel_msg
-	call early_printk
+#	call early_printk
 	li a0, 0x100
 	csrc sstatus, a0
 	la a0, guest
