@@ -76,11 +76,13 @@ static void sbi_ipi_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 	unsigned long funcid = regs->a6;
 	unsigned long *out_val = &regs->a1;
 
-	if (funcid == SBI_TYPE_IPI_SEND_IPI)
-//		*ret = sbi_ipi_send_smode(regs->a0, regs->a1);
+	if (funcid == SBI_TYPE_IPI_SEND_IPI) {
+		unsigned long cpu = regs->a0;
+	//	*ret = sbi_ipi_send_smode(regs->a0, regs->a1);
 		*ret = SBI_SUCCESS;
-	else
+	} else {
 		*ret = SBI_ENOTSUPP;
+	}
 
 	return;
 }
@@ -152,12 +154,15 @@ static void sbi_ecall_base_probe(unsigned long id, unsigned long *out_val)
 	struct sbi_ecall_dispatch *d = &sbi_dispatch_table[SBI_MAX_TYPES];
 
 	*out_val = 0;
-	for (int i = 0; i < SBI_MAX_TYPES; i++) {
-		if (id == sbi_dispatch_table[i].ext_id) {
-			*out_val = 1;
-			break;
-		}
+	switch (id) {
+	case SBI_ID_BASE:
+		*out_val = 1;
+		break;
+	default:
+		break;
 	}
+
+	return;
 }
 
 int sbi_ecall_handler(struct acrn_vcpu *vcpu)
