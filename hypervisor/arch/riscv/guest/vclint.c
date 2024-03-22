@@ -363,7 +363,7 @@ bool vclint_find_deliverable_intr(const struct acrn_vcpu *vcpu, uint32_t *vector
 		ret = true;
 	}
 
-	return false;
+	return ret;
 }
 
 void vcpu_inject_intr(struct acrn_vcpu *vcpu, bool guest_irq_enabled, bool injected)
