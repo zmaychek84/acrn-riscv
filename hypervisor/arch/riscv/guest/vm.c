@@ -353,10 +353,8 @@ void start_vm(struct acrn_vm *vm)
 {
 	vm->state = VM_RUNNING;
 
-//	for (int i = 0; i < vm->hw.created_vcpus; i++)
-//		launch_vcpu(&vm->hw.vcpu[i]);
-
-	launch_vcpu(&vm->hw.vcpu[0]);
+	for (int i = 0; i < vm->hw.created_vcpus; i++)
+		launch_vcpu(&vm->hw.vcpu[i]);
 }
 
 static inline struct cpu_info *get_cpu_info_from_sp(uint16_t id)
