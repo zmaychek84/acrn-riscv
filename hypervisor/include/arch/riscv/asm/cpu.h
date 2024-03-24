@@ -189,6 +189,15 @@ extern void cpu_do_idle(void);
 			:: "r"(val));		 			\
 })
 
+/* Clear CSR */
+#define cpu_csr_clear(reg, csr_val)					\
+({									\
+	uint64_t val = (uint64_t)csr_val;				\
+	asm volatile (" csrc " ASM_STR(reg) ", %0 \n\t"			\
+			:: "r"(val));		 			\
+})
+
+
 static inline void asm_pause(void)
 {
 	asm volatile ("fence; nop");

@@ -410,16 +410,14 @@ static bool vclint_clint_write_access_may_valid(uint32_t offset)
 	return true;
 }
 
-int32_t clint_access_vmexit_handler(struct acrn_vcpu *vcpu)
+int32_t vclint_access_handler(struct acrn_vcpu *vcpu, uint32_t ins)
 {
 	int32_t err;
-	uint32_t offset, ins;
-	uint64_t pc, qual, access_type = TYPE_INST_READ;
+	uint32_t offset;
+	uint64_t qual, access_type = TYPE_INST_READ;
 	struct acrn_vclint *vclint;
 	struct acrn_mmio_request *mmio;
 
-	pc = vcpu_get_gpreg(vcpu, CPU_REG_IP);
-	ins = *(uint32_t *)pc;
 	qual = vcpu->arch.exit_qualification;
 
 	if (decode_instruction(vcpu, ins) >= 0) {

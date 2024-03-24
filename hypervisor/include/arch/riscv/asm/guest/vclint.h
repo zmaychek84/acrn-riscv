@@ -50,6 +50,6 @@ extern void vclint_free(struct acrn_vcpu *vcpu);
 extern void vclint_reset(struct acrn_vclint*vclint, const struct acrn_vclint_ops *ops, enum reset_mode mode);
 extern uint64_t vclint_get_clint_access_addr(void);
 extern uint64_t vclint_get_clint_page_addr(struct acrn_vclint*vclint);
-extern int32_t clint_access_vmexit_handler(struct acrn_vcpu *vcpu);
+extern int32_t vclint_access_handler(struct acrn_vcpu *vcpu, uint32_t ins);
 extern bool vclint_has_pending_intr(struct acrn_vcpu *vcpu);
 #endif /* __RISCV_VCLINT_H__ */

@@ -40,6 +40,29 @@ emulate_pio_complete(struct acrn_vcpu *vcpu, const struct io_request *io_req)
 	pr_fatal("Wrong state, should not reach here!\n");
 }
 
+#ifdef CONFIG_MACRN
+static uint32_t get_instruction(uint64_t gva)
+{
+	uint64_t m = 0xa0000;
+	register uint32_t ins;
+
+	asm volatile (
+		"csrs mstatus, %[m] \n\t"
+		"lw %[ins], (%[gva]) \n\t"
+		"csrc mstatus, %[m] \n\t"
+		: [ins] "=r"(ins)
+		: [gva] "r"(gva), [m] "r"(m)
+	);
+
+	return ins;
+}
+#else
+uint32_t get_instrcution(uint64_t gva)
+{
+
+}
+#endif
+
 int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 {
 	int ret;
@@ -54,7 +77,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 
 	/* Handle page fault from guest */
 	exit_qual = vcpu->arch.exit_qualification;
-	ins = *(uint32_t *)(ctx->cpu_gp_regs.regs.ip);
+	ins = get_instruction(ctx->cpu_gp_regs.regs.ip);
 	gpa = ctx->cpu_gp_regs.regs.tval;
 	io_req->io_type = ACRN_IOREQ_TYPE_MMIO;
 
@@ -83,7 +106,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 	if (ret > 0) {
 		mmio_req->size = (uint64_t)ret;
 		if (mmio_req->address > CLINT_MEM_ADDR && mmio_req->address + ret < CLINT_MEM_REGION) {
-			status = clint_access_vmexit_handler(vcpu);
+			status = vclint_access_handler(vcpu, ins);
 			return status;
 		}
 
