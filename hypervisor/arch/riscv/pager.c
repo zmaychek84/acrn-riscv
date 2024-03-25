@@ -11,10 +11,6 @@
 #include <asm/page.h>
 #include <asm/vm_config.h>
 
-extern DEFINE_PAGE_TABLE(acrn_vpn3);
-extern DEFINE_PAGE_TABLE(acrn_vpn2);
-extern DEFINE_PAGE_TABLES(acrn_vpn1, 8);
-
 #define VPN3_PAGE_NUM(size)	1UL
 #define VPN2_PAGE_NUM(size)	(((size) + VPN3_SIZE - 1UL) >> VPN3_SHIFT)
 #define VPN1_PAGE_NUM(size)	(((size) + VPN2_SIZE - 1UL) >> VPN2_SHIFT)
@@ -24,14 +20,6 @@ static struct page vm_vpn3_pages[CONFIG_MAX_VM_NUM][VPN3_PAGE_NUM(CONFIG_GUEST_A
 static struct page vm_vpn2_pages[CONFIG_MAX_VM_NUM][VPN2_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE);
 static struct page vm_vpn1_pages[CONFIG_MAX_VM_NUM][VPN1_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE);
 static struct page vm_vpn0_pages[CONFIG_MAX_VM_NUM][VPN0_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE);
-
-static union pgtable_pages_info ppt_pages_info = {
-	.ppt = {
-		.vpn3_base = (struct page *)acrn_vpn3,
-		.vpn2_base = (struct page *)acrn_vpn2,
-		.vpn1_base = (struct page *)acrn_vpn1,
-	}
-};
 
 static union pgtable_pages_info s2pt_pages_info[CONFIG_MAX_VM_NUM];
 
@@ -90,6 +78,28 @@ static inline struct page *ppt_get_vpn0_page(const union pgtable_pages_info *inf
 static inline void nop_tweak_exe_right(uint64_t *entry __attribute__((unused))) {}
 static inline void nop_recover_exe_right(uint64_t *entry __attribute__((unused))) {}
 
+#ifndef CONFIG_MACRN
+extern pgtable_t acrn_vpn3[];
+extern pgtable_t acrn_vpn2[];
+extern pgtable_t acrn_vpn1[];
+
+static union pgtable_pages_info ppt_pages_info = {
+	.ppt = {
+		.vpn3_base = (struct page *)acrn_vpn3,
+		.vpn2_base = (struct page *)acrn_vpn2,
+		.vpn1_base = (struct page *)acrn_vpn1,
+	}
+};
+#else
+static union pgtable_pages_info ppt_pages_info = {
+	.ppt = {
+		.vpn3_base = NULL,
+		.vpn2_base = NULL,
+		.vpn1_base = NULL,
+	}
+};
+#endif
+
 const struct memory_ops ppt_mem_ops = {
 	.info = &ppt_pages_info,
 	.large_page_support = large_page_support,
@@ -104,6 +114,7 @@ const struct memory_ops ppt_mem_ops = {
 	.recover_exe_right = nop_recover_exe_right,
 };
 
+#ifndef CONFIG_MACRN
 static inline struct page *s2pt_get_vpn3_page(const union pgtable_pages_info *info)
 {
 	struct page *vpn3_page = info->s2pt.vpn3_base;
@@ -167,3 +178,4 @@ void init_s2pt_mem_ops(struct memory_ops *mem_ops, uint16_t vm_id)
 	mem_ops->tweak_exe_right = nop_tweak_exe_right;
 	mem_ops->recover_exe_right = nop_recover_exe_right;
 }
+#endif

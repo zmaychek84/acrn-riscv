@@ -11,7 +11,6 @@
 #include <asm/current.h>
 #include <asm/pgtable.h>
 
-#define INVALID_HPA   (0x1UL << 52U)
 #define S2PT_PFN_HIGH_MASK      0xFFFF000000000000UL
 
 struct acrn_vm;

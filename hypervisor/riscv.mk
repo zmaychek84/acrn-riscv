@@ -166,9 +166,10 @@ BOOT_C_SRCS += arch/riscv/guest/vio.c
 BOOT_C_SRCS += arch/riscv/guest/sbi.c
 
 BOOT_C_SRCS += arch/riscv/mem.c
-ifndef CONFIG_MACRN
-BOOT_C_SRCS += arch/riscv/pager.c
 BOOT_C_SRCS += arch/riscv/pgtable.c
+BOOT_C_SRCS += arch/riscv/pager.c
+
+ifndef CONFIG_MACRN
 BOOT_C_SRCS += arch/riscv/guest/s2vm.c
 endif
 

@@ -94,6 +94,9 @@ pgtable_t __aligned(PAGE_SIZE) name[PG_TABLE_ENTRIES * (nr)]
 #define VPN2_PFN_MASK		0x0000FFFFFFFFF000UL
 #define VPN1_PFN_MASK		0x0000FFFFFFFFF000UL
 
+#define PPT_PFN_HIGH_MASK	0xFFFF000000000000UL
+#define INVALID_HPA		(0x1UL << 52U)
+
 #ifndef __ASSEMBLY__
 
 #include <asm/init.h>
@@ -289,6 +292,11 @@ extern const uint64_t *lookup_address(uint64_t *vpn3_page, uint64_t addr, uint64
 
 #define pgtable_get_mfn(pte)	((pte).walk.base)
 #define pgtable_set_mfn(pte, mfn)  ((pte).walk.base = mfn)
+
+static uint64_t *satp_to_vpn3_page(uint64_t satp)
+{
+        return (uint64_t *)((satp & ~SATP_MODE_SV48) << 12);
+}
 
 extern const struct memory_ops ppt_mem_ops;
 extern uint64_t init_satp;

@@ -56,6 +56,20 @@ static uint32_t get_instruction(uint64_t gva)
 
 	return ins;
 }
+
+static uint64_t get_gpa(uint64_t *vpn3, uint64_t gva)
+{
+	uint64_t gpa = INVALID_HPA;
+	const uint64_t *pret = NULL;
+	uint64_t pg_size;
+
+	pret = lookup_address(vpn3, gva, &pg_size, &ppt_mem_ops);
+	if (pret != NULL)
+		gpa = (((*pret << 2) & (~PPT_PFN_HIGH_MASK)) & (~(pg_size - 1UL)))
+			| (gva & (pg_size - 1UL));
+
+	return gpa;
+}
 #else
 uint32_t get_instrcution(uint64_t gva)
 {
@@ -68,7 +82,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 	int ret;
 	int32_t status = -1;
 	uint64_t exit_qual;
-	uint64_t gpa;
+	uint64_t gva, gpa;
 	uint32_t ins;
 	struct io_request *io_req = &vcpu->req;
 	struct acrn_mmio_request *mmio_req = &io_req->reqs.mmio_request;
@@ -78,7 +92,8 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 	/* Handle page fault from guest */
 	exit_qual = vcpu->arch.exit_qualification;
 	ins = get_instruction(ctx->cpu_gp_regs.regs.ip);
-	gpa = ctx->cpu_gp_regs.regs.tval;
+	gva = ctx->cpu_gp_regs.regs.tval;
+	gpa = get_gpa(satp_to_vpn3_page(ctx->satp), gva);
 	io_req->io_type = ACRN_IOREQ_TYPE_MMIO;
 
 	/* Specify if read or write operation */
