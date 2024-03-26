@@ -89,7 +89,8 @@ static void sbi_ipi_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 
 static void sbi_rfence_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
-	regs->a0 = SBI_ENOTSUPP;
+	//regs->a0 = SBI_ENOTSUPP;
+	regs->a0 = SBI_SUCCESS;
 
 	return;
 }
@@ -156,6 +157,8 @@ static void sbi_ecall_base_probe(unsigned long id, unsigned long *out_val)
 	*out_val = 0;
 	switch (id) {
 	case SBI_ID_BASE:
+	case SBI_ID_IPI:
+	case SBI_ID_RFENCE:
 		*out_val = 1;
 		break;
 	default:
