@@ -32,41 +32,71 @@
 #define INS32_OPSIZE_WORD	0x2
 #define INS32_OPSIZE_DWORD	0x3
 
-static int32_t emulate_ins16(struct acrn_vcpu *vcpu, uint32_t ins)
+#define BIT64_MASK		0xffffffffffffffff
+#define BIT32_MASK		0xffffffff
+#define BIT16_MASK		0xffff
+#define BIT8_MASK		0xff
+
+static inline uint64_t get_mask(uint32_t size)
+{
+	uint64_t mask;
+
+	switch (size) {
+	case 1:
+		mask = BIT8_MASK;
+		break;
+	case 2:
+		mask = BIT16_MASK;
+		break;
+	case 4:
+		mask = BIT32_MASK;
+		break;
+	case 8:
+	default:
+		mask = BIT64_MASK;
+		break;
+	}
+
+	return mask;
+}
+
+static int32_t emulate_ins16(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t size)
 {
 	struct acrn_mmio_request *mmio_req = &vcpu->req.reqs.mmio_request;
 	uint64_t pc;
 	int32_t reg, rc = 0;
+	uint64_t mask = get_mask(size);
 
 	pc = vcpu_get_gpreg(vcpu, CPU_REG_IP);
 	vcpu_set_gpreg(vcpu, CPU_REG_IP, pc + 2);
 
-	if ((INS16_OPCODE_MASK & ins) > 0x8000) {
+	if ((INS16_OPCODE_MASK & ins) <= 0x8000) {
 		reg = (ins & INS16_OPRD_MASK) >> 2;
-		vcpu_set_gpreg(vcpu, reg, mmio_req->value);
+		vcpu_set_gpreg(vcpu, reg + 0x8, (mmio_req->value) & mask);
 	} else {
 		reg = (ins & INS16_OPRS2_MASK) >> 2;
-		mmio_req->value = vcpu_get_gpreg(vcpu, reg);
+		mmio_req->value = vcpu_get_gpreg(vcpu, reg + 0x8) & mask;
 	}
 
 	return rc;
 }
 
-int32_t emulate_ins32(struct acrn_vcpu *vcpu, uint32_t ins)
+int32_t emulate_ins32(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t size)
 {
 	struct acrn_mmio_request *mmio_req = &vcpu->req.reqs.mmio_request;
 	uint64_t pc;
 	int32_t reg, rc = 0;
+	int64_t mask = get_mask(size);
 
 	pc = vcpu_get_gpreg(vcpu, CPU_REG_IP);
 	vcpu_set_gpreg(vcpu, CPU_REG_IP, pc + 4);
 
 	if ((INS32_OPCODE_MASK & ins) == 0x3) {
 		reg = (ins & INS32_OPRD_MASK) >> 7;
-		vcpu_set_gpreg(vcpu, reg, mmio_req->value);
+		vcpu_set_gpreg(vcpu, reg, (mmio_req->value) & mask);
 	} else if ((INS32_OPCODE_MASK & ins) == 0x23) {
 		reg = (ins & INS32_OPRS2_MASK) >> 20;
-		mmio_req->value = vcpu_get_gpreg(vcpu, reg);
+		mmio_req->value = vcpu_get_gpreg(vcpu, reg) & mask;
 	} else {
 		rc = -EFAULT;
 	}
@@ -74,12 +104,13 @@ int32_t emulate_ins32(struct acrn_vcpu *vcpu, uint32_t ins)
 	return rc;
 }
 
-int32_t emulate_instruction(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t emulate_instruction(struct acrn_vcpu *vcpu, uint32_t ins,
+			    uint32_t xlen, uint32_t size)
 {
 	if (xlen == 32)
-		return emulate_ins32(vcpu, ins);
+		return emulate_ins32(vcpu, ins, size);
 	else
-		return emulate_ins16(vcpu, ins);
+		return emulate_ins16(vcpu, ins, size);
 }
 
 static int32_t decode_ins16(struct acrn_vcpu *vcpu, uint32_t ins)

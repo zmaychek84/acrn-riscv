@@ -21,9 +21,6 @@ extern void init_vmcs(struct acrn_vcpu *vcpu);
 extern void load_vmcs(struct acrn_vcpu *vcpu);
 extern void save_vmcs(struct acrn_vcpu *vcpu);
 
-#define TYPE_INST_READ		(0UL << 12U)
-#define TYPE_INST_WRITE		(1UL << 12U)
-
 #endif /* __ASSEMBLY__ */
 
 #endif /* __RISCV_VMCS_H__ */

@@ -7,7 +7,12 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+#ifdef CONFIG_RISCV_64
+#include <asm/guest/vuart.h>
+#else
 #include <vuart.h>
+#endif
+
 #include <asm/guest/vcpu.h>
 
 /** Initializes the console module.

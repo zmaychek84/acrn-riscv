@@ -21,6 +21,7 @@
 #include <asm/guest/vcsr.h>
 #include <asm/guest/vm.h>
 #include <asm/guest/s2vm.h>
+#include <asm/guest/instr_emul.h>
 #include <trace.h>
 #include <logmsg.h>
 #include "vclint_priv.h"
@@ -413,31 +414,28 @@ static bool vclint_clint_write_access_may_valid(uint32_t offset)
 int32_t vclint_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
 {
 	int32_t err;
-	uint32_t offset;
+	uint32_t offset, size;
 	uint64_t qual, access_type = TYPE_INST_READ;
 	struct acrn_vclint *vclint;
 	struct acrn_mmio_request *mmio;
 
 	qual = vcpu->arch.exit_qualification;
+	size = decode_instruction(vcpu, ins, xlen);
 
-	if (decode_instruction(vcpu, ins, xlen) >= 0) {
+	if (size >= 0) {
 		vclint = vcpu_vclint(vcpu);
 		mmio = &vcpu->req.reqs.mmio_request;
 		offset = mmio->address;
 		if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
-			err = emulate_instruction(vcpu, ins, xlen);
-			if (err == 0) {
-				if (vclint->ops->clint_write_access_may_valid(offset)) {
-					(void)vclint_write(vclint, offset, mmio->value);
-				}
-			}
+			err = emulate_instruction(vcpu, ins, xlen, size);
+			if (err == 0 && vclint->ops->clint_write_access_may_valid(offset))
+				(void)vclint_write(vclint, offset, mmio->value);
 		} else {
-			if (vclint->ops->clint_read_access_may_valid(offset)) {
+			if (vclint->ops->clint_read_access_may_valid(offset))
 				(void)vclint_read(vclint, offset, &mmio->value);
-			} else {
+			else
 				mmio->value = 0UL;
-			}
-			err = emulate_instruction(vcpu, ins, xlen);
+			err = emulate_instruction(vcpu, ins, xlen, size);
 		}
 	} else {
 		pr_err("%s, unhandled access\n", __func__);

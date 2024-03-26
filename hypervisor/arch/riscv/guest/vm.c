@@ -19,6 +19,7 @@
 #include <asm/board.h>
 #include <asm/current.h>
 #include <asm/image.h>
+#include <asm/guest/vuart.h>
 
 static struct acrn_vm vm_array[CONFIG_MAX_VM_NUM] __aligned(PAGE_SIZE);
 struct acrn_vm_config vm_configs;
@@ -313,6 +314,9 @@ int create_vm(struct acrn_vm *vm)
 //		release_guest_irq(sos_vm, CONFIG_PHY_UART_IRQ);
 		map_irq_to_vm(vm, CONFIG_PHY_UART_IRQ);
 	}
+
+	/* Create virtual uart;*/
+	setup_vuart(vm, 0);
 	vm->state = VM_CREATED;
  
 	return 0;

@@ -160,7 +160,7 @@ int32_t vmexit_handler(struct acrn_vcpu *vcpu)
 		exit_type = (uint16_t)((vcpu->arch.exit_reason & HX_VMEXIT_TYPE_MASK) != 0);
 
 		/* Log details for exit */
-		pr_info("Exit Reason: 0x%016lx ", vcpu->arch.exit_reason);
+//		pr_info("Exit Reason: 0x%016lx ", vcpu->arch.exit_reason);
 		if (!exit_type)
 			dispatch_table = exception_dispatch_table;
 		else

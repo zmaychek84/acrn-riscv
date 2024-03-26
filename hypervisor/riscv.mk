@@ -57,7 +57,7 @@ endif
 CFLAGS += -DSTACK_PROTECTOR
 endif
 
-CFLAGS += -DCONFIG_RISCV_64
+CFLAGS += -DCONFIG_RISCV64
 
 #ASFLAGS += -nostdlib
 ASFLAGS += -nostdinc
@@ -78,7 +78,7 @@ ARCH_CFLAGS += -D__ACRN__
 CFLAGS += -std=gnu99
 
 ARCH_ASFLAGS += -D__ASSEMBLY__ -DBUILD_ID -fno-strict-aliasing -Wall -Wstrict-prototypes -Wdeclaration-after-statement -Wno-unused-but-set-variable -Wno-unused-local-typedefs -O1 -fno-omit-frame-pointer  -fno-builtin -fno-common -Wredundant-decls -Wno-pointer-arith -Wvla -pipe  -Wa,--strip-local-absolute -g -mcmodel=medany -fno-stack-protector -fno-exceptions -fno-asynchronous-unwind-tables -Wnested-externs 
-ARCH_ASFLAGS += -DCONFIG_RISCV_64
+ARCH_ASFLAGS += -DCONFIG_RISCV64
 ARCH_ASFLAGS += -D__ACRN__
 ARCH_ASFLAGS += -xassembler-with-cpp
 
@@ -120,7 +120,7 @@ CFLAGS += -DCONFIG_RETPOLINE
 CONFIG_MACRN := 1
 
 # unit testing framework with builtin fake kernel
-CONFIG_KTEST := 1
+#CONFIG_KTEST := 1
 
 ifdef CONFIG_MACRN
 CFLAGS += -DCONFIG_MACRN
@@ -164,6 +164,7 @@ BOOT_C_SRCS += arch/riscv/guest/vmcs.c
 BOOT_C_SRCS += arch/riscv/guest/vm.c
 BOOT_C_SRCS += arch/riscv/guest/vio.c
 BOOT_C_SRCS += arch/riscv/guest/sbi.c
+BOOT_C_SRCS += arch/riscv/guest/vuart.c
 
 BOOT_C_SRCS += arch/riscv/mem.c
 BOOT_C_SRCS += arch/riscv/pgtable.c

@@ -10,13 +10,15 @@
 #include <shell.h>
 #include <timer.h>
 #include <ticks.h>
-#include <vuart.h>
 #include <logmsg.h>
 #include <acrn_hv_defs.h>
 #include <asm/guest/vm.h>
 #include <console.h>
-#ifndef CONFIG_RISCV
+#ifndef CONFIG_RISCV64
 #include <boot.h>
+#include <vuart.h>
+#else
+#include <asm/guest/vuart.h>
 #endif
 #include <dbg_cmd.h>
 
@@ -35,7 +37,7 @@ bool is_using_init_ipi(void)
 	return use_init_ipi;
 }
 
-#ifndef CONFIG_RISCV
+#ifndef CONFIG_RISCV64
 static void parse_hvdbg_cmdline(void)
 {
 	const char *start = NULL;
@@ -139,12 +141,6 @@ static void vuart_console_tx_chars(struct acrn_vuart *vu)
 	}
 }
 
-#ifdef CONFIG_RISCV
-static struct acrn_vuart *vuart_console_active(void)
-{
-	return NULL;
-}
-#else
 static struct acrn_vuart *vuart_console_active(void)
 {
 	struct acrn_vm *vm = NULL;
@@ -162,7 +158,6 @@ static struct acrn_vuart *vuart_console_active(void)
 
 	return ((vu != NULL) && vu->active) ? vu : NULL;
 }
-#endif
 
 static void console_timer_callback(__unused void *data)
 {

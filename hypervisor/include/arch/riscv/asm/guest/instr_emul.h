@@ -11,6 +11,9 @@
 #include <asm/cpu.h>
 #include <asm/guest/guest_memory.h>
 
+#define TYPE_INST_READ		(0UL << 12U)
+#define TYPE_INST_WRITE		(1UL << 12U)
+
 struct acrn_vcpu;
 struct instr_emul_vie_op {
 	uint8_t		op_type;	/* type of operation (e.g. MOV) */
@@ -67,7 +70,9 @@ struct instr_emul_ctxt {
 	struct instr_emul_vie vie;
 };
 
-extern int32_t emulate_instruction(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen);
-extern int32_t decode_instruction(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen);
+extern int32_t emulate_instruction(struct acrn_vcpu *vcpu, uint32_t ins,
+				   uint32_t xlen, uint32_t size);
+extern int32_t decode_instruction(struct acrn_vcpu *vcpu, uint32_t ins,
+				   uint32_t xlen);
 
 #endif /* __RISCV_INSTR_EMUL_H__ */

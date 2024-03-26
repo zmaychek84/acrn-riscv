@@ -17,7 +17,7 @@
 #include <vpic.h>
 #include <errno.h>
 #include <asm/guest/vio.h>
-#include <vuart.h>
+#include <asm/guest/vuart.h>
 #include <vpci.h>
 #include <asm/vm_config.h>
 

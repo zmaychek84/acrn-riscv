@@ -136,8 +136,13 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 	ret = decode_instruction(vcpu, ins, xlen);
 	if (ret > 0) {
 		mmio_req->size = (uint64_t)ret;
-		if (mmio_req->address > CLINT_MEM_ADDR && mmio_req->address + ret < CLINT_MEM_REGION) {
+		if (mmio_req->address >= CLINT_MEM_ADDR &&
+		    mmio_req->address + ret < CLINT_MEM_REGION) {
 			status = vclint_access_handler(vcpu, ins, xlen);
+			return status;
+		} else if (mmio_req->address >= UART_MEM_ADDR &&
+			   mmio_req->address + ret < UART_MEM_REGION) {
+			status = vuart_access_handler(vcpu, ins, xlen);
 			return status;
 		}
 
@@ -149,7 +154,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 
 		/* Determine value being written. */
 		if (mmio_req->direction == ACRN_IOREQ_DIR_WRITE) {
-			status = emulate_instruction(vcpu, ins, xlen);
+			status = emulate_instruction(vcpu, ins, xlen, ret);
 			if (status != 0) {
 				ret = -EFAULT;
 			}

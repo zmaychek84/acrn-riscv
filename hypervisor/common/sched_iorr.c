@@ -9,7 +9,7 @@
 #include <schedule.h>
 #include <ticks.h>
 
-#ifdef CONFIG_RISCV
+#ifdef CONFIG_RISCV64
 #define CONFIG_SLICE_MS 1UL
 #else
 #define CONFIG_SLICE_MS 10UL

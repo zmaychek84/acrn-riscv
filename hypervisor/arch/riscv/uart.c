@@ -23,7 +23,7 @@ static void init_uart(void)
 	write32(UART_BASE + 0xe, 0x10);
 }
 
-static void put_char(char c)
+void put_char(char c)
 {
 	unsigned char t = 0;
 	write8((volatile unsigned char *)UART_BASE, c);
