@@ -21,6 +21,7 @@
 #include <asm/guest/vcsr.h>
 #include <asm/guest/vm.h>
 #include <asm/guest/s2vm.h>
+#include <asm/guest/virq.h>
 #include <asm/guest/instr_emul.h>
 #include <trace.h>
 #include <logmsg.h>
@@ -64,8 +65,6 @@ static inline void vclint_dump_irr(__unused const struct acrn_vclint *vclint, __
 static inline void vclint_dump_isr(__unused const struct acrn_vclint *vclint, __unused const char *msg) {}
 #endif
 
-static bool apicv_set_intr_ready(struct acrn_vclint *vclint, uint32_t vector);
-
 /*
  * Post an interrupt to the vcpu running on 'hostcpu'. This will use a
  * hardware assist if available (e.g. Posted Interrupt) or fall back to
@@ -76,16 +75,6 @@ static void vclint_timer_expired(void *data);
 static inline bool vclint_enabled(const struct acrn_vclint *vclint)
 {
 	return true;
-}
-
-static struct acrn_vclint *
-vm_clint_from_vcpu_id(struct acrn_vm *vm, uint16_t vcpu_id)
-{
-	struct acrn_vcpu *vcpu;
-
-	vcpu = vcpu_from_vid(vm, vcpu_id);
-
-	return vcpu_vclint(vcpu);
 }
 
 /**
@@ -133,15 +122,12 @@ void vclint_write_tmr(struct acrn_vclint *vclint, uint32_t index, uint64_t data)
 	(void)add_timer(timer);
 }
 
-static void vclint_write_mtime(struct acrn_vclint *vclint, uint64_t data)
-{
-	vclint->clint_page.mtime = data;
-}
-
 uint64_t vclint_get_tsc_deadline_csr(const struct acrn_vclint *vclint)
 {
-	uint64_t ret;
-	return ret;
+	/*
+	 * FIXME: AndreiW.
+	 */
+	return 0;
 }
 
 void vclint_set_tsc_deadline_csr(struct acrn_vclint *vclint, uint32_t index, uint64_t val_arg)
@@ -185,7 +171,6 @@ static int32_t vclint_read(struct acrn_vclint *vclint, uint32_t offset_arg, uint
 {
 	int32_t ret = 0;
 	struct clint_regs *clint = &(vclint->clint_page);
-	uint32_t i;
 	uint64_t offset = offset_arg - CLINT_MEM_ADDR;
 	*data = 0UL;
 
@@ -223,7 +208,6 @@ static int32_t vclint_read(struct acrn_vclint *vclint, uint32_t offset_arg, uint
 static int32_t vclint_write(struct acrn_vclint *vclint, uint64_t offset, uint64_t data)
 {
 	struct clint_regs *clint = &(vclint->clint_page);
-	uint32_t *regptr;
 	uint32_t data32 = (uint32_t)data;
 	int32_t ret = 0;
 
@@ -281,7 +265,6 @@ void
 vclint_reset(struct acrn_vclint *vclint, const struct acrn_vclint_ops *ops, enum reset_mode mode)
 {
 	struct clint_regs *clint;
-	uint64_t preserved_clint_mode = vclint->clint_base;
 
 	vclint->clint_base = DEFAULT_CLINT_BASE;
 
@@ -303,8 +286,6 @@ uint64_t vclint_get_clintbase(const struct acrn_vclint *vclint)
 int32_t vclint_set_clintbase(struct acrn_vclint *vclint, uint64_t new)
 {
 	int32_t ret = 0;
-	uint64_t changed;
-	bool change_in_vclint_mode = false;
 
 	if (vclint->clint_base != new) {
 		vclint->clint_base = new;
@@ -327,7 +308,7 @@ void vclint_set_intr(struct acrn_vcpu *vcpu)
 /* interrupt context */
 static void vclint_timer_expired(void *data)
 {
-	struct acrn_vcpu *vcpu = (struct acrn_vclint *)data;
+	struct acrn_vcpu *vcpu = data;
 	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
 	uint64_t flags;
 
@@ -409,9 +390,6 @@ bool vclint_has_pending_intr(struct acrn_vcpu *vcpu)
 
 static bool vclint_has_pending_delivery_intr(struct acrn_vcpu *vcpu)
 {
-	uint32_t vector;
-	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
-
 	if (vclint_has_pending_intr(vcpu))
 		vcpu_make_request(vcpu, ACRN_REQUEST_EVENT);
 
@@ -461,10 +439,10 @@ static const struct acrn_vclint_ops acrn_vclint_ops = {
 void vclint_init(struct acrn_vm *vm)
 {
 	struct acrn_vclint *vclint = &vm->vclint;
-	uint64_t *pml4_page = (uint64_t *)vm->arch_vm.s2ptp;
 
 	/* only need unmap it from SOS as UOS never mapped it */
 #if 0
+	uint64_t *pml4_page = (uint64_t *)vm->arch_vm.s2ptp;
 	if (is_sos_vm(vm)) {
 		s2pt_del_mr(vm, pml4_page,
 			DEFAULT_CLINT_BASE, DEFAULT_CLINT_SIZE);
