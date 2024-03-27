@@ -27,20 +27,47 @@
 #define CONST_ADDR (*(const volatile int *) addr)
 
 #define always_inline __inline__ __attribute__ ((__always_inline__))
+#ifdef CONFIG_MACRN
+static always_inline unsigned long ffsl(unsigned long x)
+{
+	int m = 0x1, i;
 
+	for (i = 0; i < BITS_PER_LONG; i++) {
+		if (x & m != 0)
+			break;
+		m <<= 1;
+	};
+
+	return i + 1;
+}
+
+static inline int flsl(unsigned long x)
+{
+	int m = 0x1000000000000000, i;
+
+	for (i = 0; i < BITS_PER_LONG; i++) {
+		if (x & m != 0)
+			break;
+		m >>= 1;
+	};
+
+	return BITS_PER_LONG - i;
+}
+#else
 static always_inline unsigned long ffsl(unsigned long x)
 {
 	asm volatile ("ctz %0, %1" : "=r"(x) : "r"(x));
 	return x;
 }
 
-#define ffz(x)  ffsl(~(x))
-
 static inline int flsl(unsigned long x)
 {
 	asm volatile ("clz %0, %1" : "=r"(x) : "r"(x));
 	return BITS_PER_LONG - 1 - x;
 }
+#endif
+
+#define ffz(x)  ffsl(~(x))
 
 extern unsigned long find_next_bit(const unsigned long *addr, unsigned long
 		size, unsigned long offset);
