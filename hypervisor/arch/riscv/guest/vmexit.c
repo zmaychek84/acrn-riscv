@@ -37,12 +37,6 @@ static int32_t unhandled_vmexit_handler(struct acrn_vcpu *vcpu)
 	return 0;
 }
 
-static int32_t pause_vmexit_handler(__unused struct acrn_vcpu *vcpu)
-{
-	yield_current();
-	return 0;
-}
-
 static int32_t hlt_vmexit_handler(struct acrn_vcpu *vcpu)
 {
 	if ((vcpu->arch.pending_req == 0UL) && (!vclint_has_pending_intr(vcpu))) {
