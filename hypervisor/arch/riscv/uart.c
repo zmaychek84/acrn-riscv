@@ -7,12 +7,7 @@
 #include <acrn/config.h>
 #include <types.h>
 
-#define UART_BASE (volatile unsigned int *)0x10000000
-
-static void write32(volatile unsigned int *addr, char c)
-{
-	*addr = c;
-}
+#define UART_BASE (volatile uint8_t *)0x10000000
 
 static void write8(volatile unsigned char *addr, char c)
 {
@@ -24,26 +19,21 @@ static char read8(volatile unsigned char *addr)
 	return *addr;
 }
 
-static void init_uart(void)
-{
-	write32(UART_BASE + 0xe, 0x10);
-}
-
-void put_char(char c)
+static void put_char(char c)
 {
 	unsigned char t = 0;
-	write8((volatile unsigned char *)UART_BASE, c);
+	write8(UART_BASE, c);
 	while (!t)
-		t = *((volatile unsigned char *)UART_BASE + 0x5) & 0x20;
+		t = *(UART_BASE + 0x5) & 0x20;
 }
 
 static void get_char(char *c)
 {
 	char d;
 
-	d = read8((volatile unsigned char *)(0x10000005));
+	d = read8(UART_BASE + 5);
 	if ((d & 0x1) == 1)
-		*c = read8((volatile unsigned char *)(UART_BASE));
+		*c = read8(UART_BASE);
 }
 
 char uart16550_getc(void)
