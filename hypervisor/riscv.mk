@@ -178,6 +178,7 @@ BOOT_C_SRCS += arch/riscv/guest/vcpu.c
 BOOT_C_SRCS += arch/riscv/guest/vcsr.c
 BOOT_C_SRCS += arch/riscv/guest/virq.c
 BOOT_C_SRCS += arch/riscv/guest/vclint.c
+BOOT_C_SRCS += arch/riscv/guest/vplic.c
 BOOT_C_SRCS += arch/riscv/guest/vmexit.c
 BOOT_C_SRCS += arch/riscv/guest/vmcall.c
 BOOT_C_SRCS += arch/riscv/guest/guest_memory.c

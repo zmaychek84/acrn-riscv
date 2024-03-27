@@ -130,7 +130,7 @@ struct intr_excp_ctx {
 /* vectors range for dynamic allocation, usually for devices */
 #define VECTOR_DYNAMIC_START	0x20U
 #define VECTOR_DYNAMIC_END	0xDFU
-#define HYPERVISOR_CALLBACK_HSM_VECTOR	0xF3U
+#define HYPERVISOR_CALLBACK_HSM_VECTOR	0x20U
 
 #define INVALID_INTERRUPT_PIN	0xffffffffU
 extern bool request_irq_arch(uint32_t irq);

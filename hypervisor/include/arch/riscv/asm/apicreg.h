@@ -56,4 +56,31 @@ enum CLINT_REGISTERS {
 #define CLINT_VECTOR_STI       0x00000020U
 #define CLINT_VECTOR_SEI       0x00000200U
 
+// PLIC definitions
+#define PLIC_MEM_ADDR		CONFIG_PLIC_BASE
+#define PLIC_MEM_REGION		PLIC_MEM_ADDR + CONFIG_PLIC_SIZE
+
+#define DEFAULT_PLIC_BASE	0x0C000000UL
+#define DEFAULT_PLIC_SIZE	0x04000000
+
+#define PLIC_NUM_SOURCES	64
+#define PLIC_NUM_PRIORITY	8
+#define PLIC_NUM_CONTEXT	8
+#define PLIC_NUM_FIELDS		((PLIC_NUM_SOURCES + 31)/32)
+
+#define PLIC_SRC_PRIORITY_BASE	0x00
+#define PLIC_PENDING_BASE	0x1000
+#define PLIC_ENABLE_BASE	0x2000
+#define PLIC_ENABLE_STRIDE	0x80
+#define PLIC_DST_PRIO_BASE	0x200000
+#define PLIC_DST_PRIO_STRIDE 	0x1000
+
+struct plic_regs {
+        uint32_t source_priority[PLIC_NUM_SOURCES];
+        uint32_t pending[PLIC_NUM_FIELDS];
+        uint32_t enable[PLIC_NUM_CONTEXT][PLIC_NUM_FIELDS];
+        uint32_t target_priority[PLIC_NUM_CONTEXT];
+        uint32_t claimed[PLIC_NUM_FIELDS];
+} __aligned(PAGE_SIZE);
+
 #endif /* __RISCV_APICREG_H__ */
