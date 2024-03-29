@@ -88,7 +88,7 @@ secondary:
 	call start_secondary 
 
 init_stack:
-	li sp, ACRN_STACK_START
+	li sp, ACRN_STACK_TOP
 	li t0, ACRN_STACK_SIZE
 	mul t0, a0, t0
 	sub sp, sp, t0
@@ -96,7 +96,7 @@ init_stack:
 	ret
 
 init_mstack:
-	li sp, ACRN_MSTACK_START
+	li sp, ACRN_MSTACK_TOP
 	li t0, ACRN_MSTACK_SIZE
 	mul t0, a0, t0
 	sub sp, sp, t0

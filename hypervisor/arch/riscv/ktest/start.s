@@ -57,7 +57,7 @@ _vsecondary:
 	sret
 
 init_vstack:
-	li sp, ACRN_VSTACK_START
+	li sp, ACRN_VSTACK_TOP
 	li t0, ACRN_VSTACK_SIZE
 	mul t0, a0, t0
 	sub sp, sp, t0
