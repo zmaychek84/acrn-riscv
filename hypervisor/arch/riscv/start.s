@@ -110,5 +110,3 @@ boot_idle:
 
 	.globl _end_boot
 _end_boot:
-	nop
-	ret
