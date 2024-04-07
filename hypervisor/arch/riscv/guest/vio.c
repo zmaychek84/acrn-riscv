@@ -40,17 +40,20 @@ emulate_pio_complete(struct acrn_vcpu *vcpu, const struct io_request *io_req)
 }
 
 #ifdef CONFIG_MACRN
-static uint32_t get_instruction(uint64_t gva, uint32_t *xlen)
+static uint32_t get_instruction(uint64_t status, uint64_t gva, uint32_t *xlen)
 {
-	uint64_t m = 0xa0000;
+	uint64_t m = 0xa0800;
 	register uint32_t ins;
+	uint64_t st;
 
+	ASSERT((status & 0x1800) == 0x800);
+	st = cpu_csr_read(mstatus);
 	asm volatile (
 		"csrs mstatus, %[m] \n\t"
 		"lw %[ins], (%[gva]) \n\t"
-		"csrc mstatus, %[m] \n\t"
+		"csrw mstatus, %[old] \n\t"
 		: [ins] "=r"(ins)
-		: [gva] "r"(gva), [m] "r"(m)
+		: [gva] "r"(gva), [m] "r"(m), [old] "r"(st)
 	);
 
 	if ((ins & 0x3) != 0x3) {
@@ -77,9 +80,9 @@ static uint64_t get_gpa(uint64_t *vpn3, uint64_t gva)
 	return gpa;
 }
 #else
-uint32_t get_instrcution(uint64_t gva)
+static uint32_t get_instruction(uint64_t status, uint64_t gva, uint32_t *xlen)
 {
-
+	return 0;
 }
 #endif
 
@@ -102,7 +105,7 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 
 	/* Handle page fault from guest */
 	exit_qual = vcpu->arch.exit_qualification;
-	ins = get_instruction(ctx->cpu_gp_regs.regs.ip, &xlen);
+	ins = get_instruction(ctx->sstatus, ctx->cpu_gp_regs.regs.ip, &xlen);
 	gva = ctx->cpu_gp_regs.regs.tval;
 	if (need_pagetable_walk(ctx->satp))
 		gpa = get_gpa(satp_to_vpn3_page(ctx->satp), gva);
@@ -147,6 +150,11 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 			   mmio_req->address + ret < UART_MEM_REGION) {
 			status = vuart_access_handler(vcpu, ins, xlen);
 			return status;
+		}
+		if (gpa == INVALID_HPA) {
+			mmio_req->value = 0UL;
+			emulate_instruction(vcpu, ins, xlen, ret);
+			return 0;
 		}
 
 		/*
