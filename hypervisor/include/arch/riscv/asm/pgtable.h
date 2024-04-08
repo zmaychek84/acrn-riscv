@@ -8,6 +8,7 @@
 #define __RISCV_PGTABLE_H__
 
 #define SATP_MODE_SV48	0x9000000000000000
+#define SATP_PPN_MASK	0x00000FFFFFFFFFFF
 
 #define PG_TABLE_SHIFT			9
 #define PG_TABLE_ENTRIES		(_AC(1,U) << PG_TABLE_SHIFT)
@@ -295,7 +296,7 @@ extern const uint64_t *lookup_address(uint64_t *vpn3_page, uint64_t addr, uint64
 
 static uint64_t *satp_to_vpn3_page(uint64_t satp)
 {
-        return (uint64_t *)((satp & ~SATP_MODE_SV48) << 12);
+        return (uint64_t *)((satp & SATP_PPN_MASK) << 12);
 }
 
 extern const struct memory_ops ppt_mem_ops;
