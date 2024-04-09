@@ -11,6 +11,7 @@ _start:
 	or t0, t0, t1
 	csrw menvcfg, t1
 	csrwi mcounteren, 0x7
+	csrwi scounteren, 0x7
 	jal init_mstack
 	call reset_mtimer
 	csrw mip, 0x0
