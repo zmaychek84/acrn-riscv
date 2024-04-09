@@ -426,6 +426,11 @@ const uint64_t *lookup_address(uint64_t *vpn3_page, uint64_t addr, uint64_t *pg_
 	uint64_t *vpn3, *vpn2, *vpn1, *pte;
 
 	vpn3 = vpn3_offset(vpn3_page, addr);
+
+#ifdef CONFIG_MACRN
+	if (vpn3 >= 0x180000000)
+		return NULL;
+#endif
 	present = (mem_ops->pgentry_present(*vpn3) != 0UL);
 
 	if (present) {
