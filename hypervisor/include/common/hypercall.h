@@ -642,10 +642,10 @@ static inline int32_t hcall_set_vcpu_regs(struct acrn_vcpu *vcpu, struct acrn_vm
 	return -1;
 }
 
-static inline int32_t hcall_set_irqline(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
-{
-	return -1;
-}
+//static inline int32_t hcall_set_irqline(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
+//{
+//	return -1;
+//}
 
 static inline int32_t hcall_inject_msi(struct acrn_vcpu *vcpu, struct acrn_vm *target_vm, uint64_t param1, uint64_t param2)
 {

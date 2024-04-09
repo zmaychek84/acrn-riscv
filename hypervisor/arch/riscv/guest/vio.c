@@ -27,8 +27,7 @@ void arch_fire_hsm_interrupt(void)
 	sos_vm = get_sos_vm();
 	vcpu = vcpu_from_vid(sos_vm, BSP_CPU_ID);
 
-	//vclint_set_intr(vcpu, get_hsm_notification_vector());
-	vclint_set_intr(vcpu);
+	vplic_accept_intr(vcpu, get_hsm_notification_vector(), true);
 }
 
 /**
@@ -139,6 +138,10 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 		if (mmio_req->address >= CLINT_MEM_ADDR &&
 		    mmio_req->address + ret < CLINT_MEM_REGION) {
 			status = vclint_access_handler(vcpu, ins, xlen);
+			return status;
+		} else if (mmio_req->address > PLIC_MEM_ADDR &&
+			   mmio_req->address + ret < PLIC_MEM_REGION) {
+			status = vplic_access_handler(vcpu, ins, xlen);
 			return status;
 		} else if (mmio_req->address >= UART_MEM_ADDR &&
 			   mmio_req->address + ret < UART_MEM_REGION) {

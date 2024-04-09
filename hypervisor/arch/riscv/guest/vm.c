@@ -270,6 +270,8 @@ int create_vm(struct acrn_vm *vm)
 	}
 
 	vclint_init(vm);
+	vplic_init(vm);
+
 	for (i = 0 ; i < CONFIG_MAX_VCPU; /*vm->max_vcpu*/ i++) {
 		ret = create_vcpu(vm, i);
 		pr_info("create_vcpu\n");

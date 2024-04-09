@@ -254,13 +254,6 @@ static bool vcpu_inject_exception(struct acrn_vcpu *vcpu)
 	return injected;
 }
 
-/* Inject external interrupt to guest */
-void vcpu_inject_extint(struct acrn_vcpu *vcpu)
-{
-	vcpu_make_request(vcpu, ACRN_REQUEST_EXTINT);
-	signal_event(&vcpu->events[VCPU_EVENT_VIRTUAL_INTERRUPT]);
-}
-
 /* Inject NMI to guest */
 void vcpu_inject_nmi(struct acrn_vcpu *vcpu)
 {
@@ -383,7 +376,7 @@ static inline void acrn_inject_pending_intr(struct acrn_vcpu *vcpu,
 		/* Inject external interrupt first */
 		if (bitmap_test_and_clear_lock(ACRN_REQUEST_EXTINT, pending_req_bits)) {
 			/* has pending external interrupts */
-			ret = vcpu_do_pending_extint(vcpu);
+			vcpu_inject_extint(vcpu);
 		}
 	}
 

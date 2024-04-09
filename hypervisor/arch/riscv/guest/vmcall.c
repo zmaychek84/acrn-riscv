@@ -15,6 +15,22 @@
 #include <logmsg.h>
 #include "sbi.h"
 
+int32_t hcall_set_irqline(__unused struct acrn_vcpu *vcpu, struct acrn_vm *target_vm,
+	__unused uint64_t param1, uint64_t param2)
+{
+	int32_t ret = -1;
+	struct acrn_irqline_ops *ops = (struct acrn_irqline_ops *)&param2;
+
+	if (!is_poweroff_vm(target_vm)) {
+		if (ops->gsi < PLIC_NUM_SOURCES) {
+			vplic_accept_intr(vcpu, ops->gsi, ops->op == GSI_SET_LOW);
+			ret = 0;
+		}
+	}
+
+	return ret;
+}
+
 static int32_t dispatch_sos_hypercall(struct acrn_vcpu *vcpu, uint64_t hypcall_id)
 {
 	struct acrn_vm *sos_vm = vcpu->vm;
