@@ -73,10 +73,6 @@ void smp_call_function(uint64_t mask, smp_call_func_t func, void *data)
 	spin_unlock(&smpcall_lock);
 }
 
-/*
- * only run bsp.
- * */
-
 void smp_call_init(void)
 {
 	spinlock_init(&smpcall_lock);

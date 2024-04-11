@@ -8,10 +8,10 @@
 #include <asm/config.h>
 
 #ifndef CONFIG_EFI_BOOT
-#define KERNEL_IMAGE_START 0x81000000
-#define KERNEL_IMAGE_SIZE 0x10000000
-#define DTB_IMAGE_START 0
-#define	DTB_IMAGE_SIZE 0
+#define KERNEL_IMAGE_START	0x81000000
+#define KERNEL_IMAGE_SIZE	0x10000000
+#define DTB_IMAGE_START		0x82200000
+#define DTB_IMAGE_SIZE		0x400000
 
 void get_kernel_info(struct kernel_info *info)
 {

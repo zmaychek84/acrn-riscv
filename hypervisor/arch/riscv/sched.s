@@ -5,6 +5,7 @@
  */
 
 #include <asm/cpu.h>
+
 	.text
 
 	.align 8

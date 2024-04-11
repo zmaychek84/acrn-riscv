@@ -152,9 +152,6 @@ void dispatch_interrupt(struct cpu_regs *regs)
 	} while (1);
 }
 
-/*
- * descs[] must have NR_IRQS entries
- */
 void init_irq_descs_arch(struct irq_desc descs[])
 {
 	uint32_t i;

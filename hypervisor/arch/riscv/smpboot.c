@@ -53,7 +53,6 @@ smp_clear_cpu_maps (void)
 	set_bit(0, &cpu_possible_map);
 }
 
-extern int do_swi(int cpu);
 static int __init smp_platform_init(int cpu)
 {
 	smp_enable_ops[cpu].prepare_cpu = do_swi;
