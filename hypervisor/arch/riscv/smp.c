@@ -27,13 +27,6 @@ int do_swi(int cpu)
 }
 
 int g_cpus = 1;
-int g_vcpus = 1;
-void smp_start_cpus(int cpus)
-{
-	for (int i = 1; i < cpus; i++) {
-		do_swi(i);
-	}
-}
 
 void cpu_dead(void)
 {

@@ -46,8 +46,6 @@ init_trap:
 	addi sp, sp, -16
 	sd ra, 0(sp)
 	sd t0, 8(sp)
-#	la t0, trap_msg
-#	call do_logmsg
 
 	la t0, strap_handler
 	csrw stvec, t0
@@ -60,12 +58,6 @@ init_trap:
 	ld t0, 8(sp)
 	ld ra, 0(sp)
 	addi sp, sp, 16
-	ret
-
-	.globl setup_vtrap
-setup_vtrap:
-	la t0, vstrap_handler
-	csrw stvec, t0
 	ret
 
 	.globl kernel_init
@@ -129,39 +121,6 @@ sout:
 	#csrrw sp, sscratch, sp
 	sret
 
-	.balign 4
-vstrap_handler:
-	cpu_disable_irq
-#	csrrw sp, sscratch, sp
-	vcpu_ctx_save
-	li a0, 0
-	csrw sip, a0
-
-	#check if it's in VS mode
-	#csrr t1, 0x600
-
-	csrr a0, scause
-	li a1, 0x8000000000000000
-	and a1, a0, a1
-	andi a0, a0, 0xff
-	beqz a1, vexcept
-	call sint_handler
-	j vout
-vexcept:
-	csrr a0, sepc
-	addi a0, a0, 4
-	sd a0, REG_EPC(sp)
-vout:
-	vcpu_ctx_restore
-#	li a0, 0
-#	ecall
-#	csrw sstatus, a0
-#	la a0, vstrap_msg
-#	call printk
-#	csrrw sp, sscratch, sp
-	cpu_enable_irq
-	sret
-
 boot_sswi_handler:
 	csrc sip, 0x2
 	sret
@@ -201,31 +160,6 @@ boot_mtimer_handler:
 boot_mexti_handler:
 	mret
 
-	.balign 4
-trap_msg:
-	.string "init_trap\n"
-
-kernel_msg:
-	.string "i'm kernel\n"
-
-vkernel_msg:
-	.string "i'm vkernel\n"
-
-idle_msg:
-	.string "i'm idle\n"
-
-switch_msg:
-	.string "switch context\n"
-
-mtrap_msg:
-	.string "mtrap handler\n"
-
-strap_msg:
-	.string "strap handler\n"
-
-vstrap_msg:
-	.string "vstrap handler\n"
-
 	.balign 256
 vect_table:
 	.balign 4
@@ -264,12 +198,3 @@ vect_rsv10:
 	.balign 4
 vect_mexti:
 	j boot_mexti_handler
-
-
-	.balign 256
-vect_mtrap:
-	j mtrap_handler
-
-	.balign 256
-vect_strap:
-	j strap_handler

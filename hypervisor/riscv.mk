@@ -135,19 +135,22 @@ endif
 # platform boot component
 BOOT_S_SRCS += arch/riscv/start.s
 BOOT_S_SRCS += arch/riscv/intr.s
-BOOT_S_SRCS += arch/riscv/mmu.s
 ifdef CONFIG_MACRN
 BOOT_S_SRCS += arch/riscv/guest/pmp.s
 else
 BOOT_S_SRCS += arch/riscv/guest/virt.s
 endif
 BOOT_S_SRCS += arch/riscv/sched.s
+ifdef CONFIG_KTEST
+BOOT_S_SRCS += arch/riscv/ktest/mmu.s
+BOOT_S_SRCS += arch/riscv/ktest/start.s
+BOOT_S_SRCS += arch/riscv/ktest/intr.s
+endif
 
 BOOT_C_SRCS += arch/riscv/mtrap.c
 BOOT_C_SRCS += arch/riscv/trap.c
 BOOT_C_SRCS += arch/riscv/smp.c
 BOOT_C_SRCS += arch/riscv/uart.c
-BOOT_C_SRCS += arch/riscv/app.c
 BOOT_C_SRCS += arch/riscv/setup.c
 BOOT_C_SRCS += arch/riscv/percpu.c
 BOOT_C_SRCS += arch/riscv/smpboot.c
@@ -208,6 +211,11 @@ BOOT_C_SRCS += release/hypercall.c
 #BOOT_C_SRCS += dm/vuart.c
 BOOT_C_SRCS += dm/io_req.c
 #BOOT_C_SRCS += dm/vpci/vdev.c
+
+ifdef CONFIG_KTEST
+BOOT_C_SRCS += arch/riscv/ktest/app.c
+BOOT_C_SRCS += arch/riscv/ktest/smp.c
+endif
 
 BOOT_C_OBJS := $(patsubst %.c,$(HV_OBJDIR)/%.o,$(BOOT_C_SRCS))
 BOOT_S_OBJS := $(patsubst %.s,$(HV_OBJDIR)/%.o,$(BOOT_S_SRCS))

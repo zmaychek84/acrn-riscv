@@ -60,15 +60,17 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 
 	pr_info("prepare sos");
 	prepare_sos_vm();
-	prepare_uos_vm();
-
 	pr_info("create vm");
 	create_vm(sos_vm);
-	create_vm(uos_vm);
-
 	// currently, direct run sos.
 	start_vm(sos_vm);
+
+#ifdef CONFIG_KTEST
+	prepare_uos_vm();
+	create_vm(uos_vm);
 	start_vm(uos_vm);
+#endif
+
 	pr_info("end\n");
 
 	run_idle_thread();

@@ -80,8 +80,6 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
 	pr_dbg("Initialize host state");
-	pr_dbg("guest kernel entry: %lx\n", _vboot);
-
 	value64 = 0x200000180;
 	//value64 = 0x200200080;
 	cpu_csr_set(hstatus, value64);
@@ -158,8 +156,6 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
 	pr_dbg("Initialize host state");
-	pr_dbg("guest kernel entry: %lx\n", _vboot);
-
 /*
 	value64 = 0x200000800;
 	cpu_csr_set(mstatus, value64);

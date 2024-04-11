@@ -574,12 +574,11 @@ int create_vcpu(struct acrn_vm *vm, uint16_t vcpu_id)
 		vcpu_set_state(vcpu, VCPU_INIT);
 #ifdef CONFIG_KTEST
 		vcpu_set_rip(vcpu, (uint64_t)_vboot);
-#else
-		if (vm->vm_id == 0)
-			vcpu_set_rip(vcpu, vm->sw.kernel_info.entry);
-		else
+		if (vm->vm_id != 0)
 			vcpu_set_rip(vcpu, (uint64_t)_vboot);
+		else
 #endif
+			vcpu_set_rip(vcpu, vm->sw.kernel_info.entry);
 		(void)memset((void *)&vcpu->req, 0U, sizeof(struct io_request));
 		vm->hw.created_vcpus++;
 
