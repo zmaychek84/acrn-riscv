@@ -499,7 +499,7 @@ void launch_vcpu(struct acrn_vcpu *vcpu)
 
 	pr_info("vcpu%hu scheduled on pcpu%hu", vcpu->vcpu_id, pcpu_id);
 	vcpu_set_state(vcpu, VCPU_RUNNING);
-	vcpu_set_gpreg(vcpu, CPU_REG_A0, pcpu_id);
+	vcpu_set_gpreg(vcpu, CPU_REG_A0, vcpu->vcpu_id);
 	wake_thread(&vcpu->thread_obj);
 }
 
@@ -575,7 +575,10 @@ int create_vcpu(struct acrn_vm *vm, uint16_t vcpu_id)
 #ifdef CONFIG_KTEST
 		vcpu_set_rip(vcpu, (uint64_t)_vboot);
 #else
-		vcpu_set_rip(vcpu, vm->sw.kernel_info.entry);
+		if (vm->vm_id == 0)
+			vcpu_set_rip(vcpu, vm->sw.kernel_info.entry);
+		else
+			vcpu_set_rip(vcpu, (uint64_t)_vboot);
 #endif
 		(void)memset((void *)&vcpu->req, 0U, sizeof(struct io_request));
 		vm->hw.created_vcpus++;

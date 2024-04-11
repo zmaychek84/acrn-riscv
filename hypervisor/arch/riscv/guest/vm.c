@@ -123,7 +123,6 @@ static int kernel_header_parse(struct kernel_info *info)
 
 	info->text_offset = zimage.text_offset;
 	pr_info("zimage addr %lx text_offset %x", addr, info->text_offset);
-	//info->text_offset = (paddr_t)_boot;
 	return 0;
 }
 
@@ -166,6 +165,7 @@ void prepare_uos_vm(void)
 	uos_vm->arch_vm.s2ptp = uos_vm->arch_vm.s2pt_mem_ops.get_pml4_page(uos_vm->arch_vm.s2pt_mem_ops.info);
 	pr_info("%s stage 2 transation table location: 0x%lx ", __func__, (uint64_t *)(uos_vm->arch_vm.s2ptp));
 #endif
+	init_vm_sw_load(uos_vm);
 }
 
 static void dtb_load(struct dtb_info *info)
@@ -252,6 +252,8 @@ int create_vm(struct acrn_vm *vm)
 	} else {
 		kinfo->mem_start_gpa = CONFIG_UOS_MEM_START;
 		kinfo->mem_size_gpa = CONFIG_UOS_MEM_SIZE; //256M
+		dinfo->dtb_start_gpa = CONFIG_UOS_DTB_BASE; //membase + 128M
+		dinfo->dtb_size_gpa = CONFIG_UOS_DTB_SIZE; // 2M
 	}
 	pr_info("init stage 2 translation table");
 	s2pt_init(vm);
@@ -259,7 +261,7 @@ int create_vm(struct acrn_vm *vm)
 	pr_info("allocate memory for guest");
 	spinlock_init(&vm->emul_mmio_lock);
 
-	if (is_service_vm(vm)) {
+//	if (is_service_vm(vm)) {
 		allocate_guest_memory(vm, kinfo);
 		pr_info("load kernel and dtb");
 		kernel_load(kinfo);
@@ -267,7 +269,7 @@ int create_vm(struct acrn_vm *vm)
  
 		pr_info("passthru devices");
 		passthru_devices_to_sos();
-	}
+//	}
 
 	vclint_init(vm);
 	vplic_init(vm);
@@ -280,8 +282,7 @@ int create_vm(struct acrn_vm *vm)
 	if (is_service_vm(vm)) {
 		vcpu = &vm->hw.vcpu[0];
 		ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
-		cpu_csr_set(sepc, kinfo->entry);
-//		ctx->run_ctx.sepc = kinfo->entry;
+		ctx->run_ctx.sepc = kinfo->entry;
 //		pr_info("%lx %lx ", *((uint64_t *)(regs->pc)), *((uint64_t *)(regs->pc + 8)));
 //		pr_info("%lx %lx ", *((uint64_t *)(regs->x0)), *((uint64_t *)(regs->x0 + 8)));
 
@@ -293,6 +294,9 @@ int create_vm(struct acrn_vm *vm)
 			pr_info("Reserved UPCALL interrupt irq %d failed!!!!!!!!!!", CONFIG_UPCALL_IRQ);
 */
 	} else {
+		vcpu = &vm->hw.vcpu[0];
+		ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
+		ctx->run_ctx.sepc = kinfo->entry;
 		/* FIXME:
 		 * currently, directly enable IO completion polling mode, as there would be some race when
 		 * passthru physical uart irq to Guest OS. */
@@ -314,7 +318,7 @@ int create_vm(struct acrn_vm *vm)
 
 		// Passthru physical uart irq to Post-launched VM.
 //		release_guest_irq(sos_vm, CONFIG_PHY_UART_IRQ);
-		map_irq_to_vm(vm, CONFIG_PHY_UART_IRQ);
+//		map_irq_to_vm(vm, CONFIG_PHY_UART_IRQ);
 	}
 
 	/* Create virtual uart;*/

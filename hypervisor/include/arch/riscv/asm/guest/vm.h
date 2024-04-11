@@ -236,6 +236,7 @@ extern uint16_t get_vmid_by_uuid(const uint8_t *uuid);
 extern struct acrn_vm *get_vm_from_vmid(uint16_t vm_id);
 
 extern struct acrn_vm *sos_vm;
+extern struct acrn_vm *uos_vm;
 static inline struct acrn_vm *get_sos_vm(void)
 {
 	return sos_vm; 
