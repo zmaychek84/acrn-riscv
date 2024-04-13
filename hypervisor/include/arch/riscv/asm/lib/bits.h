@@ -69,12 +69,6 @@ static inline int flsl(unsigned long x)
 
 #define ffz(x)  ffsl(~(x))
 
-extern unsigned long find_next_bit(const unsigned long *addr, unsigned long
-		size, unsigned long offset);
-
-extern unsigned long find_next_zero_bit(const unsigned long *addr, unsigned
-		long size, unsigned long offset);
-
 /*
  * Atomic bitops
  *
