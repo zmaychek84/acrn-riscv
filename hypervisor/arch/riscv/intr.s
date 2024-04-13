@@ -62,13 +62,13 @@ init_trap:
 
 	.globl kernel_init
 kernel_init:
-.if !CONFIG_MACRN
+#ifndef CONFIG_MACRN
 	li t0, 0
 	csrw sie, t0
 	li t0, 0xC0000
 	csrw sstatus, t0
 	call init_trap
-.endif
+#endif
 	li a0, 0
 	li a1, 0
 	call start_acrn
@@ -78,9 +78,9 @@ kernel_init:
 	.globl mtrap_handler
 mtrap_handler:
 	#csrc mstatus, 0x8
-.if !CONFIG_MACRN
+#ifndef CONFIG_MACRN
 	csrrw sp, mscratch, sp
-.endif
+#endif
 	cpu_mctx_save
 	csrr a0, mcause
 	li a1, 0x8000000000000000
@@ -94,9 +94,9 @@ mexcept:
 	call m_service
 mout:
 	cpu_mctx_restore
-.if !CONFIG_MACRN
+#ifndef CONFIG_MACRN
 	csrrw sp, mscratch, sp
-.endif
+#endif
 	#csrs mstatus, 0x8
 	mret
 
