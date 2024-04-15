@@ -5,8 +5,12 @@
  */
 
 #include <lib/types.h>
+#include <asm/lib/bits.h>
 #include <asm/cpu.h>
+#include <asm/irq.h>
+#include <asm/smp.h>
 #include <asm/guest/vcpu.h>
+#include <asm/guest/vm.h>
 #include "sbi.h"
 
 static void sbi_ecall_base_probe(unsigned long id, unsigned long *out_val);
@@ -70,6 +74,20 @@ static void sbi_timer_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 	return;
 }
 
+static void send_vipi_mask(struct acrn_vcpu *vcpu, uint64_t mask, uint32_t base)
+{
+	uint16_t offset;
+
+	offset = ffs64(mask) - 1;
+
+	while (offset + base < vcpu->vm->hw.created_vcpus) {
+		clear_bit(offset, &mask);
+		send_single_swi(vcpu->vm->hw.vcpu[base + offset].pcpu_id,
+				NOTIFY_VCPU_SWI);
+		offset = ffs64(mask) - 1;
+	}
+}
+
 static void sbi_ipi_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
 	int *ret = &regs->a0;
@@ -77,8 +95,7 @@ static void sbi_ipi_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 	unsigned long *out_val = &regs->a1;
 
 	if (funcid == SBI_TYPE_IPI_SEND_IPI) {
-		unsigned long cpu = regs->a0;
-	//	*ret = sbi_ipi_send_smode(regs->a0, regs->a1);
+		send_vipi_mask(vcpu, regs->a0, regs->a1);
 		*ret = SBI_SUCCESS;
 	} else {
 		*ret = SBI_ENOTSUPP;
