@@ -95,6 +95,8 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	value64 = 0xf0bfff;
 	cpu_csr_write(hedeleg, value64);
 }
+
+static inline void load_guest_pmp(struct acrn_vcpu *vcpu) {}
 #else
 static void init_guest_state(struct acrn_vcpu *vcpu)
 {
@@ -169,6 +171,44 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	value64 = 0xf0b55f;
 	cpu_csr_write(medeleg, value64);
 }
+
+static inline void sos_pmp_switch(void)
+{
+	int pmp_cfg = 0x0f080f;
+	int pmp_addr0 = 0x10000000 >> 2;
+	int pmp_addr1 = 0x10000100 >> 2;
+	int pmp_addr2 = 0xffffffff;
+
+	asm volatile (
+		"csrw pmpcfg0, %0 \n\t"
+		"csrw pmpaddr0, %1 \n\t"
+		"csrw pmpaddr1, %2 \n\t"
+		"csrw pmpaddr2, %3 \n\t"
+		::"r"(pmp_cfg), "r"(pmp_addr0), "r"(pmp_addr1), "r"(pmp_addr2)
+	);
+}
+
+static inline void uos_pmp_switch(void)
+{
+	int pmp_cfg = 0x0f08;
+	int pmp_addr0 = 0x20000000;
+	int pmp_addr1 = 0xffffffff;
+
+	asm volatile (
+		"csrw pmpcfg0, %0 \n\t"
+		"csrw pmpaddr0, %1 \n\t"
+		"csrw pmpaddr1, %2 \n\t"
+		::"r"(pmp_cfg), "r"(pmp_addr0), "r"(pmp_addr1)
+	);
+}
+
+void load_guest_pmp(struct acrn_vcpu *vcpu)
+{
+	if (is_service_vm(vcpu->vm))
+		sos_pmp_switch();
+	else
+		uos_pmp_switch();
+}
 #endif
 
 /**
@@ -192,7 +232,9 @@ void init_vmcs(struct acrn_vcpu *vcpu)
 void load_vmcs(struct acrn_vcpu *vcpu)
 {
 	void **vcpu_ptr = &get_cpu_var(vcpu_run);
+
 	load_guest_state(vcpu);
+	load_guest_pmp(vcpu);
 	*vcpu_ptr = (void *)vcpu;
 }
 

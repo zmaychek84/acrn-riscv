@@ -22,24 +22,16 @@ _start:
 	call reset_mtimer
 	csrw mip, 0x0
 #ifndef CONFIG_MACRN
-	li t0, 0x08
+	li t0, 0x0f
 	csrw pmpcfg0, t0
 	li t0, 0xffffffff
 	csrw pmpaddr0, t0
 
 	li t0, 0x9aa
-	csrs mstatus, t0
 #else
-	li t0, 0x0f08
-	csrw pmpcfg0, t0
-	li t0, 0x20000000
-	csrw pmpaddr0, t0
-	li t0, 0xffffffff
-	csrw pmpaddr1, t0
-
 	li t0, 0x19aa
-	csrs mstatus, t0
 #endif
+	csrs mstatus, t0
 
 	call init_mtrap
 
