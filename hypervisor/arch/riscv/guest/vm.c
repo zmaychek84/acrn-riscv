@@ -19,10 +19,35 @@
 #include <asm/board.h>
 #include <asm/current.h>
 #include <asm/image.h>
-#include <asm/guest/vuart.h>
+//#include <asm/guest/vuart.h>
+#include <asm/guest/vpci.h>
+#include <vmcs9900.h>
 
 static struct acrn_vm vm_array[CONFIG_MAX_VM_NUM] __aligned(PAGE_SIZE);
-struct acrn_vm_config vm_configs;
+struct acrn_vm_pci_dev_config sos_pci_devs[CONFIG_MAX_PCI_DEV_NUM] = {
+	{
+		.emu_type = PCI_DEV_TYPE_HVEMUL,
+		.vdev_ops = &vhostbridge_ops,
+		.vbdf.bits = {.b = 0x00U, .d = 0x00U, .f = 0x00U},
+	},
+	{
+		.emu_type = PCI_DEV_TYPE_HVEMUL,
+		.vuart_idx = 0,
+		.vdev_ops = &vmcs9900_ops,
+		.vbdf.bits = {.b = 0x00U, .d = 0x01U, .f = 0x00U},
+		.vbar_base[0] = DEFAULT_VM_VIRT_MCS9900_MMIO_BASE,
+		.vbar_base[1] = DEFAULT_VM_VIRT_MCS9900_MSIX_BASE,
+	},
+};
+struct acrn_vm_config vm_configs[CONFIG_MAX_VM_NUM] = {
+	{
+		.load_order = SERVICE_VM,
+		.severity = SEVERITY_SERVICE_VM,
+		.name = "RISC-V ACRN SOS",
+		.pci_dev_num = 2U,
+		.pci_devs = sos_pci_devs,
+	},
+};
 struct acrn_vm *sos_vm = &vm_array[0];
 struct acrn_vm *uos_vm = &vm_array[1];
 
@@ -307,8 +332,10 @@ int create_vm(struct acrn_vm *vm)
 //		map_irq_to_vm(vm, CONFIG_PHY_UART_IRQ);
 	}
 
+	vpci_init(vm);
+
 	/* Create virtual uart;*/
-	setup_vuart(vm, 0);
+	//setup_vuart(vm, 0);
 	vm->state = VM_CREATED;
  
 	return 0;
@@ -321,6 +348,8 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 
 	/* TODO: only have one core */
 	offline_vcpu(&vm->hw.vcpu[0]);
+
+	vpci_deinit(vm);
 
 	/* Return status to caller */
 	return 0;

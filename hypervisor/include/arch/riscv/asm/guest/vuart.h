@@ -24,15 +24,38 @@ struct vuart_fifo {
 };
 
 struct acrn_vuart {
+	uint8_t data;           /* Data register (R/W) */
+	uint8_t ier;            /* Interrupt enable register (R/W) */
+	uint8_t lcr;            /* Line control register (R/W) */
+	uint8_t mcr;            /* Modem control register (R/W) */
+	uint8_t lsr;            /* Line status register (R/W) */
+	uint8_t msr;            /* Modem status register (R/W) */
+	uint8_t fcr;            /* FIFO control register (W) */
+	uint8_t scr;            /* Scratch register (R/W) */
+	uint8_t dll;            /* Baudrate divisor latch LSB */
+	uint8_t dlh;            /* Baudrate divisor latch MSB */
+
 	struct vuart_fifo rxfifo;
 	struct vuart_fifo txfifo;
 	uint16_t port_base;
+	uint32_t irq;
 	char vuart_rx_buf[RX_BUF_SIZE];
 	char vuart_tx_buf[TX_BUF_SIZE];
-	struct acrn_vm *vm;
-	spinlock_t lock;	/* protects all softc elements */
+	bool thre_int_pending;  /* THRE interrupt pending */
 	bool active;
+	struct acrn_vuart *target_vu; /* Pointer to target vuart */
+	struct acrn_vm *vm;
+	struct pci_vdev *vdev;  /* pci vuart */
+	spinlock_t lock;	/* protects all softc elements */
 };
 
-static inline void vuart_toggle_intr(const struct acrn_vuart *vu) {}
+void init_pci_vuart(struct pci_vdev *vdev);
+void deinit_pci_vuart(struct pci_vdev *vdev);
+void vuart_toggle_intr(const struct acrn_vuart *vu);
+void vpci_vuart_toggle_intr(const struct acrn_vuart *vu);
+
+void vpci_vuart_putchar(struct acrn_vuart *vu, char ch);
+char vpci_vuart_getchar(struct acrn_vuart *vu);
+uint8_t vpci_vuart_read_reg(struct acrn_vuart *vu, uint16_t offset);
+void vpci_vuart_write_reg(struct acrn_vuart *vu, uint16_t offset, uint8_t value);
 #endif /* __RISCV_VUART_H__ */

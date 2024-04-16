@@ -168,6 +168,12 @@ BOOT_C_SRCS += arch/riscv/guest/vm.c
 BOOT_C_SRCS += arch/riscv/guest/vio.c
 BOOT_C_SRCS += arch/riscv/guest/sbi.c
 BOOT_C_SRCS += arch/riscv/guest/vuart.c
+BOOT_C_SRCS += arch/riscv/guest/vpci/vuart.c
+BOOT_C_SRCS += arch/riscv/guest/vpci/vdev.c
+BOOT_C_SRCS += arch/riscv/guest/vpci/vhostbridge.c
+BOOT_C_SRCS += arch/riscv/guest/vpci/vmcs9900.c
+BOOT_C_SRCS += arch/riscv/guest/vpci/vpci.c
+BOOT_C_SRCS += arch/riscv/guest/vpci/vmsix.c
 
 BOOT_C_SRCS += arch/riscv/mem.c
 BOOT_C_SRCS += arch/riscv/pgtable.c

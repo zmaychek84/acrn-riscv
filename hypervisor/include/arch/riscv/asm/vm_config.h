@@ -137,6 +137,8 @@ struct acrn_vm_pci_dev_config {
 	uint32_t emu_type;				/* the type how the device is emulated. */
 	union pci_bdf vbdf;				/* virtual BDF of PCI device */
 	union pci_bdf pbdf;				/* physical BDF of PCI device */
+	struct target_vuart t_vuart;
+	uint16_t vuart_idx;
 	uint64_t vbar_base[PCI_BAR_COUNT];		/* vbar base address of PCI device */
 	struct pci_pdev *pdev;				/* the physical PCI device if it's a PT device */
 	const struct pci_vdev_ops *vdev_ops;		/* operations for PCI CFG read/write */
@@ -181,10 +183,10 @@ struct acrn_vm_config {
 	struct acrn_mmiodev mmiodevs[MAX_MMIO_DEV_NUM];
 } __aligned(8);
 
-extern struct acrn_vm_config vm_configs;
+extern struct acrn_vm_config vm_configs[CONFIG_MAX_VM_NUM];
 static inline struct acrn_vm_config *get_vm_config(uint16_t vm_id)
 {
-	return &vm_configs;
+	return &vm_configs[vm_id];
 }
 extern uint8_t get_vm_severity(uint16_t vm_id);
 extern bool vm_has_matched_uuid(uint16_t vmid, const uint8_t *uuid);

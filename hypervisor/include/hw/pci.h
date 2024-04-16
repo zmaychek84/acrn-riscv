@@ -335,8 +335,10 @@ static inline bool is_bar_offset(uint32_t nr_bars, uint32_t offset)
 	if ((offset >= pci_bar_offset(0U))
 		&& (offset < pci_bar_offset(nr_bars))) {
 		ret = true;
+	} else if (offset == 0x30) {
+		ret = true;
 	} else {
-	    ret = false;
+		ret = false;
 	}
 
 	return ret;

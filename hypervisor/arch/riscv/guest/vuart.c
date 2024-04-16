@@ -18,6 +18,10 @@
 #define obtain_vuart_lock(vu, flags)	spinlock_irqsave_obtain(&((vu)->lock), &(flags))
 #define release_vuart_lock(vu, flags)	spinlock_irqrestore_release(&((vu)->lock), (flags))
 
+void vuart_toggle_intr(const struct acrn_vuart *vu) {
+        return;
+};
+
 static inline void reset_fifo(struct vuart_fifo *fifo)
 {
 	fifo->rindex = 0U;

@@ -10,6 +10,7 @@
 #include <asm/apicreg.h>
 #include <asm/guest/vcpu.h>
 #include <asm/guest/vm.h>
+#include <asm/guest/vpci.h>
 #include <asm/guest/instr_emul.h>
 #include <asm/guest/vmexit.h>
 #include <asm/vmx.h>
@@ -149,6 +150,18 @@ int32_t mmio_access_vmexit_handler(struct acrn_vcpu *vcpu)
 		} else if (mmio_req->address >= UART_MEM_ADDR &&
 			   mmio_req->address + ret < UART_MEM_REGION) {
 			status = vuart_access_handler(vcpu, ins, xlen);
+			return status;
+		} else if (mmio_req->address >= DEFAULT_VM_VIRT_PCI_MMCFG_BASE &&
+			   mmio_req->address + ret < DEFAULT_VM_VIRT_PCI_MMCFG_LIMIT) {
+			status = vpci_cfg_access_handler(vcpu, ins, xlen);
+			return status;
+		} else if (mmio_req->address >= DEFAULT_VM_VIRT_MCS9900_MMIO_BASE &&
+			   mmio_req->address + ret < (DEFAULT_VM_VIRT_MCS9900_MMIO_BASE + 0x1000)) {
+			status = vmcs9900_mmio_access_handler(vcpu, ins, xlen);
+			return status;
+		} else if (mmio_req->address >= DEFAULT_VM_VIRT_MCS9900_MSIX_BASE &&
+			   mmio_req->address + ret < (DEFAULT_VM_VIRT_MCS9900_MSIX_BASE + 0x1000)) {
+			status = vmsix_table_access_handler(vcpu, ins, xlen);
 			return status;
 		}
 		if (gpa == INVALID_HPA) {
