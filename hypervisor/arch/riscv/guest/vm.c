@@ -23,15 +23,11 @@
 
 static struct acrn_vm vm_array[CONFIG_MAX_VM_NUM] __aligned(PAGE_SIZE);
 struct acrn_vm_config vm_configs;
-//struct acrn_vm acrn_sos_vm;
-//struct acrn_vm acrn_uos_vm;
-//struct acrn_vm *sos_vm = &acrn_sos_vm;
-//struct acrn_vm *uos_vm = &acrn_uos_vm;
 struct acrn_vm *sos_vm = &vm_array[0];
 struct acrn_vm *uos_vm = &vm_array[1];
 
-#define RV64_ZIMAGE_MAGIC0 0x5643534952
-#define RV64_ZIMAGE_MAGIC1 0x05435352
+#define RV64_BIMAGE_MAGIC0 0x5643534952
+#define RV64_BIMAGE_MAGIC1 0x05435352
 
 #define MASK_2M 0xFFFFFFFFFFE00000
 
@@ -94,8 +90,6 @@ static void kernel_load(struct kernel_info *info)
 static int kernel_header_parse(struct kernel_info *info)
 {
 	/* linux/Documentation/arch/riscv/boot-image-header.rst*/
-	info->text_offset = 0;
-	return 0;
 	struct {
 		uint32_t code0;
 		uint32_t code1;
@@ -108,21 +102,17 @@ static int kernel_header_parse(struct kernel_info *info)
 		uint64_t magic0;
 		uint32_t magic1;
 		uint32_t res3;
-	} zimage;
+	} bimage;
 	void *addr = hpa2hva(info->kernel_addr);
 
-	memcpy_s(&zimage, sizeof(zimage), addr, sizeof(zimage));
-	if (zimage.magic0 != RV64_ZIMAGE_MAGIC0 &&
-		 zimage.magic1 != RV64_ZIMAGE_MAGIC1)
+	memcpy_s(&bimage, sizeof(bimage), addr, sizeof(bimage));
+	if (bimage.magic0 != RV64_BIMAGE_MAGIC0 &&
+		 bimage.magic1 != RV64_BIMAGE_MAGIC1)
 		return -EINVAL;
 
-	/*
-	 * Given the above this check is a bit pointless, but leave it
-	 * here in case someone adds a length field in the future.
-	 */
-
-	info->text_offset = zimage.text_offset;
-	pr_info("zimage addr %lx text_offset %x", addr, info->text_offset);
+	info->text_offset = 0;
+	//info->text_offset = bimage.text_offset;
+	pr_info("bimage addr %lx text_offset %x", addr, info->text_offset);
 	return 0;
 }
 
@@ -261,7 +251,7 @@ int create_vm(struct acrn_vm *vm)
 	pr_info("allocate memory for guest");
 	spinlock_init(&vm->emul_mmio_lock);
 
-//	if (is_service_vm(vm)) {
+	if (is_service_vm(vm)) {
 		allocate_guest_memory(vm, kinfo);
 		pr_info("load kernel and dtb");
 		kernel_load(kinfo);
@@ -269,7 +259,7 @@ int create_vm(struct acrn_vm *vm)
  
 		pr_info("passthru devices");
 		passthru_devices_to_sos();
-//	}
+	}
 
 	vclint_init(vm);
 	vplic_init(vm);
@@ -282,9 +272,6 @@ int create_vm(struct acrn_vm *vm)
 	if (is_service_vm(vm)) {
 		vcpu = &vm->hw.vcpu[0];
 		ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
-		ctx->run_ctx.sepc = kinfo->entry;
-//		pr_info("%lx %lx ", *((uint64_t *)(regs->pc)), *((uint64_t *)(regs->pc + 8)));
-//		pr_info("%lx %lx ", *((uint64_t *)(regs->x0)), *((uint64_t *)(regs->x0 + 8)));
 
 		/* prepare upcall interrupt, irq is hardcode in kernel */
 /*
@@ -296,7 +283,6 @@ int create_vm(struct acrn_vm *vm)
 	} else {
 		vcpu = &vm->hw.vcpu[0];
 		ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
-		ctx->run_ctx.sepc = kinfo->entry;
 		/* FIXME:
 		 * currently, directly enable IO completion polling mode, as there would be some race when
 		 * passthru physical uart irq to Guest OS. */
