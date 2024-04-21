@@ -25,6 +25,23 @@
 #define smp_rmb()       dmb()
 #define smp_wmb()       dmb()
 
+#ifdef CONFIG_MACRN
+#define local_irq_disable()   asm volatile ( "csrc mstatus, 0x8\n" :::)
+#define local_irq_enable()    asm volatile ( "csrs mstatus, 0x8\n" :::)
+#define local_save_flags(x)					\
+({								\
+	asm volatile ("csrr t0, mstatus\n\t"			\
+		      "sd t0, (%0)\n"				\
+		      ::"r"((unsigned long)x):"memory", "t0");	\
+})
+
+#define local_irq_restore(x)					\
+({								\
+	asm volatile ( "csrw mstatus, %0\n" ::"r"(x):);		\
+})
+
+#else /* !CONFIG_MACRN */
+
 #define local_irq_disable()   asm volatile ( "csrc sstatus, 0x2\n" :::)
 #define local_irq_enable()    asm volatile ( "csrs sstatus, 0x2\n" :::)
 
@@ -35,15 +52,16 @@
 		      ::"r"((unsigned long)x):"memory", "t0");	\
 })
 
+#define local_irq_restore(x)					\
+({								\
+	asm volatile ( "csrw sstatus, %0\n" ::"r"(x):);		\
+})
+#endif
+
 #define local_irq_save(x)					\
 ({								\
 	local_save_flags(x);					\
 	local_irq_disable();					\
-})
-
-#define local_irq_restore(x)					\
-({								\
-	asm volatile ( "csrw sstatus, %0\n" ::"r"(x):);		\
 })
 
 static inline int local_irq_is_enabled(void)
@@ -52,9 +70,6 @@ static inline int local_irq_is_enabled(void)
 	local_save_flags(flags);
 	return !(flags & 0x2);
 }
-
-struct acrn_vcpu;
-extern struct acrn_vcpu *__context_switch(struct acrn_vcpu *prev, struct acrn_vcpu *next);
 
 /* Synchronizes all write accesses to memory */
 static inline void cpu_write_memory_barrier(void)
