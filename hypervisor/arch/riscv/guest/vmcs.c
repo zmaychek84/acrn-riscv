@@ -25,12 +25,8 @@ static void init_guest_state(struct acrn_vcpu *vcpu)
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
 	vcpu_set_gpreg(vcpu, OFFSET_REG_A0, vcpu->vcpu_id);
-	//cpu_csr_write(vsstatus, ctx->run_ctx.sstatus);
 	cpu_csr_write(vsstatus, 0x2000C0000);
 	cpu_csr_write(vsepc, ctx->run_ctx.sepc);
-
-	/* use magic # to check if vs-mode switching succeeds or not */
-	//cpu_csr_write(vsepc, 0xaaaabbbb);
 	cpu_csr_write(vsip, ctx->run_ctx.sip);
 	cpu_csr_write(vsie, ctx->run_ctx.sie);
 	cpu_csr_write(vstvec, ctx->run_ctx.stvec);
@@ -45,11 +41,7 @@ static void load_guest_state(struct acrn_vcpu *vcpu)
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
 	cpu_csr_write(vsstatus, ctx->run_ctx.sstatus);
-//	cpu_csr_write(vsstatus, 0x2000C0000);
 	cpu_csr_write(vsepc, ctx->run_ctx.sepc);
-
-	/* use magic # to check if vs-mode switching succeeds or not */
-	//cpu_csr_write(vsepc, 0xaaaabbbb);
 	cpu_csr_write(vsip, ctx->run_ctx.sip);
 	cpu_csr_write(vsie, ctx->run_ctx.sie);
 	cpu_csr_write(vstvec, ctx->run_ctx.stvec);
@@ -81,7 +73,6 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 
 	pr_dbg("Initialize host state");
 	value64 = 0x200000180;
-	//value64 = 0x200200080;
 	cpu_csr_set(hstatus, value64);
 	ctx->run_ctx.cpu_gp_regs.regs.hstatus = value64;
 
@@ -89,8 +80,6 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	value64 = 0x2000C0100;
 	cpu_csr_set(sstatus, value64);
 	ctx->run_ctx.cpu_gp_regs.regs.status = value64;
-	//value64 = (uint64_t)_vkernel;
-//	cpu_csr_write(sepc, value64);
 
 	value64 = 0xf0bfff;
 	cpu_csr_write(hedeleg, value64);
@@ -102,12 +91,8 @@ static void init_guest_state(struct acrn_vcpu *vcpu)
 {
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
-	//cpu_csr_write(vsstatus, ctx->run_ctx.sstatus);
 	cpu_csr_write(sstatus, 0x2000C0000);
 	cpu_csr_write(sepc, ctx->run_ctx.sepc);
-
-	/* use magic # to check if vs-mode switching succeeds or not */
-	//cpu_csr_write(vsepc, 0xaaaabbbb);
 	cpu_csr_write(sip, ctx->run_ctx.sip);
 	cpu_csr_write(sie, ctx->run_ctx.sie);
 	cpu_csr_write(stvec, ctx->run_ctx.stvec);
@@ -122,11 +107,7 @@ static void load_guest_state(struct acrn_vcpu *vcpu)
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
 	cpu_csr_write(sstatus, ctx->run_ctx.sstatus);
-//	cpu_csr_write(vsstatus, 0x2000C0000);
 	cpu_csr_write(sepc, ctx->run_ctx.sepc);
-
-	/* use magic # to check if vs-mode switching succeeds or not */
-	//cpu_csr_write(vsepc, 0xaaaabbbb);
 	cpu_csr_write(sip, ctx->run_ctx.sip);
 	cpu_csr_write(sie, ctx->run_ctx.sie);
 	cpu_csr_write(stvec, ctx->run_ctx.stvec);
@@ -157,11 +138,6 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
 	pr_dbg("Initialize host state");
-/*
-	value64 = 0x200000800;
-	cpu_csr_set(mstatus, value64);
-	ctx->run_ctx.cpu_gp_regs.regs.hstatus = value64;
-*/
 
 	/* must set the MPP in order to enter into guest s-mode */
 	value64 = 0x200000800;
