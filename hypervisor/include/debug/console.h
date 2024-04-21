@@ -7,7 +7,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#ifdef CONFIG_RISCV_64
+#ifdef CONFIG_RISCV64
 #include <asm/guest/vuart.h>
 #else
 #include <vuart.h>
