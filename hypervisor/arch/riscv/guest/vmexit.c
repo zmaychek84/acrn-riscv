@@ -24,6 +24,7 @@ static int32_t hlt_vmexit_handler(struct acrn_vcpu *vcpu);
 static int32_t pf_load_vmexit_handler(struct acrn_vcpu *vcpu);
 static int32_t pf_store_vmexit_handler(struct acrn_vcpu *vcpu);
 static int32_t pf_ins_vmexit_handler(struct acrn_vcpu *vcpu);
+static int32_t mswi_vmexit_handler(struct acrn_vcpu *vcpu);
 
 /* VM Dispatch table for Exit condition handling */
 static const struct vm_exit_dispatch interrupt_dispatch_table[NR_HX_EXIT_IRQ_REASONS] = {
@@ -34,7 +35,7 @@ static const struct vm_exit_dispatch interrupt_dispatch_table[NR_HX_EXIT_IRQ_REA
 	[HX_EXIT_IRQ_VIRT_SSWI] = {
 		.handler = undefined_vmexit_handler},
 	[HX_EXIT_IRQ_MSWI] = {
-		.handler = unhandled_vmexit_handler},
+		.handler = mswi_vmexit_handler},
 	[HX_EXIT_IRQ_STIMER] = {
 		.handler = unhandled_vmexit_handler},
 	[HX_EXIT_IRQ_VSTIMER] = {
@@ -187,6 +188,11 @@ int32_t vmexit_handler(struct acrn_vcpu *vcpu)
 	}
 
 	return ret;
+}
+
+static int32_t mswi_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	return 0;
 }
 
 static int32_t unhandled_vmexit_handler(struct acrn_vcpu *vcpu)
