@@ -382,7 +382,7 @@ int32_t run_vcpu(struct acrn_vcpu *vcpu)
 			}
 		}
 	} else {
-	#ifdef CONFIG_L1D_FLUSH_VMENTRY_ENABLED
+#ifdef CONFIG_L1D_FLUSH_VMENTRY_ENABLED
 		cpu_l1d_flush();
 #endif
 
@@ -499,7 +499,6 @@ void launch_vcpu(struct acrn_vcpu *vcpu)
 
 	pr_info("vcpu%hu scheduled on pcpu%hu", vcpu->vcpu_id, pcpu_id);
 	vcpu_set_state(vcpu, VCPU_RUNNING);
-	vcpu_set_gpreg(vcpu, CPU_REG_A0, vcpu->vcpu_id);
 	wake_thread(&vcpu->thread_obj);
 }
 
@@ -579,6 +578,9 @@ int create_vcpu(struct acrn_vm *vm, uint16_t vcpu_id)
 		else
 #endif
 			vcpu_set_rip(vcpu, vm->sw.kernel_info.entry);
+		vcpu_set_gpreg(vcpu, CPU_REG_A0, vcpu->vcpu_id);
+		vcpu_set_gpreg(vcpu, CPU_REG_A1, 0x12345678);
+
 		(void)memset((void *)&vcpu->req, 0U, sizeof(struct io_request));
 		vm->hw.created_vcpus++;
 

@@ -102,7 +102,6 @@ static void init_guest_state(struct acrn_vcpu *vcpu)
 {
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 
-	vcpu_set_gpreg(vcpu, OFFSET_REG_A0, vcpu->vcpu_id);
 	//cpu_csr_write(vsstatus, ctx->run_ctx.sstatus);
 	cpu_csr_write(sstatus, 0x2000C0000);
 	cpu_csr_write(sepc, ctx->run_ctx.sepc);
