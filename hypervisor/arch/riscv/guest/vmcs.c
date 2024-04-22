@@ -149,7 +149,7 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 
 static inline void sos_pmp_switch(void)
 {
-	int pmp_cfg = 0x0f080f;
+	int pmp_cfg = 0x0f0f0f;
 	int pmp_addr0 = 0x10000000 >> 2;
 	int pmp_addr1 = 0x10000100 >> 2;
 	int pmp_addr2 = 0xffffffff;
