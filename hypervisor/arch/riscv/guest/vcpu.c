@@ -23,24 +23,9 @@
 
 /* stack_frame is linked with the sequence of stack operation in arch_switch_to() */
 struct stack_frame {
-	uint64_t ip;
 	uint64_t ra;
-	uint64_t sp;
-	uint64_t gp;
-	uint64_t tp;
-	uint64_t t0;
-	uint64_t t1;
-	uint64_t t2;
 	uint64_t s0;
 	uint64_t s1;
-	uint64_t a0;
-	uint64_t a1;
-	uint64_t a2;
-	uint64_t a3;
-	uint64_t a4;
-	uint64_t a5;
-	uint64_t a6;
-	uint64_t a7;
 	uint64_t s2;
 	uint64_t s3;
 	uint64_t s4;
@@ -51,16 +36,9 @@ struct stack_frame {
 	uint64_t s9;
 	uint64_t s10;
 	uint64_t s11;
-	uint64_t t3;
-	uint64_t t4;
-	uint64_t t5;
-	uint64_t t6;
-	uint64_t status;
-	uint64_t tval;
-	uint64_t cause;
-	uint64_t hstatus;
-	uint64_t orig_a0;
-//	uint64_t magic;
+	uint64_t tp;
+	uint64_t a0; /* vcpu_thread's parameter */
+	uint64_t magic;
 };
 
 uint64_t vcpu_get_gpreg(const struct acrn_vcpu *vcpu, uint32_t reg)
@@ -294,31 +272,16 @@ static uint64_t build_stack_frame(struct acrn_vcpu *vcpu)
 {
 	uint64_t stacktop = (uint64_t)&vcpu->stack[STACK_SIZE];
 	struct stack_frame *frame;
-	uint64_t *ret;
 
 	frame = (struct stack_frame *)stacktop;
 	frame -= 1;
 
-//	frame->magic = SP_BOTTOM_MAGIC;
-	frame->ip = (uint64_t)vcpu->thread_obj.thread_entry; /*return address*/
+	frame->magic = SP_BOTTOM_MAGIC;
 	frame->ra = (uint64_t)vcpu->thread_obj.thread_entry;
-	//frame->ra = 0UL;
-	frame->sp = (uint64_t)frame;
-	frame->gp = 0UL;
 	frame->tp = (uint64_t)&vcpu->thread_obj;
-	frame->t0 = 0UL;
-	frame->t1 = 0UL;
-	frame->t2 = 0UL;
+	frame->a0 = (uint64_t)&vcpu->thread_obj;
 	frame->s0 = 0UL;
 	frame->s1 = 0UL;
-	frame->a0 = (uint64_t)&vcpu->thread_obj;
-	frame->a1 = 0UL;
-	frame->a2 = 0UL;
-	frame->a3 = 0UL;
-	frame->a4 = 0UL;
-	frame->a5 = 0UL;
-	frame->a6 = 0UL;
-	frame->a7 = 0UL;
 	frame->s2 = 0UL;
 	frame->s3 = 0UL;
 	frame->s4 = 0UL;
@@ -329,14 +292,8 @@ static uint64_t build_stack_frame(struct acrn_vcpu *vcpu)
 	frame->s9 = 0UL;
 	frame->s10 = 0UL;
 	frame->s11 = 0UL;
-	frame->t3 = 0UL;
-	frame->t4 = 0UL;
-	frame->t5 = 0UL;
-	frame->t6 = 0UL;
 
-	ret = &frame->ip;
-
-	return (uint64_t)ret;
+	return (uint64_t)frame;
 }
 
 uint64_t vcpu_get_efer(struct acrn_vcpu *vcpu)

@@ -144,23 +144,21 @@ void __init smp_init_cpus(void)
 	}
 }
 
-void start_secondary(uint32_t cpuid)
+void start_secondary(uint32_t cpu)
 {
-	set_current(&idle_vcpu[cpuid]);
-	set_pcpu_id(cpuid);
+	struct thread_object *idle = &per_cpu(idle, cpu);
+
+	set_current(idle);
+	set_pcpu_id(cpu);
 
 	/* Now report this CPU is up */
-	set_bit(cpuid, &cpu_online_map);
+	set_bit(cpu, &cpu_online_map);
 #ifndef CONFIG_MACRN
 	switch_satp(init_satp);
 #endif
-	pr_info("%s cpu = %d\n", __func__, cpuid);
 	init_trap();
-	pr_dbg("init traps");
-	pr_dbg("init local irq");
 	timer_init();
-
-	init_sched(cpuid);
+	init_sched(cpu);
 
 	local_irq_enable();
 	run_idle_thread();

@@ -13,6 +13,7 @@
 #include <asm/mem.h>
 #include <asm/early_printk.h>
 #include <asm/smp.h>
+#include <asm/per_cpu.h>
 #include <asm/notify.h>
 #include <asm/guest/vm.h>
 #include <asm/guest/s2vm.h>
@@ -26,7 +27,9 @@ size_t dcache_line_bytes;
 void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
                       unsigned long fdt_paddr)
 {
-	set_current(&idle_vcpu[cpu]);
+	struct thread_object *idle = &per_cpu(idle, cpu);
+
+	set_current(idle);
 	set_pcpu_id(cpu); /* needed early, for smp_processor_id() */
 	init_logmsg();
 
@@ -56,7 +59,7 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 	local_irq_enable();
 	setup_virt_paging();
 
-	init_sched(0U);
+	init_sched(cpu);
 
 	pr_info("prepare sos");
 	prepare_sos_vm();
@@ -72,9 +75,7 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 #endif
 
 	pr_info("end\n");
-
 	run_idle_thread();
-	while(1);
-
-	asm volatile("wfi" : : : "memory");
+	while(1)
+		asm volatile("wfi" : : : "memory");
 }

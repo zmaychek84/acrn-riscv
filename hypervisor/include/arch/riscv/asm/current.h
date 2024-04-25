@@ -11,22 +11,20 @@
 #include <asm/cpu.h>
 #include <asm/guest/vcpu.h>
 
-register struct acrn_vcpu *curr_vcpu asm ("tp");
-static inline struct thread_object *get_current(void)
+volatile register struct thread_object *current asm ("tp");
+static inline void set_current(struct thread_object *obj)
 {
-	return &curr_vcpu->thread_obj;
+	current = obj;
 }
 
-static inline void set_current(struct acrn_vcpu *vcpu)
+static inline uint16_t get_pcpu_id(void)
 {
-	curr_vcpu = vcpu;
+	return current->pcpu_id;
 }
-
-#define get_pcpu_id()		(curr_vcpu->pcpu_id)
 
 #define set_pcpu_id(id)			\
 do {					\
-	curr_vcpu->pcpu_id = id;	\
+	current->pcpu_id = id;	\
 } while ( 0 )
 
 static inline struct cpu_info *get_cpu_info(void)
@@ -46,7 +44,7 @@ static inline struct cpu_info *get_cpu_info(void)
 #define guest_cpu_ctx_regs() (&get_cpu_info()->guest_cpu_ctx_regs)
 
 #define switch_stack_and_jump(stack, fn) \
-	asm volatile ("mv sp,%0; b " STR(fn) : : "r" (stack) : "memory" )
+	asm volatile ("mv sp, %0; jalr %1" : : "r" (stack), "r" (fn) : "memory" )
 
 #define reset_stack_and_jump(fn) switch_stack_and_jump(get_cpu_info(), fn)
 

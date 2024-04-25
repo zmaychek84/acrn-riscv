@@ -353,11 +353,6 @@ void start_vm(struct acrn_vm *vm)
 		launch_vcpu(&vm->hw.vcpu[i]);
 }
 
-static inline struct cpu_info *get_cpu_info_from_sp(uint16_t id)
-{
-	return &curr_vcpu->arch.cpu_info;
-}
-
 void start_sos_vm(void)
 {
 	start_vm(sos_vm);
