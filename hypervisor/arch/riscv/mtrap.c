@@ -46,10 +46,13 @@ static void mexpt_handler(void)
 static void mswi_handler(void)
 {
 	int cpu = cpu_id();
+#if 0
 	char *s = "mswi_handler: d\n";
 
 	s[14] = cpu + '0';
 	early_printk(s);
+#endif
+
 	cpu *= 4;
 	cpu += 0x02000000;
 
