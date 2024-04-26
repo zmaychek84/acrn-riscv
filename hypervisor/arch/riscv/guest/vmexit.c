@@ -17,15 +17,98 @@
 #include <trace.h>
 #include <logmsg.h>
 
-static int32_t unhandled_vmexit_handler(struct acrn_vcpu *vcpu);
-static int32_t undefined_vmexit_handler(struct acrn_vcpu *vcpu);
-static int32_t pause_vmexit_handler(__unused struct acrn_vcpu *vcpu);
-static int32_t hlt_vmexit_handler(struct acrn_vcpu *vcpu);
-static int32_t pf_load_vmexit_handler(struct acrn_vcpu *vcpu);
-static int32_t pf_store_vmexit_handler(struct acrn_vcpu *vcpu);
-static int32_t pf_ins_vmexit_handler(struct acrn_vcpu *vcpu);
-static int32_t mswi_vmexit_handler(struct acrn_vcpu *vcpu);
+static int32_t mswi_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	return 0;
+}
 
+static int32_t mti_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	return 0;
+}
+
+static int32_t unhandled_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	pr_fatal("Error: Unhandled VM exit condition from guest at 0x%016lx ",
+			vcpu_get_gpreg(vcpu, CPU_REG_IP));
+
+	pr_fatal("Exit Reason: 0x%016lx ", vcpu->arch.exit_reason);
+	return 0;
+}
+
+static int32_t pause_vmexit_handler(__unused struct acrn_vcpu *vcpu)
+{
+	yield_current();
+	return 0;
+}
+
+static int32_t hlt_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	if ((vcpu->arch.pending_req == 0UL) && (!vclint_has_pending_intr(vcpu))) {
+		wait_event(&vcpu->events[VCPU_EVENT_VIRTUAL_INTERRUPT]);
+	}
+	return 0;
+}
+
+/*
+int32_t ecall_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	uint64_t rax, rbx, rcx, rdx;
+
+	rax = vcpu_get_gpreg(vcpu, CPU_REG_A0);
+	rbx = vcpu_get_gpreg(vcpu, CPU_REG_A1);
+	rcx = vcpu_get_gpreg(vcpu, CPU_REG_A2);
+	rdx = vcpu_get_gpreg(vcpu, CPU_REG_A3);
+	guest_cpuid(vcpu, (uint32_t *)&rax, (uint32_t *)&rbx,
+		(uint32_t *)&rcx, (uint32_t *)&rdx);
+	vcpu_set_gpreg(vcpu, CPU_REG_A0, rax);
+	vcpu_set_gpreg(vcpu, CPU_REG_A1, rbx);
+	vcpu_set_gpreg(vcpu, CPU_REG_A2, rcx);
+	vcpu_set_gpreg(vcpu, CPU_REG_A3, rdx);
+
+	return 0;
+}
+*/
+
+bool has_rt_vm(void)
+{
+	return false;
+}
+
+bool is_rt_vm(const struct acrn_vm *vm)
+{
+	return false;
+}
+
+/* vmexit handler for just injecting a #UD exception
+ *
+ * ACRN doesn't support nested virtualization, the following VMExit will inject #UD
+ * VMCLEAR/VMLAUNCH/VMPTRST/VMREAD/VMRESUME/VMWRITE/HXOFF/HXON.
+ * ACRN doesn't enable VMFUNC, VMFUNC treated as undefined.
+ */
+static int32_t undefined_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	vcpu_inject_ud(vcpu);
+	return 0;
+}
+
+static int32_t pf_load_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	pr_info("%s\n", __func__);
+	return 0;
+}
+
+static int32_t pf_store_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	pr_info("%s\n", __func__);
+	return 0;
+}
+
+static int32_t pf_ins_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	pr_info("%s\n", __func__);
+	return 0;
+}
 /* VM Dispatch table for Exit condition handling */
 static const struct vm_exit_dispatch interrupt_dispatch_table[NR_HX_EXIT_IRQ_REASONS] = {
 	[HX_EXIT_IRQ_RSV] = {
@@ -41,7 +124,7 @@ static const struct vm_exit_dispatch interrupt_dispatch_table[NR_HX_EXIT_IRQ_REA
 	[HX_EXIT_IRQ_VSTIMER] = {
 		.handler = undefined_vmexit_handler},
 	[HX_EXIT_IRQ_MTIMER] = {
-		.handler = unhandled_vmexit_handler},
+		.handler = mti_vmexit_handler},
 	[HX_EXIT_IRQ_SEXT] = {
 		.handler = external_interrupt_vmexit_handler},
 	[HX_EXIT_IRQ_VSEXT] = {
@@ -188,92 +271,4 @@ int32_t vmexit_handler(struct acrn_vcpu *vcpu)
 	}
 
 	return ret;
-}
-
-static int32_t mswi_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	return 0;
-}
-
-static int32_t unhandled_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	pr_fatal("Error: Unhandled VM exit condition from guest at 0x%016lx ",
-			vcpu_get_gpreg(vcpu, CPU_REG_IP));
-
-	pr_fatal("Exit Reason: 0x%016lx ", vcpu->arch.exit_reason);
-	return 0;
-}
-
-static int32_t pause_vmexit_handler(__unused struct acrn_vcpu *vcpu)
-{
-	yield_current();
-	return 0;
-}
-
-static int32_t hlt_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	if ((vcpu->arch.pending_req == 0UL) && (!vclint_has_pending_intr(vcpu))) {
-		wait_event(&vcpu->events[VCPU_EVENT_VIRTUAL_INTERRUPT]);
-	}
-	return 0;
-}
-
-/*
-int32_t ecall_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	uint64_t rax, rbx, rcx, rdx;
-
-	rax = vcpu_get_gpreg(vcpu, CPU_REG_A0);
-	rbx = vcpu_get_gpreg(vcpu, CPU_REG_A1);
-	rcx = vcpu_get_gpreg(vcpu, CPU_REG_A2);
-	rdx = vcpu_get_gpreg(vcpu, CPU_REG_A3);
-	guest_cpuid(vcpu, (uint32_t *)&rax, (uint32_t *)&rbx,
-		(uint32_t *)&rcx, (uint32_t *)&rdx);
-	vcpu_set_gpreg(vcpu, CPU_REG_A0, rax);
-	vcpu_set_gpreg(vcpu, CPU_REG_A1, rbx);
-	vcpu_set_gpreg(vcpu, CPU_REG_A2, rcx);
-	vcpu_set_gpreg(vcpu, CPU_REG_A3, rdx);
-
-	return 0;
-}
-*/
-
-bool has_rt_vm(void)
-{
-	return false;
-}
-
-bool is_rt_vm(const struct acrn_vm *vm)
-{
-	return false;
-}
-
-/* vmexit handler for just injecting a #UD exception
- *
- * ACRN doesn't support nested virtualization, the following VMExit will inject #UD
- * VMCLEAR/VMLAUNCH/VMPTRST/VMREAD/VMRESUME/VMWRITE/HXOFF/HXON.
- * ACRN doesn't enable VMFUNC, VMFUNC treated as undefined.
- */
-static int32_t undefined_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	vcpu_inject_ud(vcpu);
-	return 0;
-}
-
-static int32_t pf_load_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	pr_info("%s\n", __func__);
-	return 0;
-}
-
-static int32_t pf_store_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	pr_info("%s\n", __func__);
-	return 0;
-}
-
-static int32_t pf_ins_vmexit_handler(struct acrn_vcpu *vcpu)
-{
-	pr_info("%s\n", __func__);
-	return 0;
 }
