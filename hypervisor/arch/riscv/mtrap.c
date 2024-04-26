@@ -77,7 +77,7 @@ static void mtimer_handler(void)
 		:: "r"(val), "r"(addr), "r"(CLINT_DISABLE_TIMER): "memory"
 	);
 #ifdef CONFIG_MACRN
-	//hv_timer_handler();
+	hv_timer_handler();
 #endif
 }
 
