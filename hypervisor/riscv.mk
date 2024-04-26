@@ -191,6 +191,7 @@ BOOT_C_SRCS += release/profiling.c
 BOOT_C_SRCS += release/trace.c
 BOOT_C_SRCS += lib/sprintf.c
 BOOT_C_SRCS += lib/string.c
+BOOT_C_SRCS += common/timer.c
 BOOT_C_SRCS += common/irq.c
 BOOT_C_SRCS += common/sbuf.c
 BOOT_C_SRCS += common/schedule.c

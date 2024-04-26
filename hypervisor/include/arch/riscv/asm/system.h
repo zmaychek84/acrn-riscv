@@ -64,6 +64,9 @@
 	local_irq_disable();					\
 })
 
+#define CPU_INT_ALL_DISABLE(x) local_irq_save(x)
+#define CPU_INT_ALL_RESTORE(x) local_irq_restore(x)
+
 static inline int local_irq_is_enabled(void)
 {
 	unsigned long flags;

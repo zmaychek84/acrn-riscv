@@ -7,9 +7,7 @@
 #include <types.h>
 #include <errno.h>
 #include <asm/io.h>
-#ifdef CONFIG_RISCV64
-#include <asm/csr.h>
-#else
+#ifndef CONFIG_RISCV64
 #include <asm/msr.h>
 #include <asm/cpuid.h>
 #include <asm/cpu_caps.h>
@@ -56,6 +54,7 @@ static void run_timer(const struct hv_timer *timer)
 	TRACE_2L(TRACE_TIMER_ACTION_PCKUP, timer->timeout, 0UL);
 }
 
+#ifndef CONFIG_RISCV64
 static inline void update_physical_timer(struct per_cpu_timers *cpu_timer)
 {
 	struct hv_timer *timer = NULL;
@@ -69,6 +68,7 @@ static inline void update_physical_timer(struct per_cpu_timers *cpu_timer)
 		msr_write(MSR_IA32_TSC_DEADLINE, timer->timeout);
 	}
 }
+#endif
 
 /*
  * return true if we add the timer on the timer_list head
