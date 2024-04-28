@@ -78,13 +78,13 @@ static void send_vipi_mask(struct acrn_vcpu *vcpu, uint64_t mask, uint32_t base)
 {
 	uint16_t offset;
 
-	offset = ffs64(mask) - 1;
+	offset = ffs64(mask);
 
 	while (offset + base < vcpu->vm->hw.created_vcpus) {
 		clear_bit(offset, &mask);
 		send_single_swi(vcpu->vm->hw.vcpu[base + offset].pcpu_id,
 				NOTIFY_VCPU_SWI);
-		offset = ffs64(mask) - 1;
+		offset = ffs64(mask);
 	}
 }
 

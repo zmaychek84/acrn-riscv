@@ -38,14 +38,14 @@ static always_inline unsigned long ffsl(unsigned long x)
 		m <<= 1;
 	};
 
-	return i + 1;
+	return i;
 }
 
 static inline int flsl(unsigned long x)
 {
-	int m = 0x1000000000000000, i;
+	int m = 0x800000000000000, i;
 
-	for (i = 0; i < BITS_PER_LONG; i++) {
+	for (i = 1; i < BITS_PER_LONG; i++) {
 		if (x & m != 0)
 			break;
 		m >>= 1;
@@ -232,12 +232,12 @@ static inline unsigned long hweight_long(unsigned long w)
 
 static inline void bitmap_set_lock(uint16_t nr_arg, volatile uint64_t *addr)
 {
-	*addr |= 1 << nr_arg;
+	*addr |= 1 << (uint64_t)nr_arg;
 }
 
 static inline void bitmap_clear_lock(uint16_t nr_arg, volatile uint64_t *addr)
 {
-	*addr &= ~(1 << nr_arg);
+	*addr &= ~(1 << (uint64_t)nr_arg);
 }
 
 static inline void bitmap_set_nolock(uint16_t nr_arg, volatile uint64_t *addr)
