@@ -32,11 +32,11 @@ boot_trap:
 	sd ra, 0(sp)
 	la t0, vect_table
 	ori t0, t0, 0x1
-	csrw stvec, t0
+	csrw CSR_TVEC, t0
 	li t0, 0x222
-	csrw sie, t0
+	csrw CSR_IE, t0
 	li t0, 0xC0022
-	csrw sstatus, t0
+	csrw CSR_STATUS, t0
 	ld ra, 0(sp)
 	addi sp, sp, 8
 	ret

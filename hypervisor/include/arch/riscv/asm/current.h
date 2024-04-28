@@ -10,6 +10,7 @@
 #ifndef __ASSEMBLY__
 #include <asm/cpu.h>
 #include <asm/guest/vcpu.h>
+#include <debug/logmsg.h>
 
 volatile register struct thread_object *current asm ("tp");
 static inline void set_current(struct thread_object *obj)
@@ -19,6 +20,7 @@ static inline void set_current(struct thread_object *obj)
 
 static inline uint16_t get_pcpu_id(void)
 {
+	ASSERT(current != 0);
 	return current->pcpu_id;
 }
 

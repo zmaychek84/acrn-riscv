@@ -24,6 +24,7 @@ static int32_t mswi_vmexit_handler(struct acrn_vcpu *vcpu)
 
 static int32_t mti_vmexit_handler(struct acrn_vcpu *vcpu)
 {
+	ASSERT(current != 0);
 	return 0;
 }
 

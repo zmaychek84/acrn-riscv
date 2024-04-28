@@ -44,21 +44,20 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 //	init_pcpu_capabilities();
 //	ASSERT(detect_hardware_support() == 0);
 
+	timer_init();
+	pr_info("init timer\r\n");
+	console_init();
+//	console_setup_timer();
+	pr_info("console init \r\n");
+
 	smp_clear_cpu_maps();
 	smp_init_cpus();
 	start_pcpus();
 	pr_info("Brought up %ld CPUs\n", (long)num_online_cpus());
 	smp_call_init();
 
-	timer_init();
-	pr_info("init timer\r\n");
-
-	console_init();
-	console_setup_timer();
-	pr_info("console init \r\n");
 	local_irq_enable();
 	setup_virt_paging();
-
 	init_sched(cpu);
 
 	pr_info("prepare sos");

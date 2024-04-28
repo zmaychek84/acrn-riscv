@@ -46,4 +46,14 @@
 #define REG_HSTATUS	0x118
 #define REG_ORIG_A0	0x120
 
+#ifdef CONFIG_MACRN
+#define CSR_TVEC mtvec
+#define CSR_IE mie
+#define CSR_STATUS mstatus
+#else
+#define CSR_TVEC stvec
+#define CSR_IE sie
+#define CSR_STATUS sstatus
+#endif
+
 #endif /* __RISCV_OFFSET_H__ */

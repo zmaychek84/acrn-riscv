@@ -155,9 +155,13 @@ void start_secondary(uint32_t cpu)
 	set_bit(cpu, &cpu_online_map);
 #ifndef CONFIG_MACRN
 	switch_satp(init_satp);
-#endif
 	init_trap();
+#else
+	init_mtrap();
+#endif
 	timer_init();
+//	if (cpu == 2)
+//		console_setup_timer();
 	init_sched(cpu);
 
 	local_irq_enable();

@@ -348,7 +348,7 @@ int32_t run_vcpu(struct acrn_vcpu *vcpu)
 		status = vmx_vmrun(vcpu);
 		save_vmcs(vcpu);
 	}
-
+	ASSERT(current != 0);
 	vcpu->reg_cached = 0UL;
 
 	/* Obtain current VCPU instruction length */

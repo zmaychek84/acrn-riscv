@@ -6,6 +6,8 @@
 
 #include <asm/cpu.h>
 #include <asm/timer.h>
+#include <asm/current.h>
+#include <debug/logmsg.h>
 #include "uart.h"
 #include "trap.h"
 
@@ -104,8 +106,11 @@ static irq_handler_t mirq_handler[] = {
 
 void mint_handler(int irq)
 {
+	ASSERT(current != 0);
 	if (irq < 12)
 		mirq_handler[irq]();
 	else
 		mirq_handler[12]();
+
+	do_softirq();
 }

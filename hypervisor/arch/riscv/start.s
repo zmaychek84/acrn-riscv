@@ -22,6 +22,7 @@ _start:
 	call reset_mtimer
 	csrw mip, 0x0
 #ifndef CONFIG_MACRN
+	call init_mtrap
 	li t0, 0x0f
 	csrw pmpcfg0, t0
 	li t0, 0xffffffff
@@ -29,11 +30,11 @@ _start:
 
 	li t0, 0x9aa
 #else
+	call boot_trap
 	li t0, 0x19aa
 #endif
 	csrs mstatus, t0
 
-	call init_mtrap
 
 	li t0, 0xaaa
 	csrs mideleg, t0
@@ -64,7 +65,9 @@ secondary:
 	lw t0, g_cpus
 	addi t0, t0, 1
 	sw t0, g_cpus, t1
+#ifndef CONFIG_MACRN
 	call boot_trap
+#endif
 	jal boot_idle
 	call start_secondary 
 
