@@ -386,11 +386,11 @@ static inline void clac(void)
 	.endm
 
 	.macro cpu_disable_mirq
-	csrci mstatus, 0x2
+	csrci mstatus, 0x8
 	.endm
 
 	.macro cpu_enable_mirq
-	csrsi mstatus, 0x2
+	csrsi mstatus, 0x8
 	.endm
 
 	.macro cpu_disable_irq
