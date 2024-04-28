@@ -10,7 +10,7 @@
 #include <asm/per_cpu.h>
 #include <softirq.h>
 
-static softirq_handler softirq_handlers[NR_SOFTIRQS];
+static softirq_handler softirq_handlers[NR_SOFTIRQS] = {NULL};
 
 void init_softirq(void)
 {
@@ -40,7 +40,8 @@ static void do_softirq_internal(uint16_t cpu_id)
 
 	while (nr < NR_SOFTIRQS) {
 		bitmap_clear_lock(nr, softirq_pending_bitmap);
-		(*softirq_handlers[nr])(cpu_id);
+		if (softirq_handlers[nr] != NULL)
+			(*softirq_handlers[nr])(cpu_id);
 		nr = ffs64(*softirq_pending_bitmap);
 	}
 }
