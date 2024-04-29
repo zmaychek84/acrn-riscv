@@ -61,19 +61,44 @@ vmx_vmrun:
 	#csrw hstatus, t6
 	ld t6, REG_T6(a0)
 	ld a0, REG_A0(a0)
+	cpu_enable_mirq
 	mret
 
 	.balign 4
 	.global vm_exit
 vm_exit:
 	csrrw a0, mscratch, a0
+
+/*
+ * if MPP is 0x3 (mstatus 0x1800), i.e. it's the host-irq-interrupted vm_exit
+ *  without entering guest yet.
+ */
+	sd t1, REG_T1(a0)
+	sd t2, REG_T2(a0)
+	csrr t1, mstatus
+	li t2, 0x1800
+	and t1, t1, t2
+	sub t2, t2, t1
+	bnez t2, 1f
+
+/*
+ * fake a guest context with previous saved data.
+ */
+	ld t1, REG_EPC(a0)
+	csrw mepc, t1
+	ld t1, REG_STATUS(a0)
+	csrw mstatus, t1
+	ld t1, REG_TVAL(a0)
+	csrw mtval, t1
+
+1:
 	sd ra, REG_RA(a0)
 	sd sp, REG_SP(a0)
 	sd gp, REG_GP(a0)
 	sd tp, REG_TP(a0)
 	sd t0, REG_T0(a0)
-	sd t1, REG_T1(a0)
-	sd t2, REG_T2(a0)
+#	sd t1, REG_T1(a0)
+#	sd t2, REG_T2(a0)
 	sd s0, REG_S0(a0)
 	sd s1, REG_S1(a0)
 	sd a1, REG_A1(a0)
