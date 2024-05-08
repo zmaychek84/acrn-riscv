@@ -20,6 +20,7 @@
 #include <sprintf.h>
 #include <asm/irq.h>
 #include <asm/current.h>
+#include <asm/boot.h>
 
 /* stack_frame is linked with the sequence of stack operation in arch_switch_to() */
 struct stack_frame {
@@ -538,7 +539,7 @@ int create_vcpu(struct acrn_vm *vm, uint16_t vcpu_id)
 #endif
 			vcpu_set_rip(vcpu, vm->sw.kernel_info.entry);
 		vcpu_set_gpreg(vcpu, CPU_REG_A0, vcpu->vcpu_id);
-		vcpu_set_gpreg(vcpu, CPU_REG_A1, 0x12345678);
+		vcpu_set_gpreg(vcpu, CPU_REG_A1, fw_dtb);
 
 		(void)memset((void *)&vcpu->req, 0U, sizeof(struct io_request));
 		vm->hw.created_vcpus++;

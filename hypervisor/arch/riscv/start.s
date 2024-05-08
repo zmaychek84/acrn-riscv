@@ -11,7 +11,10 @@
 	.globl _start
 _start:
 	csrr a0, mhartid
-
+	la t0, fw_dtb
+	sd a1, 0(t0)
+	la t0, fw_dinfo
+	sd a2, 0(t0)
 	csrr t0, menvcfg
 	li t1, 0x8000000000000000
 	or t0, t0, t1
