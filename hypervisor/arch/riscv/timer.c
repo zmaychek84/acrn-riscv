@@ -20,7 +20,8 @@ unsigned long boot_count;
 
 
 /* Qemu default cpu freq is 0x10000000 */
-#define QEMU_CPUFREQ		0x1000000
+//#define QEMU_CPUFREQ		0x1000000
+#define QEMU_CPUFREQ		10000000
 
 static unsigned long get_cpu_khz(void)
 {
