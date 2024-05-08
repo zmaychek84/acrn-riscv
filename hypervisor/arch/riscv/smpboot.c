@@ -160,8 +160,10 @@ void start_secondary(uint32_t cpu)
 	init_mtrap();
 #endif
 	timer_init();
-//	if (cpu == 2)
-//		console_setup_timer();
+	if (cpu == 2) {
+		shell_init();
+		console_setup_timer();
+	}
 	init_sched(cpu);
 
 	local_irq_enable();

@@ -122,8 +122,8 @@ static void vuart_console_rx_chars(struct acrn_vuart *vu)
 		printf("\r\n\r\n ---Entering ACRN SHELL---\r\n");
 	}
 	if (ch != -1) {
-		vuart_putchar(vu, ch);
-		vuart_toggle_intr(vu);
+		vpci_vuart_putchar(vu, ch);
+		vpci_vuart_toggle_intr(vu);
 	}
 
 }
@@ -133,11 +133,11 @@ static void vuart_console_rx_chars(struct acrn_vuart *vu)
  */
 static void vuart_console_tx_chars(struct acrn_vuart *vu)
 {
-	char c = vuart_getchar(vu);
+	char c = vpci_vuart_getchar(vu);
 
-	while(c != -1) {
+	while(c != (char)(-1)) {
 		printf("%c", c);
-		c = vuart_getchar(vu);
+		c = vpci_vuart_getchar(vu);
 	}
 }
 
