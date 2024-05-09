@@ -52,7 +52,8 @@ static void mexpt_handler(void)
 static void mswi_handler(void)
 {
 	struct smp_call_info_data *smp_call;
-	int cpu = cpu_id(), off;
+	int cpu = cpu_id();
+	uint64_t off = CLINT_SWI_REG;
 #if 0
 	char *s = "mswi_handler: d\n";
 
@@ -60,7 +61,7 @@ static void mswi_handler(void)
 	early_printk(s);
 #endif
 
-	off = (cpu * 4) + 0x02000000;
+	off += (uint64_t)(cpu * 4);
 
 	asm volatile (
 		"sw x0, 0(%0) \n\t" \

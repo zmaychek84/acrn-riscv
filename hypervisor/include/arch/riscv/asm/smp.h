@@ -10,6 +10,7 @@
 #ifndef __ASSEMBLY__
 #include <asm/current.h>
 
+#define CLINT_SWI_REG	CONFIG_CLINT_BASE
 struct swi_vector {
 	uint64_t type;
 	uint64_t param;

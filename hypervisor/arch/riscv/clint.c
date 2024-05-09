@@ -39,7 +39,6 @@ void send_dest_ipi_mask(uint64_t dest_mask, uint64_t vector)
 	}
 }
 
-#define CLINT_SWI_REG 0x02000000
 void send_single_swi(uint16_t pcpu_id, uint64_t vector)
 {
 	unsigned long reg = CLINT_SWI_REG + pcpu_id * 4;

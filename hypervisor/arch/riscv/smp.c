@@ -15,13 +15,15 @@ void cpu_do_idle(void)
 
 int do_swi(int cpu)
 {
-	cpu *= 4;
-	cpu += 0x02000000;
+	int val = 0x1;
+	uint64_t off = CLINT_SWI_REG;
+
+	off += (uint64_t)cpu * 4;
 	asm volatile (
-		"li a0, 1\n\t" \
-		"sw a0, 0(%0) \n\t"
-		:: "r"(cpu)
+		"sw %0, 0(%1)"
+		:: "r"(val), "r"(off)
 	);
+	dsb();
 
 	return 0;
 }
