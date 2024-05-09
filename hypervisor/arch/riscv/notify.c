@@ -19,9 +19,6 @@ spinlock_t smpcall_lock;
 /* run in interrupt context */
 void kick_notification(void)
 {
-	/* Notification vector is used to kick taget cpu out of non-root mode.
-	 * And it also serves for smp call.
-	 */
 	uint16_t pcpu_id = get_pcpu_id();
 
 	if (test_bit(pcpu_id, smp_call_mask)) {
@@ -31,6 +28,8 @@ void kick_notification(void)
 		if (smp_call->func != NULL) {
 			smp_call->func(smp_call->data);
 		}
+		smp_call->func = NULL;
+		smp_call->data = NULL;
 		clear_bit(pcpu_id, &smp_call_mask);
 	}
 }
@@ -53,23 +52,27 @@ void smp_call_function(uint64_t mask, smp_call_func_t func, void *data)
 	while (smp_call_mask);
 	smp_call_mask |= mask;
 
-	pcpu_id = 0;
+	pcpu_id = ffs64(mask);
 	while (pcpu_id < CONFIG_NR_CPUS) {
 		__clear_bit(pcpu_id, &mask);
-		if (cpu_online(pcpu_id)) {
+		if (pcpu_id == get_pcpu_id()) {
+			func(data);
+			__clear_bit(pcpu_id, &mask);
+			__clear_bit(pcpu_id, &smp_call_mask);
+		} else if (cpu_online(pcpu_id)) {
 			smp_call = &per_cpu(smp_call_info, pcpu_id);
 			smp_call->func = func;
 			smp_call->data = data;
+			send_single_swi(pcpu_id, SMP_FUNC_CALL);
 		} else {
 			/* pcpu is not in active, print error */
 			pr_err("pcpu_id %d not in active!", pcpu_id);
 			__clear_bit(pcpu_id, &smp_call_mask);
 		}
-		pcpu_id += 1U;
+		pcpu_id = ffs64(mask);
 	}
-	send_dest_ipi_mask(smp_call_mask, NOTIFY_VCPU_SWI);
 	/* wait for current smp call complete */
-	//wait_sync_change(&smp_call_mask, 0UL);
+	wait_sync_change(&smp_call_mask, 0UL);
 	spin_unlock(&smpcall_lock);
 }
 

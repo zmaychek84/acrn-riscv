@@ -33,7 +33,7 @@ static always_inline unsigned long ffsl(unsigned long x)
 	int m = 0x1, i;
 
 	for (i = 0; i < BITS_PER_LONG; i++) {
-		if (x & m != 0)
+		if ((x & m) != 0)
 			break;
 		m <<= 1;
 	};
@@ -46,7 +46,7 @@ static inline int flsl(unsigned long x)
 	int m = 0x800000000000000, i;
 
 	for (i = 1; i < BITS_PER_LONG; i++) {
-		if (x & m != 0)
+		if ((x & m) != 0)
 			break;
 		m >>= 1;
 	};

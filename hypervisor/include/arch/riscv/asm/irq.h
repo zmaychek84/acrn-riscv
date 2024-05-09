@@ -23,7 +23,7 @@
 #define NR_VECTORS 256 /* XXX */
 
 #define NOTIFY_VCPU_SWI		0
-#define CLINT_SWI_EVENT_CHECK	1
+#define SMP_FUNC_CALL		1
 
 /*
  * IRQ line status.

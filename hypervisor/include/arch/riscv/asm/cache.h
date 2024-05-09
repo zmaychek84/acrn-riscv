@@ -36,14 +36,14 @@
 
 static inline void invalidate_icache(void)
 {
-	asm volatile ("fence_i");
+	asm volatile ("fence.i");
 	dsb();               /* Ensure completion of the flush I-cache */
 	isb();
 }
 
 static inline void invalidate_icache_local(void)
 {
-	asm volatile ("fence_i");
+	asm volatile ("fence.i");
 	dsb();
 	isb();
 }

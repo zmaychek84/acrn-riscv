@@ -1,7 +1,14 @@
+/*
+ * Copyright (C) 2023-2024 Intel Corporation.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #ifndef __RISCV_SBI_H__
 #define __RISCV_SBI_H__
 
 #include <asm/cpu.h>
+#include <lib/types.h>
 
 enum sbi_id {
 	SBI_ID_BASE = 0x10,
@@ -41,6 +48,11 @@ enum sbi_id {
 /* SBI function IDs for IPI extension*/
 #define SBI_TYPE_IPI_SEND_IPI			0x0
 
+/* SBI function IDs for RFENCE extension*/
+#define SBI_TYPE_RFENCE_FNECE_I			0x0
+#define SBI_TYPE_RFENCE_SFNECE_VMA		0x1
+#define SBI_TYPE_RFENCE_SFNECE_VMA_ASID		0x2
+
 /* SBI return error codes */
 #define SBI_SUCCESS				0
 #define SBI_EFAILURE				-1
@@ -69,5 +81,12 @@ struct sbi_ecall_dispatch {
 	enum sbi_id ext_id;
 	void (*handler)(struct acrn_vcpu *, struct cpu_regs *regs);
 };
+
+struct sbi_rfence_call {
+	uint64_t base;
+	uint64_t size;
+	uint64_t asid;
+};
+#define SBI_RFENCE_FLUSH_ALL ((uint64_t)-1)
 
 #endif /* __RISCV_SBI_H__ */

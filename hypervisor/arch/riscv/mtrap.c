@@ -7,6 +7,10 @@
 #include <asm/cpu.h>
 #include <asm/timer.h>
 #include <asm/current.h>
+#include <asm/notify.h>
+#include <asm/per_cpu.h>
+#include <asm/notify.h>
+#include <asm/irq.h>
 #include <debug/logmsg.h>
 #include "uart.h"
 #include "trap.h"
@@ -47,7 +51,8 @@ static void mexpt_handler(void)
 
 static void mswi_handler(void)
 {
-	int cpu = cpu_id();
+	struct smp_call_info_data *smp_call;
+	int cpu = cpu_id(), off;
 #if 0
 	char *s = "mswi_handler: d\n";
 
@@ -55,16 +60,21 @@ static void mswi_handler(void)
 	early_printk(s);
 #endif
 
-	cpu *= 4;
-	cpu += 0x02000000;
+	off = (cpu * 4) + 0x02000000;
 
 	asm volatile (
-		"li t0, 0 \n\t" \
-		"sw t0, 0(%0) \n\t" \
-		"li t0, 0x2 \n\t" \
-		"csrw mip, t0\n\t"
-		:: "r"(cpu)
+		"sw x0, 0(%0) \n\t" \
+		"csrwi mip, 0x2\n\t"
+		:: "r"(off)
 	);
+
+	if (test_bit(NOTIFY_VCPU_SWI, per_cpu(swi_vector, cpu).type))
+		clear_bit(NOTIFY_VCPU_SWI, &(per_cpu(swi_vector, cpu).type));
+
+	if (test_bit(SMP_FUNC_CALL, per_cpu(swi_vector, cpu).type)) {
+		clear_bit(SMP_FUNC_CALL, &(per_cpu(swi_vector, cpu).type));
+		kick_notification();
+	}
 }
 
 static void mtimer_handler(void)

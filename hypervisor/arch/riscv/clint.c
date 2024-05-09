@@ -24,7 +24,7 @@ send_startup_ipi(uint16_t dest_pcpu_id, uint64_t cpu_startup_start_address)
 {
 }
 
-void send_dest_ipi_mask(uint64_t dest_mask, uint32_t vector)
+void send_dest_ipi_mask(uint64_t dest_mask, uint64_t vector)
 {
 	uint16_t pcpu_id;
 	uint64_t mask = dest_mask;
@@ -40,12 +40,12 @@ void send_dest_ipi_mask(uint64_t dest_mask, uint32_t vector)
 }
 
 #define CLINT_SWI_REG 0x02000000
-void send_single_swi(uint16_t pcpu_id, uint32_t vector)
+void send_single_swi(uint16_t pcpu_id, uint64_t vector)
 {
 	unsigned long reg = CLINT_SWI_REG + pcpu_id * 4;
 	int val = 0x1;
 
-	per_cpu(swi_vector, pcpu_id).type |= vector;
+	set_bit(vector, &per_cpu(swi_vector, pcpu_id).type);
 	asm volatile (
 		"sw %1, 0(%0) \n\t"
 		:: "r" (reg), "r" (val)
