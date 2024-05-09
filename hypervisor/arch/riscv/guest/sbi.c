@@ -23,6 +23,7 @@ static void sbi_ecall_base_probe(unsigned long id, unsigned long *out_val)
 	case SBI_ID_BASE:
 	case SBI_ID_IPI:
 	case SBI_ID_RFENCE:
+	case SBI_ID_TIMER:
 		*out_val = 1;
 		break;
 	default:
