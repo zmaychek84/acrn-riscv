@@ -84,6 +84,7 @@ static uint8_t get_exception_type(uint32_t vector)
 
 static bool is_guest_irq_enabled(struct acrn_vcpu *vcpu)
 {
+	return true;
 	return !!(vcpu_get_status(vcpu) & HV_ARCH_VCPU_STATUS_SIE);
 }
 
