@@ -16,7 +16,6 @@ extern uint16_t console_loglevel;
 extern uint16_t mem_loglevel;
 extern uint16_t npk_loglevel;
 
-#define CPU_IRQ_DISABLE_ON_CONFIG()		do { } while (0)
 #define BSP_CPU_ID			 0U
 #define INVALID_CPU_ID 0xffffU
 #define BROADCAST_CPU_ID 0xfffeU
@@ -207,19 +206,31 @@ static inline void asm_hlt(void)
 {
 }
 
+#define cpu_enable_mirq()						\
+{									\
+	asm volatile ("li t0, 0x8 \n"					\
+			  "csrs mstatus, t0 \n" : : : "cc", "t0"); 	\
+}
+
+#define cpu_disable_mirq()						\
+{									\
+	asm volatile ("li t0, 0x8 \n"					\
+			  "csrc mstatus, t0 \n" : : : "cc", "t0");	\
+}
+
 #define cpu_enable_irq()						\
 {									\
 	asm volatile ("li t0, 0x2 \n"					\
 			  "csrs sstatus, t0 \n" : : : "cc", "t0"); 	\
 }
 
-#define CPU_IRQ_ENABLE cpu_enable_irq
 #define cpu_disable_irq()						\
 {									\
 	asm volatile ("li t0, 0x2 \n"					\
 			  "csrc sstatus, t0 \n" : : : "cc", "t0");	\
 }
 
+#define CPU_IRQ_ENABLE cpu_enable_irq
 #define CPU_IRQ_DISABLE cpu_disable_irq
 
 /*
@@ -583,5 +594,13 @@ static inline void clac(void)
 	.endm
 
 #endif /* __ASSEMBLY__ */
+
+#ifdef CONFIG_MACRN
+#define CPU_IRQ_DISABLE_ON_CONFIG	cpu_disable_mirq
+#define CPU_IRQ_ENABLE_ON_CONFIG	cpu_enable_mirq
+#else
+#define CPU_IRQ_DISABLE_ON_CONFIG	cpu_disable_irq
+#define CPU_IRQ_ENABLE_ON_CONFIG	cpu_enable_irq
+#endif
 
 #endif /* __RISCV_CPU_H__ */

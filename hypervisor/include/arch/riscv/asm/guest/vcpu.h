@@ -239,8 +239,6 @@ extern uint64_t vcpumask2pcpumask(struct acrn_vm *vm, uint64_t vdmask);
 extern bool is_lapic_pt_enabled(struct acrn_vcpu *vcpu);
 extern void vcpu_set_state(struct acrn_vcpu *vcpu, enum vcpu_state new_state);
 
-#define CPU_IRQ_ENABLE_ON_CONFIG()		do { } while (0)
-
 #endif /* __ASSEMBLY__ */
 
 #endif /* __RISCV_VCPU_H__ */
