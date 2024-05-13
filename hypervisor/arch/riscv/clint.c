@@ -34,7 +34,8 @@ void send_dest_ipi_mask(uint64_t dest_mask, uint64_t vector)
 		return;
 	while (pcpu_id < NR_CPUS) {
 		clear_bit(pcpu_id, &mask);
-		send_single_swi(pcpu_id, vector);
+		if (pcpu_id != get_pcpu_id())
+			send_single_swi(pcpu_id, vector);
 		pcpu_id = ffs64(mask);
 	}
 }
