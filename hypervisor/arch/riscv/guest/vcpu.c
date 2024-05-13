@@ -92,11 +92,13 @@ uint64_t vcpu_get_status(struct acrn_vcpu *vcpu)
 	struct run_context *ctx =
 		&vcpu->arch.contexts[vcpu->arch.cur_context].run_ctx;
 
+#ifndef CONFIG_MACRN
 	if (!bitmap_test(CPU_REG_STATUS, &vcpu->reg_updated) &&
 		!bitmap_test_and_set_lock(CPU_REG_STATUS,
 			&vcpu->reg_cached) && vcpu->launched) {
 		ctx->sstatus = cpu_csr_read(vsstatus);
 	}
+#endif
 
 	return ctx->sstatus;
 }
