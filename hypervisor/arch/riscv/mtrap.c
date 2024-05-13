@@ -64,8 +64,7 @@ static void mswi_handler(void)
 	off += (uint64_t)(cpu * 4);
 
 	asm volatile (
-		"sw x0, 0(%0) \n\t" \
-		"csrwi mip, 0x2\n\t"
+		"sw x0, 0(%0) \n\t"
 		:: "r"(off)
 	);
 
@@ -81,13 +80,11 @@ static void mswi_handler(void)
 static void mtimer_handler(void)
 {
 	int cpu = cpu_id();
-	uint64_t val = 0x20;
 	uint64_t addr = CLINT_MTIMECMP(cpu);
 
 	asm volatile (
-		"csrs mip, %0 \n\t" \
-		"sw %2, 0(%1)"
-		:: "r"(val), "r"(addr), "r"(CLINT_DISABLE_TIMER): "memory"
+		"sw %1, 0(%0)"
+		:: "r"(addr), "r"(CLINT_DISABLE_TIMER): "memory"
 	);
 #ifdef CONFIG_MACRN
 	hv_timer_handler();
