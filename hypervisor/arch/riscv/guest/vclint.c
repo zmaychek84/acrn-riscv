@@ -122,7 +122,7 @@ static void vclint_reset_timer(struct acrn_vclint *vclint)
 	}
 }
 
-static void vclint_write_tmr(struct acrn_vclint *vclint, uint32_t index, uint64_t data)
+void vclint_write_tmr(struct acrn_vclint *vclint, uint32_t index, uint64_t data)
 {
 	del_timer(&vclint->vtimer[index].timer);
 	vclint->vtimer[index].timer.timeout = data;
@@ -168,6 +168,8 @@ vclint_write_msip(struct acrn_vclint *vclint, uint32_t idx, uint32_t data)
 	struct acrn_vcpu *vcpu = &vclint->vm->hw.vcpu[idx];
 
 	clint = &(vclint->clint_page);
+	if (clint->msip[idx] & 0x1)
+		return;
 	clint->msip[idx] = data & 0x1;
 	vclint_set_intr(vcpu);
 }
@@ -257,6 +259,19 @@ static int32_t vclint_write(struct acrn_vclint *vclint, uint32_t offset, uint64_
 	}
 
 	return ret;
+}
+
+void vclint_send_ipi(struct acrn_vclint *vclint, uint32_t cpu)
+{
+	uint32_t offset;
+	uint64_t data;
+
+
+	offset = vclint->clint_base + cpu * 4;
+	data = 0x1UL;
+	vclint_write(vclint, offset, data);
+
+	return;
 }
 
 /*
@@ -370,17 +385,12 @@ bool vclint_find_deliverable_intr(const struct acrn_vcpu *vcpu, uint32_t *vector
 void vcpu_inject_intr(struct acrn_vcpu *vcpu, bool guest_irq_enabled, bool injected)
 {
 	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
+	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 	uint32_t vector = 0U;
 
-	if (guest_irq_enabled && (!injected)) {
-		if (vclint_find_deliverable_intr(vcpu, &vector)) {
-#ifdef CONFIG_MACRN
-			cpu_csr_write(sip, vector);
-#else
-			cpu_csr_write(hvip, vector);
-#endif
-		}
-	}
+	if ((guest_irq_enabled && (!injected)) &&
+	    (vclint_find_deliverable_intr(vcpu, &vector)))
+		ctx->run_ctx.sip |= vector;
 }
 
 bool vclint_has_pending_intr(struct acrn_vcpu *vcpu)
