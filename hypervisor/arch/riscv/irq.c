@@ -109,8 +109,9 @@ void post_irq_arch(const struct irq_desc *desc)
 void do_IRQ(struct cpu_regs *regs, unsigned int irq)
 {
 	struct irq_desc *desc = irq_to_desc(irq);
+	uint64_t flags;
 
-	spin_lock(&desc->lock);
+	spin_lock_irqsave(&desc->lock, &flags);
 
 	if (test_bit(_IRQ_DISABLED, ((struct arch_irq_desc *)desc->arch_data)->status)) {
 		pr_dbg("irq is disabled");
@@ -120,17 +121,17 @@ void do_IRQ(struct cpu_regs *regs, unsigned int irq)
 	set_bit(_IRQ_INPROGRESS, &((struct arch_irq_desc *)desc->arch_data)->status);
 
 	// run handler with irq enabled.
-	spin_unlock_irq(&desc->lock);
+	spin_unlock_irqrestore(&desc->lock, flags);
 	if (desc->action)
 		desc->action(irq, regs);
 
 	// disable irq
-	spin_lock_irq(&desc->lock);
+	spin_lock_irqsave(&desc->lock, &flags);
 	clear_bit(_IRQ_INPROGRESS, &((struct arch_irq_desc *)desc->arch_data)->status);
 
 out:
 	((struct arch_irq_desc *)desc->arch_data)->irqchip->eoi(desc);
-	spin_unlock(&desc->lock);
+	spin_unlock_irqrestore(&desc->lock, flags);
 }
 
 struct acrn_irqchip_ops *acrn_irqchip;

@@ -88,18 +88,6 @@ static inline void spinlock_release(spinlock_t *lock)
 #define spin_lock(x) spinlock_obtain(x)
 #define spin_unlock(x) spinlock_release(x)
 
-static inline void spin_lock_irq(spinlock_t *lock)
-{
-	local_irq_disable();
-	spin_lock(lock);
-}
-
-static inline void spin_unlock_irq(spinlock_t *lock)
-{
-	spin_unlock(lock);
-	local_irq_enable();
-}
-
 #define spin_lock_irqsave(l, f) spinlock_irqsave_obtain(l, f)
 #define spin_unlock_irqrestore(l, f) spinlock_irqrestore_release(l, f)
 
