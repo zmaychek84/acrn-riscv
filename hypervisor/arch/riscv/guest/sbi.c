@@ -14,6 +14,7 @@
 #include <asm/cache.h>
 #include <asm/guest/vcpu.h>
 #include <asm/guest/vm.h>
+#include <asm/guest/vclint.h>
 #include "sbi.h"
 
 static void sbi_ecall_base_probe(unsigned long id, unsigned long *out_val)
@@ -81,10 +82,9 @@ static void sbi_timer_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
 	int *ret = &regs->a0;
 	unsigned long funcid = regs->a6;
-	unsigned long *out_val = &regs->a1;
 
 	if (funcid == SBI_TYPE_TIME_SET_TIMER) {
-//		sbi_timer_event_start((u64)regs->a0);
+		vclint_write_tmr(vcpu_vclint(vcpu), vcpu->vcpu_id, regs->a0);
 		*ret = SBI_SUCCESS;
 	} else {
 		*ret = SBI_ENOTSUPP;
@@ -100,9 +100,13 @@ static void send_vipi_mask(struct acrn_vcpu *vcpu, uint64_t mask, uint64_t base)
 	offset = ffs64(mask);
 
 	while ((offset + base) < vcpu->vm->hw.created_vcpus) {
+		struct acrn_vcpu *t = &vcpu->vm->hw.vcpu[base + offset];
+		struct acrn_vclint *vclint = vcpu_vclint(t);
+
 		clear_bit(offset, &mask);
-		send_single_swi(vcpu->vm->hw.vcpu[base + offset].pcpu_id,
-				NOTIFY_VCPU_SWI);
+		if (t == vcpu)
+			continue;
+		vclint_send_ipi(vclint, base + offset);
 		offset = ffs64(mask);
 	}
 }

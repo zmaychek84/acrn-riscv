@@ -168,8 +168,8 @@ vclint_write_msip(struct acrn_vclint *vclint, uint32_t idx, uint32_t data)
 	struct acrn_vcpu *vcpu = &vclint->vm->hw.vcpu[idx];
 
 	clint = &(vclint->clint_page);
-	if (clint->msip[idx] & 0x1)
-		return;
+//	if (clint->msip[idx] & 0x1)
+//		return;
 	clint->msip[idx] = data & 0x1;
 	vclint_set_intr(vcpu);
 }
