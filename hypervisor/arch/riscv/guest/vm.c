@@ -260,12 +260,13 @@ int create_vm(struct acrn_vm *vm)
 	struct dtb_info *dinfo= &vm->sw.dtb_info;
 	int ret, i;
 
+	vm->hw.created_vcpus = 0U;
 	/* TODO: only support one SOS and one UOS now */
 	if (is_service_vm(vm)) {
-		kinfo->mem_start_gpa = CONFIG_SOS_MEM_START;
-		kinfo->mem_size_gpa = CONFIG_SOS_MEM_SIZE; //256M
-		dinfo->dtb_start_gpa = CONFIG_SOS_DTB_BASE; //membase + 128M
-		dinfo->dtb_size_gpa = CONFIG_SOS_DTB_SIZE; // 2M
+		kinfo->mem_start_gpa = kinfo->kernel_addr;
+		kinfo->mem_size_gpa = kinfo->kernel_len;
+		dinfo->dtb_start_gpa = dinfo->dtb_addr;
+		dinfo->dtb_size_gpa = dinfo->dtb_len;
 	} else {
 		kinfo->mem_start_gpa = CONFIG_UOS_MEM_START;
 		kinfo->mem_size_gpa = CONFIG_UOS_MEM_SIZE; //256M
