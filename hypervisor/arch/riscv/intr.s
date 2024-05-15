@@ -14,7 +14,7 @@ reset_mtimer:
 	csrr t0, mhartid
 	li t1, 8
 	mul t0, t0, t1
-	li t1, 0x2004000
+	li t1, CONFIG_CLINT_TM_BASE
 	add t0, t0, t1
 	li t1, 0xffffffffffffffff
 	sd t1, 0(t0)
@@ -144,7 +144,7 @@ boot_mswi_handler:
 	csrr t0, mhartid
 	li t1, 4
 	mul t0, t0, t1
-	li t1, 0x2000000
+	li t1, CONFIG_CLINT_BASE
 	add t0, t0, t1
 	li t1, 0
 	sw t1, 0(t0)

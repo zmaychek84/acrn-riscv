@@ -29,7 +29,7 @@ extern void preinit_timer(void);
 #define CYCLES_PER_MS	us_to_ticks(1000U)
 
 #define CLINT_MTIME		(CONFIG_CLINT_BASE + 0xBFF8)
-#define CLINT_MTIMECMP(cpu)	(CONFIG_CLINT_BASE + 0x4000 + (cpu * 0x8))
+#define CLINT_MTIMECMP(cpu)	(CONFIG_CLINT_TM_BASE + (cpu * 0x8))
 #define CLINT_DISABLE_TIMER	0xffffffff
 
 #endif /* __RISCV_TIMER_H__ */
