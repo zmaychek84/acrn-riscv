@@ -79,4 +79,5 @@ void smp_call_function(uint64_t mask, smp_call_func_t func, void *data)
 void smp_call_init(void)
 {
 	spinlock_init(&smpcall_lock);
+	smp_call_mask = 0UL;
 }
