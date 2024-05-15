@@ -37,7 +37,11 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 	dcache_line_bytes = read_dcache_line_bytes();
 
 	pr_info("start acrn, boot_phys_offset = 0x%lx\n", boot_phys_offset);
+#ifdef CONFIG_MACRN
+	init_mtrap();
+#else
 	init_trap();
+#endif
 	init_interrupt(BSP_CPU_ID);
 	preinit_timer();
 	plic_init();
@@ -56,7 +60,6 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 	pr_info("Brought up %ld CPUs\n", (long)num_online_cpus());
 	smp_call_init();
 
-	local_irq_enable();
 	setup_virt_paging();
 	init_sched(cpu);
 
@@ -72,8 +75,8 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 	create_vm(uos_vm);
 	start_vm(uos_vm);
 #endif
+	local_irq_enable();
 
-	pr_info("end\n");
 	run_idle_thread();
 	while(1)
 		asm volatile("wfi" : : : "memory");

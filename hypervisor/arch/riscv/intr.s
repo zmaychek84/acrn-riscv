@@ -22,8 +22,12 @@ reset_mtimer:
 
 	.globl init_mtrap
 init_mtrap:
+	addi sp, sp, -8
+	sd t0, 8(sp)
 	la t0, mtrap_handler
 	csrw mtvec, t0
+	ld t0, 8(sp)
+	addi sp, sp, 8
 	ret
 
 	.globl boot_trap
@@ -67,7 +71,6 @@ kernel_init:
 	csrw sie, t0
 	li t0, 0xC0000
 	csrw sstatus, t0
-	call init_trap
 #endif
 	li a0, 0
 	li a1, 0

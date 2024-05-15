@@ -31,10 +31,10 @@ _start:
 	li t0, 0xffffffff
 	csrw pmpaddr0, t0
 
-	li t0, 0x9aa
+	li t0, 0x9a0
 #else
 	call boot_trap
-	li t0, 0x19aa
+	li t0, 0x1900
 #endif
 	csrs mstatus, t0
 

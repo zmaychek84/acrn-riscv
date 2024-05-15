@@ -80,11 +80,13 @@ static void mswi_handler(void)
 static void mtimer_handler(void)
 {
 	int cpu = cpu_id();
+	uint64_t val = 0x80;
 	uint64_t addr = CLINT_MTIMECMP(cpu);
 
 	asm volatile (
-		"sw %1, 0(%0)"
-		:: "r"(addr), "r"(CLINT_DISABLE_TIMER): "memory"
+		"sw %1, 0(%0) \n\t"
+		"csrc mip, %2"
+		:: "r"(addr), "r"(CLINT_DISABLE_TIMER), "r"(val): "memory"
 	);
 #ifdef CONFIG_MACRN
 	hv_timer_handler();
