@@ -22,6 +22,7 @@ int do_swi(int cpu)
 	asm volatile (
 		"sw %0, 0(%1)"
 		:: "r"(val), "r"(off)
+		:"memory"
 	);
 	dsb();
 

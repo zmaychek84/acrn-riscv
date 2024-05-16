@@ -20,9 +20,8 @@ static int cpu_id(void)
 	int cpu;
 
 	asm volatile (
-		"csrr a0, mhartid \n\t" \
-		"mv %0, a0 \n\t" \
-		:"=r"(cpu):
+		"csrr %0, mhartid \n\t"
+		:"=r"(cpu)::
 	);
 
 	return cpu;
@@ -36,7 +35,7 @@ void m_service(struct cpu_regs *regs)
 			asm volatile(
 				"li t0, 0x20 \n\t" \
 				"csrc mip, t0 \n\t"
-				::: "memory"
+				::: "memory", "t0"
 			);
 			regs->ip += 4;
 			break;
@@ -65,7 +64,7 @@ static void mswi_handler(void)
 
 	asm volatile (
 		"sw x0, 0(%0) \n\t"
-		:: "r"(off)
+		:: "r"(off): "memory"
 	);
 
 	if (test_bit(NOTIFY_VCPU_SWI, per_cpu(swi_vector, cpu).type))
