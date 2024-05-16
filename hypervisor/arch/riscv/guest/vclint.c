@@ -179,7 +179,7 @@ static int32_t vclint_read(struct acrn_vclint *vclint, uint32_t offset_arg, uint
 	int32_t ret = 0;
 	struct clint_regs *clint = &(vclint->clint_page);
 	uint32_t i;
-	uint32_t offset = offset_arg - CLINT_MEM_ADDR;
+	uint64_t offset = offset_arg - CLINT_MEM_ADDR;
 	*data = 0UL;
 
 	if (offset > sizeof(*clint)) {
@@ -210,21 +210,15 @@ static int32_t vclint_read(struct acrn_vclint *vclint, uint32_t offset_arg, uint
 		}
 	}
 
-	dev_dbg(DBG_LEVEL_VCLINT, "vclint read offset %x, data %lx", offset, *data);
 	return ret;
 }
 
-static int32_t vclint_write(struct acrn_vclint *vclint, uint32_t offset, uint64_t data)
+static int32_t vclint_write(struct acrn_vclint *vclint, uint64_t offset, uint64_t data)
 {
 	struct clint_regs *clint = &(vclint->clint_page);
 	uint32_t *regptr;
 	uint32_t data32 = (uint32_t)data;
 	int32_t ret = 0;
-
-//	ASSERT(((offset & 0xfU) == 0U) && (offset < PAGE_SIZE),
-//		"%s: invalid offset %#x", __func__, offset);
-
-	dev_dbg(DBG_LEVEL_VCLINT, "vclint write offset %#x, data %#lx", offset, data);
 
 	offset -= vclint->clint_base;
 	if (offset <= sizeof(*clint)) {
@@ -263,9 +257,8 @@ static int32_t vclint_write(struct acrn_vclint *vclint, uint32_t offset, uint64_
 
 void vclint_send_ipi(struct acrn_vclint *vclint, uint32_t cpu)
 {
-	uint32_t offset;
+	uint64_t offset;
 	uint64_t data;
-
 
 	offset = vclint->clint_base + cpu * 4;
 	data = 0x1UL;
@@ -411,20 +404,20 @@ static bool vclint_has_pending_delivery_intr(struct acrn_vcpu *vcpu)
 	return vcpu->arch.pending_req != 0UL;
 }
 
-static bool vclint_clint_read_access_may_valid(__unused uint32_t offset)
+static bool vclint_clint_read_access_may_valid(__unused uint64_t offset)
 {
 	return true;
 }
 
-static bool vclint_clint_write_access_may_valid(uint32_t offset)
+static bool vclint_clint_write_access_may_valid(uint64_t offset)
 {
 	return true;
 }
 
 int32_t vclint_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
 {
-	int32_t err;
-	uint32_t offset, size;
+	int32_t err, size;
+	uint64_t offset;
 	uint64_t qual, access_type = TYPE_INST_READ;
 	struct acrn_vclint *vclint;
 	struct acrn_mmio_request *mmio;
