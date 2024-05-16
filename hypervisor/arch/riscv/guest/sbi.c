@@ -104,8 +104,6 @@ static void send_vipi_mask(struct acrn_vcpu *vcpu, uint64_t mask, uint64_t base)
 		struct acrn_vclint *vclint = vcpu_vclint(t);
 
 		clear_bit(offset, &mask);
-		if (t == vcpu)
-			continue;
 		vclint_send_ipi(vclint, base + offset);
 		offset = ffs64(mask);
 	}
