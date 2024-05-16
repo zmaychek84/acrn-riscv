@@ -12,6 +12,7 @@
 #include <asm/notify.h>
 #include <asm/current.h>
 #include <asm/cpumask.h>
+#include <asm/lib/spinlock.h>
 
 static uint64_t smp_call_mask;
 spinlock_t smpcall_lock;
@@ -20,7 +21,9 @@ spinlock_t smpcall_lock;
 void kick_notification(void)
 {
 	uint16_t pcpu_id = get_pcpu_id();
+	uint64_t flags;
 
+	spin_lock_irqsave(&smpcall_lock, &flags);
 	if (test_bit(pcpu_id, smp_call_mask)) {
 		struct smp_call_info_data *smp_call =
 			&per_cpu(smp_call_info, pcpu_id);
@@ -32,6 +35,7 @@ void kick_notification(void)
 		smp_call->data = NULL;
 		clear_bit(pcpu_id, &smp_call_mask);
 	}
+	spin_unlock_irqrestore(&smpcall_lock, flags);
 }
 
 /* wait until *sync == wake_sync */
@@ -46,8 +50,9 @@ void smp_call_function(uint64_t mask, smp_call_func_t func, void *data)
 {
 	uint16_t pcpu_id;
 	struct smp_call_info_data *smp_call;
+	uint64_t flags;
 
-	spin_lock(&smpcall_lock);
+	spin_lock_irqsave(&smpcall_lock, &flags);
 	/* wait for previous smp call complete, which may run on other cpus */
 	while (smp_call_mask);
 	smp_call_mask |= mask;
@@ -71,9 +76,9 @@ void smp_call_function(uint64_t mask, smp_call_func_t func, void *data)
 		}
 		pcpu_id = ffs64(mask);
 	}
+	spin_unlock_irqrestore(&smpcall_lock, flags);
 	/* wait for current smp call complete */
 	wait_sync_change(&smp_call_mask, 0UL);
-	spin_unlock(&smpcall_lock);
 }
 
 void smp_call_init(void)
