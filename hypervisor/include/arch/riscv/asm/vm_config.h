@@ -12,6 +12,7 @@
 #include <acrn_common.h>
 #include <acrn_hv_defs.h>
 #include <schedule.h>
+#include <asm/guest/vclint.h>
 
 #define PRE_VM_NUM		1
 #define SOS_VM_NUM		1
@@ -20,7 +21,7 @@
 
 #define MAX_PCPU_NUM		8U
 #define AFFINITY_CPU(n)		(1UL << (n))
-#define MAX_VCPUS_PER_VM	MAX_PCPU_NUM
+#define MAX_VCPUS_PER_VM	VCLINT_LVT_MAX
 #define MAX_VUART_NUM_PER_VM	2U
 #define MAX_VM_OS_NAME_LEN	32U
 #define MAX_MOD_TAG_LEN		32U

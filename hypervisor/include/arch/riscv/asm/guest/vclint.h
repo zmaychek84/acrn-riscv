@@ -11,7 +11,7 @@
 #include <asm/timer.h>
 #include <asm/apicreg.h>
 
-#define VCLINT_MAXLVT_INDEX CLINT_LVT_MAX
+#define VCLINT_LVT_MAX	CLINT_LVT_MAX
 
 struct vclint_timer {
 	struct hv_timer timer;
@@ -21,7 +21,7 @@ struct vclint_timer {
 struct acrn_vclint {
 	struct clint_regs	clint_page;
 	struct acrn_vm		*vm;
-	struct vclint_timer	vtimer[5];
+	struct vclint_timer	vtimer[VCLINT_LVT_MAX];
 	uint64_t		mtip;
 	uint64_t		clint_base;
 

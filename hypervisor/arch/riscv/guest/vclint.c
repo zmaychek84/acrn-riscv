@@ -486,7 +486,7 @@ void vclint_init(struct acrn_vm *vm)
 	vclint->clint_base = DEFAULT_CLINT_BASE;
 	vclint->ops = &acrn_vclint_ops;
 	vclint->clint_page.mtime = (uint64_t)get_tick();
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < VCLINT_LVT_MAX; i++)
 		vclint_init_timer(vclint, i);
 }
 
