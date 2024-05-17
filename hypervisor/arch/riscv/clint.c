@@ -47,6 +47,7 @@ void send_single_swi(uint16_t pcpu_id, uint64_t vector)
 	set_bit(vector, &per_cpu(swi_vector, pcpu_id).type);
 	asm volatile (
 		"sw %1, 0(%0) \n\t"
-		:: "r" (reg), "r" (val)
+		:: "r" (reg), "r" (val) : "memory"
 	);
+	dsb();
 }
