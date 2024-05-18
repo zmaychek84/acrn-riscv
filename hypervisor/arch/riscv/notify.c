@@ -52,9 +52,9 @@ void smp_call_function(uint64_t mask, smp_call_func_t func, void *data)
 	struct smp_call_info_data *smp_call;
 	uint64_t flags;
 
-	spin_lock_irqsave(&smpcall_lock, &flags);
 	/* wait for previous smp call complete, which may run on other cpus */
 	while (smp_call_mask);
+	spin_lock_irqsave(&smpcall_lock, &flags);
 	smp_call_mask |= mask;
 
 	pcpu_id = ffs64(mask);
