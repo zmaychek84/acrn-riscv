@@ -14,7 +14,7 @@
 #include <asm/cpumask.h>
 #include <asm/lib/spinlock.h>
 
-static uint64_t smp_call_mask;
+static volatile uint64_t smp_call_mask;
 spinlock_t smpcall_lock;
 
 /* run in interrupt context */
