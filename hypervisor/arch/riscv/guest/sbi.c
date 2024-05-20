@@ -82,8 +82,12 @@ static void sbi_timer_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
 	int *ret = &regs->a0;
 	unsigned long funcid = regs->a6;
+	struct run_context *ctx =
+		&vcpu->arch.contexts[vcpu->arch.cur_context].run_ctx;
 
 	if (funcid == SBI_TYPE_TIME_SET_TIMER) {
+		ctx->sip &= ~CLINT_VECTOR_STI;
+		cpu_csr_clear(mip, CLINT_VECTOR_STI);
 		vclint_write_tmr(vcpu_vclint(vcpu), vcpu->vcpu_id, regs->a0);
 		*ret = SBI_SUCCESS;
 	} else {

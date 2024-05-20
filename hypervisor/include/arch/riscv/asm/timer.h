@@ -30,6 +30,6 @@ extern void preinit_timer(void);
 
 #define CLINT_MTIME		(CONFIG_CLINT_BASE + 0xBFF8)
 #define CLINT_MTIMECMP(cpu)	(CONFIG_CLINT_TM_BASE + (cpu * 0x8))
-#define CLINT_DISABLE_TIMER	0xffffffff
+#define CLINT_DISABLE_TIMER	0xffffffffffffffff
 
 #endif /* __RISCV_TIMER_H__ */

@@ -9,11 +9,7 @@
 #include <schedule.h>
 #include <ticks.h>
 
-#ifdef CONFIG_RISCV64
-#define CONFIG_SLICE_MS 1UL
-#else
 #define CONFIG_SLICE_MS 10UL
-#endif
 
 struct sched_iorr_data {
 	/* keep list as the first item */

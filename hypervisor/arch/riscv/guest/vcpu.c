@@ -439,14 +439,10 @@ void zombie_vcpu(struct acrn_vcpu *vcpu, enum vcpu_state new_state)
  */
 static void context_switch_out(struct thread_object *prev)
 {
-	struct acrn_vcpu *vcpu = container_of(prev, struct acrn_vcpu, thread_obj);
-	save_vmcs(vcpu);
 }
 
 static void context_switch_in(struct thread_object *next)
 {
-	struct acrn_vcpu *vcpu = container_of(next, struct acrn_vcpu, thread_obj);
-	load_vmcs(vcpu);
 }
 
 /**

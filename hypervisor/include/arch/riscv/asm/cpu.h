@@ -158,7 +158,7 @@ struct cpu_info {
 extern void cpu_dead(void);
 extern void cpu_do_idle(void);
 
-#define barrier()	__asm__ __volatile__("": : :"memory")
+#define barrier()	__asm__ __volatile__("fence": : :"memory")
 #define cpu_relax()	barrier() /* Could yield? */
 
 #define ASM_STR(x)	#x
@@ -177,7 +177,7 @@ extern void cpu_do_idle(void);
 ({									\
 	uint64_t val = (uint64_t)csr_val;				\
 	asm volatile (" csrw " ASM_STR(reg) ", %0 \n\t"			\
-			:: "r"(val));		 			\
+			:: "r"(val): "memory");	 			\
 })
 
 /* Set CSR */
@@ -185,7 +185,7 @@ extern void cpu_do_idle(void);
 ({									\
 	uint64_t val = (uint64_t)csr_val;				\
 	asm volatile (" csrs " ASM_STR(reg) ", %0 \n\t"			\
-			:: "r"(val));		 			\
+			:: "r"(val): "memory");	 			\
 })
 
 /* Clear CSR */
@@ -193,7 +193,7 @@ extern void cpu_do_idle(void);
 ({									\
 	uint64_t val = (uint64_t)csr_val;				\
 	asm volatile (" csrc " ASM_STR(reg) ", %0 \n\t"			\
-			:: "r"(val));		 			\
+			:: "r"(val): "memory");	 			\
 })
 
 
@@ -208,26 +208,26 @@ static inline void asm_hlt(void)
 
 #define cpu_enable_mirq()						\
 {									\
-	asm volatile ("li t0, 0x8 \n"					\
-			  "csrs mstatus, t0 \n" : : : "cc", "t0"); 	\
+	asm volatile ("csrsi mstatus, 0x8 \n" : :			\
+			: "memory");					\
 }
 
 #define cpu_disable_mirq()						\
 {									\
-	asm volatile ("li t0, 0x8 \n"					\
-			  "csrc mstatus, t0 \n" : : : "cc", "t0");	\
+	asm volatile ("csrci mstatus, 0x8 \n" : :			\
+			: "memory");					\
 }
 
 #define cpu_enable_irq()						\
 {									\
-	asm volatile ("li t0, 0x2 \n"					\
-			  "csrs sstatus, t0 \n" : : : "cc", "t0"); 	\
+	asm volatile ("csrsi sstatus, 0x2 \n" : :			\
+			: "memory");					\
 }
 
 #define cpu_disable_irq()						\
 {									\
-	asm volatile ("li t0, 0x2 \n"					\
-			  "csrc sstatus, t0 \n" : : : "cc", "t0");	\
+	asm volatile ("csrci sstatus, 0x2 \n" : :			\
+			: "memory");					\
 }
 
 #define CPU_IRQ_ENABLE cpu_enable_irq
@@ -596,8 +596,8 @@ static inline void clac(void)
 #endif /* __ASSEMBLY__ */
 
 #ifdef CONFIG_MACRN
-#define CPU_IRQ_DISABLE_ON_CONFIG	cpu_disable_mirq
-#define CPU_IRQ_ENABLE_ON_CONFIG	cpu_enable_mirq
+#define CPU_IRQ_DISABLE_ON_CONFIG()
+#define CPU_IRQ_ENABLE_ON_CONFIG()
 #else
 #define CPU_IRQ_DISABLE_ON_CONFIG	cpu_disable_irq
 #define CPU_IRQ_ENABLE_ON_CONFIG	cpu_enable_irq

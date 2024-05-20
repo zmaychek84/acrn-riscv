@@ -108,7 +108,10 @@ static void load_guest_state(struct acrn_vcpu *vcpu)
 
 	cpu_csr_write(sstatus, ctx->run_ctx.sstatus);
 	cpu_csr_write(sepc, ctx->run_ctx.sepc);
-	cpu_csr_write(sip, ctx->run_ctx.sip);
+	if (is_service_vm(vcpu->vm))
+		cpu_csr_set(mip, (ctx->run_ctx.sip & 0x22));
+	else
+		cpu_csr_set(mip, ctx->run_ctx.sip);
 	cpu_csr_write(sie, ctx->run_ctx.sie);
 	cpu_csr_write(stvec, ctx->run_ctx.stvec);
 	cpu_csr_write(sscratch, ctx->run_ctx.sscratch);

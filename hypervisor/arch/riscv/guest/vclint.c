@@ -125,6 +125,7 @@ static void vclint_reset_timer(struct acrn_vclint *vclint)
 void vclint_write_tmr(struct acrn_vclint *vclint, uint32_t index, uint64_t data)
 {
 	del_timer(&vclint->vtimer[index].timer);
+	clear_bit(index, &vclint->mtip);
 	vclint->vtimer[index].timer.timeout = data;
 	(void)add_timer(&vclint->vtimer[index].timer);
 }
@@ -364,11 +365,12 @@ bool vclint_find_deliverable_intr(const struct acrn_vcpu *vcpu, uint32_t *vector
 	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
 	bool ret = false;
 
-	if (vclint->clint_page.msip[vcpu->vcpu_id] & 0x1) {
-		*vector = CLINT_VECTOR_SSI;
+	if ((vclint->clint_page.msip[vcpu->vcpu_id] & 0x1)) {
+		*vector |= CLINT_VECTOR_SSI;
 		ret = true;
-	} else if (test_bit(vcpu->vcpu_id, vclint->mtip)) {
-		*vector = CLINT_VECTOR_STI;
+	}
+	if (test_bit(vcpu->vcpu_id, vclint->mtip)) {
+		*vector |= CLINT_VECTOR_STI;
 		ret = true;
 	}
 
