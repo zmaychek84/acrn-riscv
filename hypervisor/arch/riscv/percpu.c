@@ -9,3 +9,8 @@
 #include <asm/per_cpu.h>
 
 struct per_cpu_region per_cpu_data[MAX_PCPU_NUM] __aligned(PAGE_SIZE);
+
+void init_percpu_areas(void)
+{
+	memset(per_cpu_data, 0, sizeof(struct per_cpu_region) * MAX_PCPU_NUM);
+}

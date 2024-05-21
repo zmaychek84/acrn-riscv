@@ -29,6 +29,7 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 {
 	struct thread_object *idle = &per_cpu(idle, cpu);
 
+	init_percpu_areas();
 	set_current(idle);
 	set_pcpu_id(cpu); /* needed early, for smp_processor_id() */
 	init_logmsg();

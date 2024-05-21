@@ -50,6 +50,7 @@ extern struct per_cpu_region per_cpu_data[MAX_PCPU_NUM];
 	(per_cpu_data[(pcpu_id)].name)
 #define get_cpu_var(name)	per_cpu(name, get_pcpu_id())
 
+extern void init_percpu_areas(void);
 #endif /* !__ASSEMBLY__ */
 
 #endif /* __RISCV_PERCPU_H__ */
