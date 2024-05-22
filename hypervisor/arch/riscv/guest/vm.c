@@ -156,6 +156,7 @@ static void init_vm_sw_load(struct acrn_vm *vm)
 
 void prepare_sos_vm(void)
 {
+	memset(sos_vm, 0, sizeof(struct acrn_vm));
 	sos_vm->vm_id = 0;
 	sos_vm->hw.created_vcpus = 0;
 
@@ -174,6 +175,7 @@ void prepare_sos_vm(void)
  */
 void prepare_uos_vm(void)
 {
+	memset(uos_vm, 0, sizeof(struct acrn_vm));
 	uos_vm->vm_id = 1;
 	uos_vm->hw.created_vcpus = 0;
 #ifndef CONFIG_MACRN
