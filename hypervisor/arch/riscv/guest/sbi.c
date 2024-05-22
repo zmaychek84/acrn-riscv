@@ -87,7 +87,7 @@ static void sbi_timer_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 	bool sstc = false;
 
 #ifdef RUN_ON_QEMU
-	sstc = !!(cpu_csr_read(menvcfg));
+	sstc = !!(cpu_csr_read(menvcfg) & 0x8000000000000000);
 #endif
 	if (funcid == SBI_TYPE_TIME_SET_TIMER) {
 		if (sstc) {
