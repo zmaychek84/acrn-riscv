@@ -131,7 +131,7 @@ static const struct vm_exit_dispatch interrupt_dispatch_table[NR_HX_EXIT_IRQ_REA
 	[HX_EXIT_IRQ_VSEXT] = {
 		.handler = undefined_vmexit_handler},
 	[HX_EXIT_IRQ_MEXT] = {
-		.handler = unhandled_vmexit_handler},
+		.handler = mexti_vmexit_handler},
 	[HX_EXIT_IRQ_GUEST_SEXT] = {
 		.handler = unhandled_vmexit_handler},
 };

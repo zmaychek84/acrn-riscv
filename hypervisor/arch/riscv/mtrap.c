@@ -94,6 +94,7 @@ static void mtimer_handler(void)
 
 static void mexti_handler(void)
 {
+	handle_mexti();
 }
 
 typedef void (* irq_handler_t)(void);

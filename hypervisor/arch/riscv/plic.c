@@ -30,12 +30,12 @@ void plic_write8(struct acrn_plic *plic, uint32_t value, uint32_t offset)
 	writeb_relaxed(value, plic->map_base + offset);
 }
 
-void plic_write32(struct acrn_plic *plic, uint32_t value, uint32_t offset)
+void plic_write32(uint32_t value, uint32_t offset)
 {
 	writel_relaxed(value, plic->map_base + offset);
 }
 
-uint32_t plic_read32(struct acrn_plic *plic, uint32_t offset)
+uint32_t plic_read32(uint32_t offset)
 {
 	return readl_relaxed(plic->map_base + offset);
 }
@@ -45,10 +45,10 @@ static void plic_set_irq(struct irq_desc *irqd, uint32_t offset)
 	uint32_t base, val;
 
 	base = offset + (irqd->irq / 32) * 4;
-	val = plic_read32(plic, base);
+	val = plic_read32(base);
 	val |= 1U << (irqd->irq % 32);
 	// 1bits/IRQ
-	plic_write32(plic, val, base);
+	plic_write32(val, base);
 }
 
 static void plic_clear_irq(struct irq_desc *irqd, uint32_t offset)
@@ -56,10 +56,10 @@ static void plic_clear_irq(struct irq_desc *irqd, uint32_t offset)
 	uint32_t base, val;
 
 	base = offset + (irqd->irq / 32) * 4;
-	val = plic_read32(plic, base);
+	val = plic_read32(base);
 	val &= ~(1U << (irqd->irq % 32));
 	// 1bits/IRQ
-	plic_write32(plic, val, base);
+	plic_write32(val, base);
 }
 
 void plic_set_address(void)
@@ -75,7 +75,7 @@ void plic_init_map(void){
 static void plic_set_irq_mask(struct irq_desc *desc, uint32_t priority)
 {
 	spin_lock(&plic->lock);
-	plic_write32(plic, priority & 0x7, PLIC_THR);
+	plic_write32(priority & 0x7, PLIC_THR);
 	spin_unlock(&plic->lock);
 }
 
@@ -84,7 +84,7 @@ static void plic_set_irq_priority(struct irq_desc *desc, uint32_t priority)
 	unsigned int irq = desc->irq;
 
 	spin_lock(&plic->lock);
-	plic_write32(plic, priority & 0x7, PLIC_IPRR + irq * 4);
+	plic_write32(priority & 0x7, PLIC_IPRR + irq * 4);
 	spin_unlock(&plic->lock);
 }
 
@@ -111,17 +111,17 @@ static void plic_irq_disable(struct irq_desc *desc)
 
 static uint32_t plic_get_irq(void)
 {
-	return plic_read32(plic, PLIC_EOIR);
+	return plic_read32(PLIC_EOIR);
 }
 
 static void plic_eoi_irq(struct irq_desc *desc)
 {
-	plic_write32(plic, desc->irq, PLIC_EOIR);
+	plic_write32(desc->irq, PLIC_EOIR);
 }
 
 static bool plic_read_pending_state(struct irq_desc *desc)
 {
-	return (plic_read32(plic, PLIC_IPER) & PLIC_IRQ_MASK);
+	return (plic_read32(PLIC_IPER) & PLIC_IRQ_MASK);
 }
 
 struct acrn_irqchip_ops plic_ops = {

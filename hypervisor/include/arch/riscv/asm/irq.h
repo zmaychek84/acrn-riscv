@@ -142,5 +142,6 @@ extern void init_irq_descs_arch(struct irq_desc *descs);
 extern void init_interrupt_arch(uint16_t pcpu_id);
 extern void setup_irqs_arch(void);
 extern void dispatch_interrupt(struct cpu_regs *regs);
+extern void handle_mexti(void);
 
 #endif /* __RISCV_IRQ_H__ */

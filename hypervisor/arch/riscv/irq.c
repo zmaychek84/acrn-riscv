@@ -9,6 +9,7 @@
 #include <asm/init.h>
 #include <asm/irq.h>
 #include <asm/lib/bits.h>
+#include <asm/guest/vm.h>
 #include <debug/logmsg.h>
 
 const unsigned int nr_irqs = NR_IRQS;
@@ -150,6 +151,24 @@ void dispatch_interrupt(struct cpu_regs *regs)
 			break;
 		pr_dbg("dispatch interrupt: %d",irq);
 		do_IRQ(regs, irq);
+	} while (1);
+}
+
+void handle_mexti(void)
+{
+	uint32_t irq;
+	struct acrn_vm *sos_vm;
+	struct acrn_vcpu *vcpu;
+
+	sos_vm = get_sos_vm();
+	vcpu = vcpu_from_vid(sos_vm, BSP_CPU_ID);
+
+	do {
+		irq = acrn_irqchip->get_irq();
+		if (irq == 0)
+			break;
+		pr_dbg("Inject interrupt: %d", irq);
+		vplic_accept_intr(vcpu, irq, true);
 	} while (1);
 }
 

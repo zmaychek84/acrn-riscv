@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <asm/pgtable.h>
 #include <asm/irq.h>
+#include <asm/plic.h>
 #include <asm/guest/instr_emul.h>
 #include <asm/guest/virq.h>
 #include <asm/guest/vmcs.h>
@@ -223,6 +224,9 @@ static int32_t vplic_write(struct acrn_vplic *vplic, uint32_t offset, uint64_t d
                 } else {
 			dev_dbg(DBG_LEVEL_VPLIC, "vplic write: invalid source priority value %x\n", data);
 		}
+
+		if (is_service_vm(vplic->vm))
+			plic_write32(data, offset);
 	} else if (offset_between(offset, vplic->pending_base, (PLIC_NUM_SOURCES + 31) >> 3)) {
 		dev_dbg(DBG_LEVEL_VPLIC, "vplic write: invalid pending reg write %x\n", offset);
 	} else if (offset_between(offset, vplic->enable_base,
@@ -234,6 +238,9 @@ static int32_t vplic_write(struct acrn_vplic *vplic, uint32_t offset, uint64_t d
 			regs->enable[context_index][word_index] = data;
 		else
 			dev_dbg(DBG_LEVEL_VPLIC, "vplic write: invalid enable reg write %x\n", offset);
+
+		if (is_service_vm(vplic->vm))
+			plic_write32(data, PLIC_IER + (word_index << 2)); // Deliver phy irq to context 0
 	} else if (offset_between(offset, vplic->dst_prio_base,
 				  PLIC_NUM_CONTEXT * PLIC_DST_PRIO_STRIDE)) {
 		uint32_t context_index = (offset - vplic->dst_prio_base) / PLIC_DST_PRIO_STRIDE;
@@ -244,12 +251,18 @@ static int32_t vplic_write(struct acrn_vplic *vplic, uint32_t offset, uint64_t d
 				regs->target_priority[context_index] = data;
 				vplic_update(vplic);
 			}
+
+			if (is_service_vm(vplic->vm))
+				plic_write32(data, PLIC_THR);
 		} else if (reg_id == 4) { // Claim/complete register
 			if (data < PLIC_NUM_SOURCES) {
 				// Update the claimed reg
 				vplic_clear_claimed(regs, data);
 				vplic_update(vplic);
 			}
+
+			if (is_service_vm(vplic->vm))
+				plic_write32(data, PLIC_EOIR);
 		} else {
 			dev_dbg(DBG_LEVEL_VPLIC, "vplic write: invalid  context reg id %x\n", reg_id);
 			ret = -EACCES;

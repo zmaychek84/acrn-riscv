@@ -27,4 +27,7 @@ struct acrn_plic {
 	uint32_t size;
 };
 
+void plic_write32(uint32_t value, uint32_t offset);
+uint32_t plic_read32(uint32_t offset);
+
 #endif /* __RISCV_PLIC_H__ */

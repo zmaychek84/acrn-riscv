@@ -328,6 +328,13 @@ int32_t external_interrupt_vmexit_handler(struct acrn_vcpu *vcpu)
 	return ret;
 }
 
+int32_t mexti_vmexit_handler(struct acrn_vcpu *vcpu)
+{
+	handle_mexti();
+
+	return 0;
+}
+
 static inline void acrn_inject_pending_intr(struct acrn_vcpu *vcpu,
 		uint64_t *pending_req_bits, bool injected);
 

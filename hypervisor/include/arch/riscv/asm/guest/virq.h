@@ -16,6 +16,7 @@ extern void vcpu_inject_ud(struct acrn_vcpu *vcpu);
 extern void vcpu_inject_ss(struct acrn_vcpu *vcpu);
 extern int32_t interrupt_window_vmexit_handler(struct acrn_vcpu *vcpu);
 extern int32_t external_interrupt_vmexit_handler(struct acrn_vcpu *vcpu);
+extern int32_t mexti_vmexit_handler(struct acrn_vcpu *vcpu);
 extern int32_t acrn_handle_pending_request(struct acrn_vcpu *vcpu);
 extern int32_t exception_vmexit_handler(struct acrn_vcpu *vcpu);
 extern int32_t nmi_window_vmexit_handler(struct acrn_vcpu *vcpu);

@@ -45,7 +45,7 @@ _start:
 	csrs mstatus, t0
 
 
-	li t0, 0xaaa
+	li t0, 0x222
 	csrs mideleg, t0
 
 	li t0, 0xaaa
