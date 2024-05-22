@@ -150,7 +150,11 @@ endif
 BOOT_C_SRCS += arch/riscv/mtrap.c
 BOOT_C_SRCS += arch/riscv/trap.c
 BOOT_C_SRCS += arch/riscv/smp.c
+ifdef CONFIG_SIFIVE_UART
+BOOT_C_SRCS += arch/riscv/sifive_uart.c
+else
 BOOT_C_SRCS += arch/riscv/uart.c
+endif
 BOOT_C_SRCS += arch/riscv/setup.c
 BOOT_C_SRCS += arch/riscv/percpu.c
 BOOT_C_SRCS += arch/riscv/smpboot.c
