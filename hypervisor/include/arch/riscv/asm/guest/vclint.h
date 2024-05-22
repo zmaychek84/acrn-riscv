@@ -19,6 +19,8 @@ struct vclint_timer {
 };
 
 struct acrn_vclint {
+	spinlock_t lock;
+
 	struct clint_regs	clint_page;
 	struct acrn_vm		*vm;
 	struct vclint_timer	vtimer[VCLINT_LVT_MAX];

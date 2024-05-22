@@ -124,10 +124,13 @@ static void vclint_reset_timer(struct acrn_vclint *vclint)
 
 void vclint_write_tmr(struct acrn_vclint *vclint, uint32_t index, uint64_t data)
 {
-	del_timer(&vclint->vtimer[index].timer);
-	clear_bit(index, &vclint->mtip);
-	vclint->vtimer[index].timer.timeout = data;
-	(void)add_timer(&vclint->vtimer[index].timer);
+	struct hv_timer *timer = &vclint->vtimer[index].timer;
+
+	del_timer(timer);
+	timer->mode = TICK_MODE_ONESHOT;
+	timer->timeout = data;
+	timer->period_in_cycle = 0UL;
+	(void)add_timer(timer);
 }
 
 static void vclint_write_mtime(struct acrn_vclint *vclint, uint64_t data)
@@ -167,12 +170,15 @@ vclint_write_msip(struct acrn_vclint *vclint, uint32_t idx, uint32_t data)
 {
 	struct clint_regs *clint;
 	struct acrn_vcpu *vcpu = &vclint->vm->hw.vcpu[idx];
+	uint64_t flags;
 
+	spin_lock_irqsave(&vclint->lock, &flags);
 	clint = &(vclint->clint_page);
 //	if (clint->msip[idx] & 0x1)
 //		return;
 	clint->msip[idx] = data & 0x1;
 	vclint_set_intr(vcpu);
+	spin_unlock_irqrestore(&vclint->lock, flags);
 }
 
 static int32_t vclint_read(struct acrn_vclint *vclint, uint32_t offset_arg, uint64_t *data)
@@ -323,9 +329,12 @@ static void vclint_timer_expired(void *data)
 {
 	struct acrn_vcpu *vcpu = (struct acrn_vclint *)data;
 	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
+	uint64_t flags;
 
+	spin_lock_irqsave(&vclint->lock, &flags);
 	set_bit(vcpu->vcpu_id, &vclint->mtip);
 	vclint_set_intr(vcpu);
+	spin_unlock_irqrestore(&vclint->lock, flags);
 }
 
 /*
@@ -364,15 +373,20 @@ bool vclint_find_deliverable_intr(const struct acrn_vcpu *vcpu, uint32_t *vector
 {
 	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
 	bool ret = false;
+	uint64_t flags;
 
+	spin_lock_irqsave(&vclint->lock, &flags);
 	if ((vclint->clint_page.msip[vcpu->vcpu_id] & 0x1)) {
 		*vector |= CLINT_VECTOR_SSI;
+		vclint->clint_page.msip[vcpu->vcpu_id] &= ~0x1;
 		ret = true;
 	}
 	if (test_bit(vcpu->vcpu_id, vclint->mtip)) {
 		*vector |= CLINT_VECTOR_STI;
+		clear_bit(vcpu->vcpu_id, &vclint->mtip);
 		ret = true;
 	}
+	spin_unlock_irqrestore(&vclint->lock, flags);
 
 	return ret;
 }
@@ -475,6 +489,7 @@ void vclint_init(struct acrn_vm *vm)
 		PAGE_U | PAGE_ATTR_IO);
 #endif
 
+	spinlock_init(&vclint->lock);
 	vclint->vm = vm;
 	vclint->clint_base = DEFAULT_CLINT_BASE;
 	vclint->ops = &acrn_vclint_ops;
