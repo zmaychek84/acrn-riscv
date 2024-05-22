@@ -49,6 +49,13 @@ uint64_t smp_up_cpu = MP_INVALID_IDX;
 void __init
 smp_clear_cpu_maps (void)
 {
+/*
+ * On Sophgo, it needs to explictly set the value since the very early
+ * boot loader does not initialize .data section as zero.
+ */
+	cpu_online_map = 0UL;
+	cpu_possible_map = 0UL;
+
 	set_bit(0, &cpu_online_map);
 	set_bit(0, &cpu_possible_map);
 }
