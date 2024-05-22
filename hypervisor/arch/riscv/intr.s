@@ -12,6 +12,8 @@
 	.globl reset_mtimer
 reset_mtimer:
 	csrr t0, mhartid
+	li t1, NR_CPUS
+	bgt t0, t1, reset_mtimer
 	li t1, 8
 	mul t0, t0, t1
 	li t1, CONFIG_CLINT_TM_BASE
