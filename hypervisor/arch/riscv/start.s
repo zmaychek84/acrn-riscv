@@ -15,12 +15,13 @@ _start:
 	sd a1, 0(t0)
 	la t0, fw_dinfo
 	sd a2, 0(t0)
-#	csrr t0, menvcfg
-#	li t1, 0x8000000000000000
-#	or t0, t0, t1
-#	csrw menvcfg, t1
+#ifdef RUN_ON_QEMU
+	csrr t0, menvcfg
+	li t1, 0x8000000000000000
+	or t0, t0, t1
+	csrw menvcfg, t1
+#endif
 	csrwi mcounteren, 0x7
-#	csrwi scounteren, 0x7
 	jal init_mstack
 	call reset_mtimer
 	csrw mip, 0x0
