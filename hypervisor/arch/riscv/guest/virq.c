@@ -84,8 +84,14 @@ static uint8_t get_exception_type(uint32_t vector)
 
 static bool is_guest_irq_enabled(struct acrn_vcpu *vcpu)
 {
-	return true;
-	return !!(vcpu_get_status(vcpu) & HV_ARCH_VCPU_STATUS_SIE);
+	uint64_t ie = 0;
+	struct run_context *ctx =
+		&vcpu->arch.contexts[vcpu->arch.cur_context].run_ctx;
+
+	ie = ctx->sie & 0x222;
+	pr_dbg("%s: ie 0x%lx", __func__, ie);
+
+	return !!ie;
 }
 
 static inline bool is_nmi_injectable(void)
