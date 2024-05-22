@@ -377,14 +377,12 @@ bool vclint_find_deliverable_intr(const struct acrn_vcpu *vcpu, uint32_t *vector
 	return ret;
 }
 
-void vcpu_inject_intr(struct acrn_vcpu *vcpu, bool guest_irq_enabled, bool injected)
+void vcpu_inject_intr(struct acrn_vcpu *vcpu)
 {
-	struct acrn_vclint *vclint = vcpu_vclint(vcpu);
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 	uint32_t vector = 0U;
 
-	if ((guest_irq_enabled && (!injected)) &&
-	    (vclint_find_deliverable_intr(vcpu, &vector)))
+	if (vclint_find_deliverable_intr(vcpu, &vector))
 		ctx->run_ctx.sip |= vector;
 }
 

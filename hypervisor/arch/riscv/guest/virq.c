@@ -385,10 +385,8 @@ static inline void acrn_inject_pending_intr(struct acrn_vcpu *vcpu,
 			/* has pending external interrupts */
 			vcpu_inject_extint(vcpu);
 		}
-	}
-
-	if (bitmap_test_and_clear_lock(ACRN_REQUEST_EVENT, pending_req_bits)) {
-		vcpu_inject_intr(vcpu, guest_irq_enabled, ret);
+		if (bitmap_test_and_clear_lock(ACRN_REQUEST_EVENT, pending_req_bits))
+			vcpu_inject_intr(vcpu);
 	}
 }
 
