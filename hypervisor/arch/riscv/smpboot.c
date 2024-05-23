@@ -133,14 +133,14 @@ int __cpu_up(unsigned int cpu)
 
 void start_pcpus(void)
 {
-	for (uint32_t i = 1U; i < NR_CPUS; i++) {
+	for (uint32_t i = BSP_CPU_ID + 1U; i < NR_CPUS; i++) {
 		__cpu_up(i);
 	}
 }
 
 void __init smp_init_cpus(void)
 {
-	for (int i = 0; i < NR_CPUS; i++) {
+	for (int i = BSP_CPU_ID; i < NR_CPUS; i++) {
 		arch_cpu_init(i);
 		set_bit(i, &cpu_possible_map);
 	#ifdef RUN_ON_QEMU

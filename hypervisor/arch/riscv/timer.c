@@ -91,7 +91,7 @@ void preinit_timer()
 	boot_count = get_tick();
 	pr_dbg("cpu_khz = %ld boot_count=%ld \r\n", cpu_khz, boot_count);
 
-	for (int i = 0; i < NR_CPUS; i++) {
+	for (int i = BSP_CPU_ID; i < NR_CPUS; i++) {
 		writeq_relaxed(CLINT_DISABLE_TIMER, (void *)CLINT_MTIMECMP(i));
 	}
 }

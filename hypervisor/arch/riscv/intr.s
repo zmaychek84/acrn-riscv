@@ -72,7 +72,7 @@ kernel_init:
 	li t0, 0xC0000
 	csrw sstatus, t0
 #endif
-	li a0, 0
+	li a0, BSP_CPU_ID
 	li a1, 0
 	call start_acrn
 	sret

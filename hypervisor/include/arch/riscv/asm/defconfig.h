@@ -2,8 +2,12 @@
 #define __RISCV_DEFCONFIG_H__
 
 //********** board specific area *************/
+#ifdef CONFIG_SIFIVE_UNMATCHED
+#define BOARD_FILE "sifive_unmatched.h"
+#else
 #define RUN_ON_QEMU
 #define BOARD_FILE "qemu.h"
+#endif
 /*********************end********************/
 
 #define CONFIG_HAS_DEVICE_TREE 1

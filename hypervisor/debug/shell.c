@@ -661,6 +661,7 @@ void shell_init(void)
 	p_shell->to_select_index = 0;
 
 	/* Zero fill the input buffer */
+	p_shell->input_line_active = 0;
 	(void)memset(p_shell->buffered_line[p_shell->input_line_active], 0U, SHELL_CMD_MAX_LEN + 1U);
 }
 

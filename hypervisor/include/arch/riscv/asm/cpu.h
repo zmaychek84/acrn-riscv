@@ -7,6 +7,8 @@
 #ifndef __RISCV_CPU_H__
 #define __RISCV_CPU_H__
 
+#define BSP_CPU_ID		CONFIG_BSP_CPU_ID
+
 #ifndef __ASSEMBLY__
 #include <types.h>
 #include <util.h>
@@ -16,7 +18,6 @@ extern uint16_t console_loglevel;
 extern uint16_t mem_loglevel;
 extern uint16_t npk_loglevel;
 
-#define BSP_CPU_ID			 0U
 #define INVALID_CPU_ID 0xffffU
 #define BROADCAST_CPU_ID 0xfffeU
 

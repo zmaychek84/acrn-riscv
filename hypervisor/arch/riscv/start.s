@@ -5,12 +5,17 @@
  */
 
 #include <asm/config.h>
+#include <asm/cpu.h>
 
 	.text
 
 	.globl _start
 _start:
 	csrr a0, mhartid
+
+	li t0, BSP_CPU_ID
+	blt a0, t0, hart_halt
+
 	la t0, fw_dtb
 	sd a1, 0(t0)
 	la t0, fw_dinfo
@@ -59,11 +64,17 @@ _boot:
 #ifndef CONFIG_MACRN
 	jal init_stack
 #endif
-	bnez a0, secondary
+	li t0, BSP_CPU_ID
+	bne a0, t0, secondary
+
 	call kernel_init
 1:
 	la ra, 1b
 	ret
+
+hart_halt:
+	wfi
+	j  hart_halt
 
 secondary:
 	lw t0, g_cpus

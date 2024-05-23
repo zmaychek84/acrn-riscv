@@ -11,8 +11,16 @@ CFLAGS := -D__riscv64__
 ASFLAGS := -D__riscv64__
 LDFLAGS :=
 ARFLAGS :=
+ifdef CONFIG_SIFIVE_UNMATCHED
+ARCH_CFLAGS := -march=rv64imafdc_zifencei -mabi=lp64d -mcmodel=medany
+ARCH_ASFLAGS :=  -march=rv64imafdc_zifencei
+CFLAGS += -DCONFIG_SIFIVE_UNMATCHED
+ASFLAGS += -DCONFIG_SIFIVE_UNMATCHED
+CONFIG_SIFIVE_UART := 1
+else
 ARCH_CFLAGS := -march=rv64gh1p0_zifencei_zbb -mabi=lp64d -mcmodel=medany
 ARCH_ASFLAGS := -march=rv64gh1p0_zifencei_zbb
+endif
 ARCH_ARFLAGS :=
 ARCH_LDFLAGS := -mcmodel=medany
 
