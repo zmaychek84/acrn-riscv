@@ -143,11 +143,7 @@ void __init smp_init_cpus(void)
 	for (int i = BSP_CPU_ID; i < NR_CPUS; i++) {
 		arch_cpu_init(i);
 		set_bit(i, &cpu_possible_map);
-	#ifdef RUN_ON_QEMU
 		cpu_logical_map(i) = i;
-	#else
-		cpu_logical_map(i) = i * 0x100U;
-	#endif
 	}
 }
 
