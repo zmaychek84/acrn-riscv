@@ -158,8 +158,11 @@ static int32_t vplic_read(struct acrn_vplic *vplic, uint32_t offset, uint64_t *d
 {
 	int32_t ret = 0;
 	struct plic_regs *regs = &vplic->regs;
+	uint64_t flags;
 
 	*data = 0UL;
+
+	spin_lock_irqsave(&vplic->lock, &flags);
 	if (offset_between(offset, vplic->priority_base, PLIC_NUM_SOURCES << 2)) {
 		uint32_t src_index = (offset - vplic->priority_base) >> 2;
 
@@ -201,6 +204,7 @@ static int32_t vplic_read(struct acrn_vplic *vplic, uint32_t offset, uint64_t *d
 		dev_dbg(DBG_LEVEL_VPLIC, "vplic read: invalid offset %x\n", offset);
 		ret = -EACCES;
 	}
+	spin_unlock_irqrestore(&vplic->lock, flags);
 
 	dev_dbg(DBG_LEVEL_VPLIC, "vplic read offset %x, data %lx\n", offset, *data);
 	vplic_dump_regs(vplic);
@@ -212,9 +216,11 @@ static int32_t vplic_write(struct acrn_vplic *vplic, uint32_t offset, uint64_t d
 {
 	int32_t ret = 0;
 	struct plic_regs *regs = &vplic->regs;
+	uint64_t flags;
 
 	dev_dbg(DBG_LEVEL_VPLIC, "vplic write offset %#x, data %#lx", offset, data);
 
+	spin_lock_irqsave(&vplic->lock, &flags);
 	if (offset_between(offset, vplic->priority_base, PLIC_NUM_SOURCES << 2)) {
 		uint32_t src_index = (offset - vplic->priority_base) >> 2;
 
@@ -271,6 +277,7 @@ static int32_t vplic_write(struct acrn_vplic *vplic, uint32_t offset, uint64_t d
 		dev_dbg(DBG_LEVEL_VPLIC, "vplic write: invalid offset %x\n", offset);
 		ret = -EACCES;
 	}
+	spin_unlock_irqrestore(&vplic->lock, flags);
 
 	vplic_dump_regs(vplic);
 
@@ -298,8 +305,10 @@ vplic_reset(struct acrn_vplic *vplic, const struct acrn_vplic_ops *ops, enum res
 void vplic_accept_intr(struct acrn_vcpu *vcpu, uint32_t vector, bool level)
 {
 	struct acrn_vplic *vplic;
+	uint64_t flags;
 
 	vplic = vcpu_vplic(vcpu);
+	spin_lock_irqsave(&vplic->lock, &flags);
 	if (vector < PLIC_NUM_SOURCES) {
 		if (level)
 			vplic_set_pending(&vplic->regs, vector);
@@ -310,6 +319,7 @@ void vplic_accept_intr(struct acrn_vcpu *vcpu, uint32_t vector, bool level)
 	} else {
 		dev_dbg(DBG_LEVEL_VPLIC, "vplic ignoring interrupt to vector %u", vector);
 	}
+	spin_unlock_irqrestore(&vplic->lock, flags);
 }
 
 void vcpu_inject_extint(__unused struct acrn_vcpu *vcpu)
@@ -380,6 +390,7 @@ void vplic_init(struct acrn_vm *vm)
 {
 	struct acrn_vplic *vplic = &vm->vplic;
 
+	spinlock_init(&vplic->lock);
 	vplic->vm = vm;
 	vplic->plic_base = DEFAULT_PLIC_BASE;
 	vplic->ops = &acrn_vplic_ops;

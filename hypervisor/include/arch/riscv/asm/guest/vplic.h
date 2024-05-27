@@ -11,6 +11,7 @@
 #include <asm/apicreg.h>
 
 struct acrn_vplic {
+	spinlock_t lock;
 	struct plic_regs regs;
 	struct acrn_vm *vm;
 	uint64_t plic_base;
