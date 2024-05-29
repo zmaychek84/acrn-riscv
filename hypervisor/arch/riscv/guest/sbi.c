@@ -216,8 +216,11 @@ static void sbi_rfence_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 		return;
 	offset = ffs64(mask);
 	while ((offset + base) < vcpu->vm->hw.created_vcpus) {
+		uint16_t t = offset + base;
+
 		clear_bit(offset, &mask);
-		set_bit(base + offset, &rcall_mask);
+		t = vcpu->vm->hw.vcpu[t].pcpu_id;
+		set_bit(t, &rcall_mask);
 		offset = ffs64(mask);
 	}
 	smp_call_function(rcall_mask, func, (void *)&rcall);
