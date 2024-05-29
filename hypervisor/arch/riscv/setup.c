@@ -71,7 +71,7 @@ void start_acrn(uint32_t cpu, unsigned long boot_phys_offset,
 	// currently, direct run sos.
 	start_vm(sos_vm);
 
-#ifdef CONFIG_KTEST
+#if defined(CONFIG_KTEST) || defined(CONFIG_UOS)
 	prepare_uos_vm();
 	create_vm(uos_vm);
 	start_vm(uos_vm);

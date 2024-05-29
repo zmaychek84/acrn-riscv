@@ -47,6 +47,13 @@ struct acrn_vm_config vm_configs[CONFIG_MAX_VM_NUM] = {
 		.pci_dev_num = 2U,
 		.pci_devs = sos_pci_devs,
 	},
+	{
+		.load_order = SERVICE_VM,
+		.severity = SEVERITY_STANDARD_VM,
+		.name = "RISC-V ACRN UOS",
+		.pci_dev_num = 2U,
+		.pci_devs = sos_pci_devs,
+	},
 };
 struct acrn_vm *sos_vm = &vm_array[0];
 struct acrn_vm *uos_vm = &vm_array[1];
@@ -169,6 +176,23 @@ void prepare_sos_vm(void)
 	init_vm_sw_load(sos_vm);
 }
 
+static void init_uos_load(struct acrn_vm *vm)
+{
+	struct kernel_info *kinfo = &vm->sw.kernel_info;
+	struct dtb_info *dinfo = &vm->sw.dtb_info;
+
+#ifdef CONFIG_KTEST
+	kinfo->kernel_addr = _vboot;
+	dinfo->dtb_addr = 0;
+#else
+	kinfo->kernel_addr = CONFIG_UOS_MEM_START;
+	dinfo->dtb_addr = CONFIG_UOS_DTB_BASE;
+	kernel_header_parse(kinfo);
+#endif
+
+	pr_info("UOS kernel addr =%lx, dtb addr =%lx", kinfo->kernel_addr, dinfo->dtb_addr);
+}
+
 /*
  * FIXME: Need to support more UOS in future, hard code single uos for
  * now.
@@ -184,7 +208,7 @@ void prepare_uos_vm(void)
 	uos_vm->arch_vm.s2ptp = uos_vm->arch_vm.s2pt_mem_ops.get_pml4_page(uos_vm->arch_vm.s2pt_mem_ops.info);
 	pr_info("%s stage 2 transation table location: 0x%lx ", __func__, (uint64_t *)(uos_vm->arch_vm.s2ptp));
 #endif
-	init_vm_sw_load(uos_vm);
+	init_uos_load(uos_vm);
 }
 
 static void dtb_load(struct dtb_info *info)
@@ -263,30 +287,24 @@ int create_vm(struct acrn_vm *vm)
 	int ret, i;
 
 	vm->hw.created_vcpus = 0U;
-	/* TODO: only support one SOS and one UOS now */
-	if (is_service_vm(vm)) {
-		kinfo->mem_start_gpa = kinfo->kernel_addr;
-		kinfo->mem_size_gpa = kinfo->kernel_len;
-		dinfo->dtb_start_gpa = dinfo->dtb_addr;
-		dinfo->dtb_size_gpa = dinfo->dtb_len;
-	} else {
-		kinfo->mem_start_gpa = CONFIG_UOS_MEM_START;
-		kinfo->mem_size_gpa = CONFIG_UOS_MEM_SIZE; //256M
-		dinfo->dtb_start_gpa = CONFIG_UOS_DTB_BASE; //membase + 128M
-		dinfo->dtb_size_gpa = CONFIG_UOS_DTB_SIZE; // 2M
-	}
+
+	kinfo->mem_start_gpa = kinfo->kernel_addr;
+	kinfo->mem_size_gpa = kinfo->kernel_len;
+	dinfo->dtb_start_gpa = dinfo->dtb_addr;
+	dinfo->dtb_size_gpa = dinfo->dtb_len;
+
 	pr_info("init stage 2 translation table");
 	s2pt_init(vm);
 
 	pr_info("allocate memory for guest");
 	spinlock_init(&vm->emul_mmio_lock);
 
+	allocate_guest_memory(vm, kinfo);
+	pr_info("load kernel and dtb");
+	kernel_load(kinfo);
+	dtb_load(dinfo);
+
 	if (is_service_vm(vm)) {
-		allocate_guest_memory(vm, kinfo);
-		pr_info("load kernel and dtb");
-		kernel_load(kinfo);
-		dtb_load(dinfo);
- 
 		pr_info("passthru devices");
 		passthru_devices_to_sos();
 	}

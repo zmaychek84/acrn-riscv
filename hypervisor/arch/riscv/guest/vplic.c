@@ -128,27 +128,14 @@ static void vplic_set_intr(struct acrn_vcpu *vcpu)
         vcpu_make_request(vcpu, ACRN_REQUEST_EXTINT);
 }
 
-//static void vplic_update(struct acrn_vplic *vplic)
-//{
-//        for (uint32_t context_id = 0; context_id < PLIC_NUM_CONTEXT; context_id++) {
-//		uint32_t irq = vplic_get_deliverable_irq(vplic, context_id);
-//                if (irq) {
-//			struct acrn_vcpu *vcpu = &vplic->vm->hw.vcpu[context_id];
-//
-//			vplic_set_intr(vcpu);
-//		}
-//	}
-//}
-
 static void vplic_update(struct acrn_vplic *vplic)
 {
-        for (uint32_t context_id = 0; context_id < PLIC_NUM_CONTEXT; context_id++) {
-		//uint32_t irq = vplic_get_deliverable_irq(vplic, context_id);
+        for (uint32_t context_id = 0; context_id < vplic->vm->hw.created_vcpus; context_id++) {
 		struct acrn_vcpu *vcpu = &vplic->vm->hw.vcpu[context_id];
-
 		vplic_set_intr(vcpu);
 	}
 }
+
 static bool offset_between(uint32_t offset, uint32_t base, uint32_t num)
 {
 	return offset >= base && offset - base < num;
@@ -324,18 +311,22 @@ void vplic_accept_intr(struct acrn_vcpu *vcpu, uint32_t vector, bool level)
 
 void vcpu_inject_extint(__unused struct acrn_vcpu *vcpu)
 {
+	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 	struct acrn_vplic *vplic = vcpu_vplic(vcpu);
-	uint32_t irq = vplic_get_deliverable_irq(vplic, vcpu->vcpu_id);
+	uint32_t irq;
 	uint64_t value = cpu_csr_read(mip);
+	uint64_t flags;
 
-	//if (vplic_get_deliverable_irq(vplic, vcpu->vcpu_id)) {
-	//	cpu_csr_write(sip, CLINT_VECTOR_SEI);
-	//}
+	spin_lock_irqsave(&vplic->lock, &flags);
+	irq = vplic_get_deliverable_irq(vplic, vcpu->vcpu_id);
 	if (irq) {
+		ctx->run_ctx.sip |= CLINT_VECTOR_SEI;
 		cpu_csr_write(mip, value | CLINT_VECTOR_SEI);
 	} else {
+		ctx->run_ctx.sip &= ~CLINT_VECTOR_SEI;
 		cpu_csr_write(mip, value & ~CLINT_VECTOR_SEI);
 	}
+	spin_unlock_irqrestore(&vplic->lock, flags);
 }
 
 static bool vplic_read_access_may_valid(__unused uint32_t offset)
