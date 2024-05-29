@@ -170,15 +170,19 @@ static inline void sos_pmp_switch(void)
 
 static inline void uos_pmp_switch(void)
 {
-	int pmp_cfg = 0x0f08;
-	int pmp_addr0 = 0x20000000;
-	int pmp_addr1 = 0xffffffff;
+	int pmp_cfg = 0x0f080f;
+
+	/* pass-thru rtc to UOS since no vtrc yet */
+	int pmp_addr0 = (CONFIG_RTC_BASE + CONFIG_RTC_SIZE) >> 2;
+	int pmp_addr1 = 0x20000000;
+	int pmp_addr2 = 0xffffffff;
 
 	asm volatile (
 		"csrw pmpcfg0, %0 \n\t"
 		"csrw pmpaddr0, %1 \n\t"
 		"csrw pmpaddr1, %2 \n\t"
-		::"r"(pmp_cfg), "r"(pmp_addr0), "r"(pmp_addr1)
+		"csrw pmpaddr2, %3 \n\t"
+		::"r"(pmp_cfg), "r"(pmp_addr0), "r"(pmp_addr1), "r"(pmp_addr2)
 	);
 }
 
