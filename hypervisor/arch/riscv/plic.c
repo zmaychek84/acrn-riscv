@@ -74,23 +74,26 @@ void plic_init_map(void){
 
 static void plic_set_irq_mask(struct irq_desc *desc, uint32_t priority)
 {
-	spin_lock(&plic->lock);
+	uint64_t flags;
+
+	spin_lock_irqsave(&plic->lock, &flags);
 	plic_write32(priority & 0x7, PLIC_THR);
-	spin_unlock(&plic->lock);
+	spin_unlock_irqrestore(&plic->lock, flags);
 }
 
 static void plic_set_irq_priority(struct irq_desc *desc, uint32_t priority)
 {
-	unsigned int irq = desc->irq;
+	uint32_t irq = desc->irq;
+	uint64_t flags;
 
-	spin_lock(&plic->lock);
+	spin_lock_irqsave(&plic->lock, &flags);
 	plic_write32(priority & 0x7, PLIC_IPRR + irq * 4);
-	spin_unlock(&plic->lock);
+	spin_unlock_irqrestore(&plic->lock, flags);
 }
 
 static void plic_irq_enable(struct irq_desc *desc)
 {
-	unsigned long flags;
+	uint64_t flags;
 
 	spin_lock_irqsave(&plic->lock, &flags);
 	plic_set_irq(desc, PLIC_IER);
@@ -101,11 +104,12 @@ static void plic_irq_enable(struct irq_desc *desc)
 
 static void plic_irq_disable(struct irq_desc *desc)
 {
-	unsigned long flags;
+	uint64_t flags;
 
 	spin_lock_irqsave(&plic->lock, &flags);
 	plic_clear_irq(desc, PLIC_IER);
 	set_bit(_IRQ_DISABLED, &((struct arch_irq_desc *)desc->arch_data)->status);
+	dsb();
 	spin_unlock_irqrestore(&plic->lock, flags);
 }
 
@@ -116,6 +120,8 @@ static uint32_t plic_get_irq(void)
 
 static void plic_eoi_irq(struct irq_desc *desc)
 {
+	uint64_t flags;
+
 	plic_write32(desc->irq, PLIC_EOIR);
 }
 
