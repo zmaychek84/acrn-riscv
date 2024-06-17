@@ -22,8 +22,5 @@
 
 int32_t vpci_init(struct acrn_vm *vm);
 void vpci_deinit(struct acrn_vm *vm);
-int32_t vpci_cfg_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen);
-int32_t vmcs9900_mmio_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen);
-int32_t vmsix_table_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen);
 
 #endif /* __RISCV_VPCI_H__ */

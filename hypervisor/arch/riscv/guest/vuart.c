@@ -147,48 +147,30 @@ static uint64_t vuart_read_reg(struct acrn_vuart *vu, uint32_t offset, size_t si
 	return val;
 }
 
-static bool vuart_read(struct acrn_vcpu *vcpu, uint32_t offset, size_t size)
+static bool vuart_read(struct acrn_vuart *vu, uint32_t offset, size_t size, uint64_t *data)
 {
-	struct acrn_vuart *vu = &vcpu->vm->vuart[0];
-	struct acrn_mmio_request *mmio_req = &vcpu->req.reqs.mmio_request;
-
 	if (vu != NULL) {
 		offset -= vu->port_base;
-		mmio_req->value = vuart_read_reg(vu, offset, size);
+		*data = vuart_read_reg(vu, offset, size);
 	}
 
 	return true;
 }
 
-int32_t vuart_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t vuart_access_handler(struct io_request *io_req, void *private_data)
 {
-	int32_t err;
-	uint32_t offset, size;
-	uint64_t qual, access_type = TYPE_INST_READ;
-	struct acrn_mmio_request *mmio;
-	struct acrn_vuart *vu;
+	struct acrn_vuart *vu = (struct acrn_vuart *)private_data;
+	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
+	uint32_t offset = mmio->address;
+	uint32_t size = mmio->size;
 
-	size = decode_instruction(vcpu, ins, xlen);
-	qual = vcpu->arch.exit_qualification;
-
-	if (size >= 0) {
-		vu = &vcpu->vm->vuart[0];
-		mmio = &vcpu->req.reqs.mmio_request;
-		offset = mmio->address;
-		if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
-			err = emulate_instruction(vcpu, ins, xlen, size);
-			if (err == 0)
-				vuart_write(vu, offset, size, mmio->value);
-		} else {
-			(void)vuart_read(vcpu, offset, size);
-			err = emulate_instruction(vcpu, ins, xlen, size);
-		}
+	if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
+		vuart_write(vu, offset, size, mmio->value);
 	} else {
-		pr_err("%s, unhandled access\n", __func__);
-		err = -EINVAL;
+		(void)vuart_read(vu, offset, size, &mmio->value);
 	}
 
-	return err;
+	return 0;
 }
 
 void setup_vuart(struct acrn_vm *vm, uint16_t vuart_idx)
@@ -199,4 +181,7 @@ void setup_vuart(struct acrn_vm *vm, uint16_t vuart_idx)
 	init_fifo(vu);
 	init_vuart_lock(vu);
 	vu->active = true;
+
+	register_mmio_emulation_handler(vm, vuart_access_handler, CONFIG_UART_BASE,
+		CONFIG_UART_BASE + CONFIG_UART_SIZE, (void *)vu, false);
 }

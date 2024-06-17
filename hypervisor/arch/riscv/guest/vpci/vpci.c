@@ -50,53 +50,38 @@ static struct pci_vdev *find_available_vdev(struct acrn_vpci *vpci, union pci_bd
  * @retval 0 on success.
  * @retval other on false. (ACRN will deliver this MMIO request to DM to handle for post-launched VM)
  */
-int32_t vpci_cfg_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t vpci_cfg_access_handler(struct io_request *io_req, void *private_data)
 {
-	int32_t ret = 0, size;
-	struct acrn_mmio_request *mmio;
-	struct acrn_vpci *vpci;
-	uint64_t pci_mmcofg_base, address;
-	uint32_t reg_num;
+	int32_t ret = 0;
+	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
+	struct acrn_vpci *vpci = (struct acrn_vpci *)private_data;
+	uint64_t pci_mmcofg_base = vpci->pci_mmcfg.address;
+	uint64_t address = mmio->address;
+	uint32_t reg_num = (uint32_t)(address & 0xfffUL);
 	union pci_bdf bdf;
 
-	size = decode_instruction(vcpu, ins, xlen);
-	if (size >= 0) {
-		mmio = &vcpu->req.reqs.mmio_request;
-		vpci = &vcpu->vm->vpci;
-		pci_mmcofg_base = vpci->pci_mmcfg.address;
-		address = mmio->address;
-		reg_num = (uint32_t)(address & 0xfffUL);
+	/**
+	 * Enhanced Configuration Address Mapping
+	 * A[(20+n-1):20] Bus Number 1 ≤ n ≤ 8
+	 * A[19:15] Device Number
+	 * A[14:12] Function Number
+	 * A[11:8] Extended Register Number
+	 * A[7:2] Register Number
+	 * A[1:0] Along with size of the access, used to generate Byte Enables
+	 */
+	bdf.value = (uint16_t)((address - pci_mmcofg_base) >> 12U);
 
-		/**
-		 * Enhanced Configuration Address Mapping
-		 * A[(20+n-1):20] Bus Number 1 ≤ n ≤ 8
-		 * A[19:15] Device Number
-		 * A[14:12] Function Number
-		 * A[11:8] Extended Register Number
-		 * A[7:2] Register Number
-		 * A[1:0] Along with size of the access, used to generate Byte Enables
-		 */
-		bdf.value = (uint16_t)((address - pci_mmcofg_base) >> 12U);
+	if (mmio->direction == ACRN_IOREQ_DIR_READ) {
+		uint32_t val = ~0U;
 
-		if (mmio->direction == ACRN_IOREQ_DIR_READ) {
-			uint32_t val = ~0U;
-
-			if (pci_is_valid_access(reg_num, (uint32_t)mmio->size)) {
-				ret = vpci_read_cfg(vpci, bdf, reg_num, (uint32_t)mmio->size, &val);
-			}
-			mmio->value = val;
-
-			ret = emulate_instruction(vcpu, ins, xlen, size);
-		} else {
-			ret = emulate_instruction(vcpu, ins, xlen, size);
-			if (!ret && pci_is_valid_access(reg_num, (uint32_t)mmio->size)) {
-				ret = vpci_write_cfg(vpci, bdf, reg_num, (uint32_t)mmio->size, (uint32_t)mmio->value);
-			}
+		if (pci_is_valid_access(reg_num, (uint32_t)mmio->size)) {
+			ret = vpci_read_cfg(vpci, bdf, reg_num, (uint32_t)mmio->size, &val);
 		}
-
-        } else {
-		pr_err("%s, unhandled access\n", __func__);
-		ret = -EINVAL;
+		mmio->value = val;
+	} else {
+		if (pci_is_valid_access(reg_num, (uint32_t)mmio->size)) {
+			ret = vpci_write_cfg(vpci, bdf, reg_num, (uint32_t)mmio->size, (uint32_t)mmio->value);
+		}
 	}
 
 	return ret;
@@ -122,6 +107,9 @@ int32_t vpci_init(struct acrn_vm *vm)
 	ret = vpci_init_vdevs(vm);
 
 	if (ret == 0) {
+		register_mmio_emulation_handler(vm, vpci_cfg_access_handler, vm->vpci.pci_mmcfg.address,
+			vm->vpci.pci_mmcfg.address + get_pci_mmcfg_size(&vm->vpci.pci_mmcfg), &vm->vpci, false);
+
 		spinlock_init(&vm->vpci.lock);
 	}
 

@@ -428,38 +428,24 @@ static bool vclint_clint_write_access_may_valid(uint64_t offset)
 	return true;
 }
 
-int32_t vclint_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t vclint_access_handler(struct io_request *io_req, void *private_data)
 {
-	int32_t err, size;
-	uint64_t offset;
-	uint64_t qual, access_type = TYPE_INST_READ;
-	struct acrn_vclint *vclint;
-	struct acrn_mmio_request *mmio;
+	struct acrn_vclint *vclint = (struct acrn_vclint *)private_data;
+	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
+	uint32_t offset = mmio->address;
+	int32_t ret = 0;
 
-	qual = vcpu->arch.exit_qualification;
-	size = decode_instruction(vcpu, ins, xlen);
-
-	if (size >= 0) {
-		vclint = vcpu_vclint(vcpu);
-		mmio = &vcpu->req.reqs.mmio_request;
-		offset = mmio->address;
-		if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
-			err = emulate_instruction(vcpu, ins, xlen, size);
-			if (err == 0 && vclint->ops->clint_write_access_may_valid(offset))
-				(void)vclint_write(vclint, offset, mmio->value);
-		} else {
-			if (vclint->ops->clint_read_access_may_valid(offset))
-				(void)vclint_read(vclint, offset, &mmio->value);
-			else
-				mmio->value = 0UL;
-			err = emulate_instruction(vcpu, ins, xlen, size);
-		}
+	if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
+		if (vclint->ops->clint_write_access_may_valid(offset))
+			ret = vclint_write(vclint, offset, mmio->value);
 	} else {
-		pr_err("%s, unhandled access\n", __func__);
-		err = -EINVAL;
+		if (vclint->ops->clint_read_access_may_valid(offset))
+			ret = vclint_read(vclint, offset, &mmio->value);
+		else
+			mmio->value = 0UL;
 	}
 
-	return err;
+	return ret;
 }
 
 static const struct acrn_vclint_ops acrn_vclint_ops = {
@@ -496,6 +482,9 @@ void vclint_init(struct acrn_vm *vm)
 	vclint->clint_page.mtime = (uint64_t)get_tick();
 	for (int i = 0; i < VCLINT_LVT_MAX; i++)
 		vclint_init_timer(vclint, i);
+
+	register_mmio_emulation_handler(vm, vclint_access_handler, (uint64_t)vclint->clint_base,
+		(uint64_t)vclint->clint_base + DEFAULT_CLINT_SIZE, (void *)vclint, false);
 }
 
 const struct acrn_vclint_ops *vclint_ops = &acrn_vclint_ops;

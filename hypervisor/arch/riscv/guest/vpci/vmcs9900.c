@@ -34,37 +34,21 @@ static int32_t read_vmcs9900_cfg(struct pci_vdev *vdev,
 	return 0;
 }
 
-int32_t vmcs9900_mmio_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t vmcs9900_mmio_access_handler(struct io_request *io_req, void *data)
 {
-	int32_t err, size;
-	struct acrn_mmio_request *mmio;
-	struct acrn_vuart *vu;
-	struct pci_vdev *vdev;
-	struct pci_vbar *vbar;
-	uint16_t offset;
+	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
+	struct pci_vdev *vdev = (struct pci_vdev *)data;
+	struct acrn_vuart *vu = vdev->priv_data;
+	struct pci_vbar *vbar = &vdev->vbars[MCS9900_MMIO_BAR];
+	uint16_t offset = (uint16_t)(mmio->address - vbar->base_gpa);
 
-	size = decode_instruction(vcpu, ins, xlen);
-	if (size > 0) {
-		mmio = &vcpu->req.reqs.mmio_request;
-		vu = &vcpu->vm->vuart[0];
-		vdev = vu->vdev;
-		vbar = &vdev->vbars[MCS9900_MMIO_BAR];
-		offset = (uint16_t)(mmio->address - vbar->base_gpa);
-
-		if (mmio->direction == ACRN_IOREQ_DIR_READ) {
-			mmio->value = vpci_vuart_read_reg(vu, offset);
-			err = emulate_instruction(vcpu, ins, xlen, size);
-		} else {
-			err = emulate_instruction(vcpu, ins, xlen, size);
-			if (!err)
-				vpci_vuart_write_reg(vu, offset, (uint8_t) mmio->value);
-		}
+	if (mmio->direction == ACRN_IOREQ_DIR_READ) {
+		mmio->value = vpci_vuart_read_reg(vu, offset);
 	} else {
-		pr_err("%s, unhandled access\n", __func__);
-		err = -EINVAL;
+		vpci_vuart_write_reg(vu, offset, (uint8_t) mmio->value);
 	}
 
-	return err;
+	return 0;
 }
 
 static void map_vmcs9900_vbar(struct pci_vdev *vdev, uint32_t idx)
@@ -74,8 +58,12 @@ static void map_vmcs9900_vbar(struct pci_vdev *vdev, uint32_t idx)
 	struct pci_vbar *vbar = &vdev->vbars[idx];
 
 	if ((idx == MCS9900_MMIO_BAR) && (vbar->base_gpa != 0UL)) {
+		register_mmio_emulation_handler(vm, vmcs9900_mmio_access_handler,
+			vbar->base_gpa, vbar->base_gpa + vbar->size, vdev, false);
 		vu->active = true;
 	} else if ((idx == MCS9900_MSIX_BAR) && (vbar->base_gpa != 0UL)) {
+		register_mmio_emulation_handler(vm, vmsix_table_access_handler,
+			vbar->base_gpa, (vbar->base_gpa + vbar->size), vdev, false);
 		vdev->msix.mmio_gpa = vbar->base_gpa;
 	} else {
 		/* No action required. */
@@ -92,6 +80,7 @@ static void unmap_vmcs9900_vbar(struct pci_vdev *vdev, uint32_t idx)
 	if ((idx == MCS9900_MMIO_BAR) && (vbar->base_gpa != 0UL)) {
 		vu->active = false;
 	}
+	unregister_mmio_emulation_handler(vm, vbar->base_gpa, vbar->base_gpa + vbar->size);
 }
 
 static int32_t write_vmcs9900_cfg(struct pci_vdev *vdev, uint32_t offset,

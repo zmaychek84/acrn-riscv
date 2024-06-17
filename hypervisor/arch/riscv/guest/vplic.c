@@ -339,37 +339,24 @@ static bool vplic_write_access_may_valid(__unused uint32_t offset)
 	return true;
 }
 
-int32_t vplic_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t vplic_access_handler(struct io_request *io_req, void *private_data)
 {
-	int32_t err;
-	uint32_t offset, size;
-	struct acrn_vplic *vplic;
-	struct acrn_mmio_request *mmio;
+	struct acrn_vplic *vplic = (struct acrn_vplic *)private_data;
+	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
+	uint32_t offset = mmio->address - vplic->plic_base;;
+	int32_t ret = 0;
 
-	size = decode_instruction(vcpu, ins, xlen);
-	if (size >= 0) {
-		vplic = vcpu_vplic(vcpu);
-		mmio = &vcpu->req.reqs.mmio_request;
-                offset = mmio->address - vplic->plic_base;
-
-		if (mmio->direction == ACRN_IOREQ_DIR_WRITE) {
-			err = emulate_instruction(vcpu, ins, xlen, size);
-			if (err == 0 && vplic->ops->plic_write_access_may_valid(offset))
-				(void)vplic_write(vplic, offset, mmio->value);
-		} else {
-			if (vplic->ops->plic_read_access_may_valid(offset))
-				(void)vplic_read(vplic, offset, &mmio->value);
-			else
-				mmio->value = 0UL;
-
-			err = emulate_instruction(vcpu, ins, xlen, size);
-		}
+	if (mmio->size == 4) {
+		if (mmio->direction == ACRN_IOREQ_DIR_READ)
+			ret = vplic_read(vplic, offset, &mmio->value);
+		else
+			ret = vplic_write(vplic, offset, mmio->value);
 	} else {
-		pr_err("%s, unhandled access\n", __func__);
-		err = -EINVAL;
+		pr_err("All RW to PLIC must be 32-bits in size");
+		ret = -EINVAL;
 	}
 
-	return err;
+	return ret;
 }
 
 static const struct acrn_vplic_ops acrn_vplic_ops = {
@@ -390,6 +377,9 @@ void vplic_init(struct acrn_vm *vm)
 	vplic->pending_base = PLIC_PENDING_BASE;
 	vplic->enable_base = PLIC_ENABLE_BASE;
 	vplic->dst_prio_base = PLIC_DST_PRIO_BASE;
+
+	register_mmio_emulation_handler(vm, vplic_access_handler, (uint64_t)vplic->plic_base,
+		(uint64_t)vplic->plic_base + DEFAULT_PLIC_SIZE, (void *)vplic, false);
 
 	memset(&vplic->regs, 0U, sizeof(struct plic_regs));
 }

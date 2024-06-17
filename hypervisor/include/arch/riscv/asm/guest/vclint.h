@@ -52,7 +52,6 @@ extern void vclint_free(struct acrn_vcpu *vcpu);
 extern void vclint_reset(struct acrn_vclint*vclint, const struct acrn_vclint_ops *ops, enum reset_mode mode);
 extern uint64_t vclint_get_clint_access_addr(void);
 extern uint64_t vclint_get_clint_page_addr(struct acrn_vclint*vclint);
-extern int32_t vclint_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen);
 extern bool vclint_has_pending_intr(struct acrn_vcpu *vcpu);
 extern void vclint_send_ipi(struct acrn_vclint *vclint, uint32_t cpu);
 extern void vclint_write_tmr(struct acrn_vclint *vclint, uint32_t index, uint64_t data);

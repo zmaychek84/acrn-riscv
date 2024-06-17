@@ -104,9 +104,15 @@ int32_t emulate_ins32(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t size)
 	return rc;
 }
 
-int32_t emulate_instruction(struct acrn_vcpu *vcpu, uint32_t ins,
-			    uint32_t xlen, uint32_t size)
+int32_t emulate_instruction(struct acrn_vcpu *vcpu)
 {
+	uint32_t ins, xlen, size;
+	struct run_context *ctx;
+
+	ctx = &vcpu->arch.contexts[vcpu->arch.cur_context].run_ctx;
+	ins = get_instruction(ctx->cpu_gp_regs.regs.status, ctx->cpu_gp_regs.regs.ip, &xlen);
+	size = vcpu->req.reqs.mmio_request.size;
+
 	if (xlen == 32)
 		return emulate_ins32(vcpu, ins, size);
 	else

@@ -91,6 +91,8 @@ static inline bool cfg_header_access(uint32_t offset)
 	return (offset < PCI_CFG_HEADER_LENGTH);
 }
 
+int32_t vmsix_table_access_handler(struct io_request *io_req, void *priv_data);
+
 uint32_t pci_vdev_read_vcfg(const struct pci_vdev *vdev, uint32_t offset, uint32_t bytes);
 void pci_vdev_write_vcfg(struct pci_vdev *vdev, uint32_t offset, uint32_t bytes, uint32_t val);
 uint32_t vpci_add_capability(struct pci_vdev *vdev, uint8_t *capdata, uint8_t caplen);

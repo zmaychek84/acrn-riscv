@@ -87,57 +87,42 @@ bool write_vmsix_cap_reg(struct pci_vdev *vdev, uint32_t offset, uint32_t bytes,
 	return is_written;
 }
 
-int32_t vmsix_table_access_handler(struct acrn_vcpu *vcpu, uint32_t ins, uint32_t xlen)
+int32_t vmsix_table_access_handler(struct io_request *io_req, void *priv_data)
 {
-	int32_t err = 0, size;
-	struct acrn_mmio_request *mmio;
-	struct pci_vdev *vdev;
+	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
+	struct pci_vdev *vdev = (struct pci_vdev *)priv_data;
 	struct msix_table_entry *entry;
 	uint32_t entry_offset, table_offset, index = CONFIG_MAX_MSIX_TABLE_NUM;
 	uint64_t offset;
-	void *hva;
 
-	pr_info("vmcs9900_mmio_access_handler...\n");
+	if ((mmio->size <= 8U) && mem_aligned_check(mmio->address, mmio->size)) {
+		offset = mmio->address - vdev->msix.mmio_gpa;
+		if (msixtable_access(vdev, (uint32_t)offset)) {
+			/* Must be full DWORD or full QWORD aligned. */
+			if ((mmio->size == 4U) || (mmio->size == 8U)) {
 
-	size = decode_instruction(vcpu, ins, xlen);
-	if (size > 0) {
-		mmio = &vcpu->req.reqs.mmio_request;
-		vdev = vcpu->vm->vuart[1].vdev;
+				table_offset = (uint32_t)(offset - vdev->msix.table_offset);
+				index = table_offset / MSIX_TABLE_ENTRY_SIZE;
 
-		if ((mmio->size <= 8U) && mem_aligned_check(mmio->address, mmio->size)) {
-			offset = mmio->address - vdev->msix.mmio_gpa;
-			if (msixtable_access(vdev, (uint32_t)offset)) {
-				/* Must be full DWORD or full QWORD aligned. */
-				if ((mmio->size == 4U) || (mmio->size == 8U)) {
+				entry = &vdev->msix.table_entries[index];
+				entry_offset = table_offset % MSIX_TABLE_ENTRY_SIZE;
 
-					table_offset = (uint32_t)(offset - vdev->msix.table_offset);
-					index = table_offset / MSIX_TABLE_ENTRY_SIZE;
-
-					entry = &vdev->msix.table_entries[index];
-					entry_offset = table_offset % MSIX_TABLE_ENTRY_SIZE;
-
-					if (mmio->direction == ACRN_IOREQ_DIR_READ) {
-						(void)memcpy_s(&mmio->value, (size_t)mmio->size,
-							(void *)entry + entry_offset, (size_t)mmio->size);
-						err = emulate_instruction(vcpu, ins, xlen, size);
-					} else {
-						err = emulate_instruction(vcpu, ins, xlen, size);
-						if (!err)
-							(void)memcpy_s((void *)entry + entry_offset, (size_t)mmio->size,
-								&mmio->value, (size_t)mmio->size);
-					}
+				if (mmio->direction == ACRN_IOREQ_DIR_READ) {
+					(void)memcpy_s(&mmio->value, (size_t)mmio->size,
+						(void *)entry + entry_offset, (size_t)mmio->size);
 				} else {
-					pr_err("%s, Only DWORD and QWORD are permitted", __func__);
-					err = -EINVAL;
+					(void)memcpy_s((void *)entry + entry_offset, (size_t)mmio->size,
+						&mmio->value, (size_t)mmio->size);
 				}
+			} else {
+				pr_err("%s, Only DWORD and QWORD are permitted", __func__);
 			}
+		} else {
+			// TODO: physical device access
 		}
-        } else {
-		pr_err("%s, unhandled access\n", __func__);
-		err = -EINVAL;
 	}
 
-	return err;
+	return index;
 }
 
 /**

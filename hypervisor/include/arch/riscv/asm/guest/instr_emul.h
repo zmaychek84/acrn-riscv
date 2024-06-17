@@ -70,8 +70,8 @@ struct instr_emul_ctxt {
 	struct instr_emul_vie vie;
 };
 
-extern int32_t emulate_instruction(struct acrn_vcpu *vcpu, uint32_t ins,
-				   uint32_t xlen, uint32_t size);
+extern uint32_t get_instruction(uint64_t status, uint64_t gva, uint32_t *xlen);
+extern int32_t emulate_instruction(struct acrn_vcpu *vcpu);
 extern int32_t decode_instruction(struct acrn_vcpu *vcpu, uint32_t ins,
 				   uint32_t xlen);
 
