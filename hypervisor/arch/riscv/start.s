@@ -27,6 +27,7 @@ _start:
 	csrw menvcfg, t1
 #endif
 	csrwi mcounteren, 0x7
+	csrwi scounteren, 0x7
 	jal init_mstack
 	call reset_mtimer
 	csrw mip, 0x0
