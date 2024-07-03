@@ -152,10 +152,10 @@ static void init_host_state(struct acrn_vcpu *vcpu)
 
 static inline void sos_pmp_switch(void)
 {
-	int pmp_cfg = 0x0f0f080f; // Disable PLIC passthrough for SOS
+	int pmp_cfg = 0x0f08080f; // Disable PLIC/UART passthrough for SOS
 	int pmp_addr0 = CONFIG_PLIC_BASE >> 2;
 	int pmp_addr1 = CONFIG_UART_BASE >> 2;
-	int pmp_addr2 = 0x80000000 >> 2;
+	int pmp_addr2 = (CONFIG_UART_BASE + CONFIG_UART_SIZE) >> 2;
 	int pmp_addr3 = 0xffffffff;
 
 	asm volatile (

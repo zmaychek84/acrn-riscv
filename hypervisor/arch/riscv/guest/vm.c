@@ -19,7 +19,7 @@
 #include <asm/board.h>
 #include <asm/current.h>
 #include <asm/image.h>
-//#include <asm/guest/vuart.h>
+#include <asm/guest/vuart.h>
 #include <asm/guest/vpci.h>
 #include <vmcs9900.h>
 
@@ -46,6 +46,12 @@ struct acrn_vm_config vm_configs[CONFIG_MAX_VM_NUM] = {
 		.name = "RISC-V ACRN SOS",
 		.pci_dev_num = 2U,
 		.pci_devs = sos_pci_devs,
+		.vuart[0] =
+                {
+			.type = VUART_MMIO,
+			.addr.base = CONFIG_UART_BASE,
+			.irq = UART_IRQ,
+		}
 	},
 	{
 		.load_order = SERVICE_VM,
@@ -284,6 +290,7 @@ int create_vm(struct acrn_vm *vm)
 	struct acrn_vcpu *vcpu;
 	struct kernel_info *kinfo= &vm->sw.kernel_info;
 	struct dtb_info *dinfo= &vm->sw.dtb_info;
+	struct acrn_vm_config *vm_config;
 	int ret, i;
 
 	vm->hw.created_vcpus = 0U;
@@ -292,6 +299,8 @@ int create_vm(struct acrn_vm *vm)
 	kinfo->mem_size_gpa = kinfo->kernel_len;
 	dinfo->dtb_start_gpa = dinfo->dtb_addr;
 	dinfo->dtb_size_gpa = dinfo->dtb_len;
+
+	vm_config = get_vm_config(vm->vm_id);
 
 	pr_info("init stage 2 translation table");
 	s2pt_init(vm);
@@ -355,10 +364,8 @@ int create_vm(struct acrn_vm *vm)
 //		map_irq_to_vm(vm, CONFIG_PHY_UART_IRQ);
 	}
 
-	vpci_init(vm);
-
 	/* Create virtual uart;*/
-	//setup_vuart(vm, 0);
+	init_vuarts(vm, vm_config->vuart);
 	vm->state = VM_CREATED;
  
 	return 0;
@@ -372,7 +379,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 	/* TODO: only have one core */
 	offline_vcpu(&vm->hw.vcpu[0]);
 
-	vpci_deinit(vm);
+	deinit_vuarts(vm);
 
 	/* Return status to caller */
 	return 0;

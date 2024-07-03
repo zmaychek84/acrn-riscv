@@ -41,17 +41,14 @@ static void get_char(char *c)
 {
 	char d;
 
-	do {
-		//d = read8((volatile unsigned char *)(UART_BASE + 5));
-		d = read8((volatile unsigned char *)(0x10000005));
-	} while ((d & 0x1) == 0);
-
-	*c = read8((volatile unsigned char *)(UART_BASE));
+	d = read8((volatile unsigned char *)(0x10000005));
+	if ((d & 0x1) == 1)
+		*c = read8((volatile unsigned char *)(UART_BASE));
 }
 
 char uart16550_getc(void)
 {
-	char c;
+	char c = -1;
 
 	get_char(&c);
 	return c;

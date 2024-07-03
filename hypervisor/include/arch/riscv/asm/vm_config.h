@@ -22,7 +22,7 @@
 #define MAX_PCPU_NUM		8U
 #define AFFINITY_CPU(n)		(1UL << (n))
 #define MAX_VCPUS_PER_VM	VCLINT_LVT_MAX
-#define MAX_VUART_NUM_PER_VM	2U
+#define MAX_VUART_NUM_PER_VM	1U
 #define MAX_VM_OS_NAME_LEN	32U
 #define MAX_MOD_TAG_LEN		32U
 
@@ -90,22 +90,22 @@ struct target_vuart {
 };
 
 enum vuart_type {
-	VUART_LEGACY_PIO = 0,	/* legacy PIO vuart */
+	VUART_MMIO = 0,		/* MMIO vuart */
 	VUART_PCI,		/* PCI vuart, may removed */
 };
 
 union vuart_addr {
-	uint16_t port_base;		/* addr for legacy type */
-	struct {			/* addr for pci type */
-		uint8_t f : 3;		/* BITs 0-2 */
-		uint8_t d : 5;		/* BITs 3-7 */
-		uint8_t b;		/* BITs 8-15 */
+	uint64_t base;		/* addr for mmio type */
+	struct {		/* addr for pci type */
+		uint8_t f : 3;	/* BITs 0-2 */
+		uint8_t d : 5;	/* BITs 3-7 */
+		uint8_t b;	/* BITs 8-15 */
 	} bdf;
 };
 
 struct vuart_config {
-	enum vuart_type type;		/* legacy PIO or PCI  */
-	union vuart_addr addr;		/* port addr if in legacy type, or bdf addr if in pci type */
+	enum vuart_type type;		/* MMIO or PCI  */
+	union vuart_addr addr;		/* mmio addr if in mmio type, or bdf addr if in pci type */
 	uint16_t irq;
 	struct target_vuart t_vuart;	/* target vuart */
 } __aligned(8);
