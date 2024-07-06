@@ -5,6 +5,7 @@
  */
 
 #include <asm/types.h>
+#include <asm/init.h>
 #include <asm/mem.h>
 #include <asm/per_cpu.h>
 

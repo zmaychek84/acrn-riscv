@@ -69,7 +69,7 @@ void early_putch(char c)
 
 char early_getch(void)
 {
-	char c;
+	char c = -1;
 
 	get_char(&c);
 	return c;

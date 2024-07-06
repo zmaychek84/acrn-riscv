@@ -249,7 +249,7 @@ static inline uint32_t local_copy_gpa(struct acrn_vm *vm, void *h_ptr, uint64_t 
 	uint32_t size, uint32_t fix_pg_size, bool cp_from_vm)
 {
 	uint64_t hpa;
-	uint32_t offset_in_pg, len, pg_size;
+	uint32_t offset_in_pg, len, pg_size = PAGE_SIZE_4K;
 	void *g_ptr;
 
 	hpa = local_gpa2hpa(vm, gpa, &pg_size);

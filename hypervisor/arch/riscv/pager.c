@@ -16,12 +16,14 @@
 #define VPN1_PAGE_NUM(size)	(((size) + VPN2_SIZE - 1UL) >> VPN2_SHIFT)
 #define VPN0_PAGE_NUM(size)	(((size) + VPN1_SIZE - 1UL) >> VPN1_SHIFT)
 
+#ifndef CONFIG_MACRN
 static struct page vm_vpn3_pages[CONFIG_MAX_VM_NUM][VPN3_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE << 2);
 static struct page vm_vpn2_pages[CONFIG_MAX_VM_NUM][VPN2_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE);
 static struct page vm_vpn1_pages[CONFIG_MAX_VM_NUM][VPN1_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE);
 static struct page vm_vpn0_pages[CONFIG_MAX_VM_NUM][VPN0_PAGE_NUM(CONFIG_GUEST_ADDRESS_SPACE_SIZE)] __aligned(PAGE_SIZE);
 
 static union pgtable_pages_info s2pt_pages_info[CONFIG_MAX_VM_NUM];
+#endif
 
 static inline bool large_page_support(enum _page_table_level level)
 {
@@ -73,6 +75,11 @@ static inline struct page *ppt_get_vpn0_page(const union pgtable_pages_info *inf
 	struct page *vpn0_page = info->ppt.vpn0_base + ((gpa &  VPN1_MASK) >> VPN1_SHIFT);
 	(void)memset(vpn0_page, 0U, PAGE_SIZE);
 	return vpn0_page;
+}
+
+uint64_t *satp_to_vpn3_page(uint64_t satp)
+{
+	return (uint64_t *)((satp & SATP_PPN_MASK) << 12);
 }
 
 static inline void nop_tweak_exe_right(uint64_t *entry __attribute__((unused))) {}

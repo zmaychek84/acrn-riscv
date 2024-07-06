@@ -36,6 +36,6 @@ enum reset_mode;
 
 void vplic_init(struct acrn_vm *vm);
 void vplic_accept_intr(struct acrn_vcpu *vcpu, uint32_t vector, bool level);
-void vcpu_inject_extint(__unused struct acrn_vcpu *vcpu);
+void vcpu_inject_extint(struct acrn_vcpu *vcpu);
 
 #endif /* __RISCV_VLAPIC_H__ */

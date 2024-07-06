@@ -7,6 +7,8 @@
 #ifndef UART16550_H
 #define UART16550_H
 
+#include<pci.h>
+
 /* Register / bit definitions for 16c550 uart */
 /*receive buffer register            | base+00h, dlab=0b r*/
 #define UART16550_RBR           0x00U

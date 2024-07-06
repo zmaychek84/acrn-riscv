@@ -396,12 +396,12 @@ static bool vclint_has_pending_delivery_intr(struct acrn_vcpu *vcpu)
 	return vcpu->arch.pending_req != 0UL;
 }
 
-static bool vclint_clint_read_access_may_valid(__unused uint64_t offset)
+static bool vclint_clint_read_access_may_valid(__unused uint32_t offset)
 {
 	return true;
 }
 
-static bool vclint_clint_write_access_may_valid(uint64_t offset)
+static bool vclint_clint_write_access_may_valid(__unused uint32_t offset)
 {
 	return true;
 }

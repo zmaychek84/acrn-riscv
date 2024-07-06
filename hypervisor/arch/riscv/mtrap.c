@@ -11,7 +11,9 @@
 #include <asm/per_cpu.h>
 #include <asm/notify.h>
 #include <asm/irq.h>
+#include <asm/lib/bits.h>
 #include <debug/logmsg.h>
+#include <softirq.h>
 #include "uart.h"
 #include "trap.h"
 
@@ -50,7 +52,6 @@ static void mexpt_handler(void)
 
 static void mswi_handler(void)
 {
-	struct smp_call_info_data *smp_call;
 	int cpu = cpu_id();
 	uint64_t off = CLINT_SWI_REG;
 #if 0

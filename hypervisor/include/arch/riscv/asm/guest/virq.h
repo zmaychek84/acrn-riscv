@@ -8,7 +8,6 @@
 #define __RISCV_VIRQ_H__
 
 extern void vcpu_make_request(struct acrn_vcpu *vcpu, uint16_t eventid);
-extern void vcpu_inject_extint(struct acrn_vcpu *vcpu);
 extern void vcpu_inject_nmi(struct acrn_vcpu *vcpu);
 extern void vcpu_inject_gp(struct acrn_vcpu *vcpu, uint32_t err_code);
 extern void vcpu_inject_pf(struct acrn_vcpu *vcpu, uint64_t addr, uint32_t err_code);

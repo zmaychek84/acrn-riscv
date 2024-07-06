@@ -8,6 +8,7 @@
 #define __RISCV_VUART_H__
 
 #include <asm/lib/spinlock.h>
+#include <asm/vm_config.h>
 
 #define	UART_MEM_ADDR		CONFIG_UART_BASE
 #define	UART_MEM_REGION		UART_MEM_ADDR + CONFIG_UART_SIZE
@@ -51,5 +52,10 @@ struct acrn_vuart {
 	spinlock_t lock;	/* protects all softc elements */
 };
 
+void init_vuarts(struct acrn_vm *vm, const struct vuart_config *vu_config);
+void deinit_vuarts(struct acrn_vm *vm);
 void vuart_toggle_intr(struct acrn_vuart *vu);
+
+void vuart_putchar(struct acrn_vuart *vu, char ch);
+char vuart_getchar(struct acrn_vuart *vu);
 #endif /* __RISCV_VUART_H__ */

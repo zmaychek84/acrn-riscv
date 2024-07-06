@@ -120,8 +120,6 @@ static uint32_t plic_get_irq(void)
 
 static void plic_eoi_irq(struct irq_desc *desc)
 {
-	uint64_t flags;
-
 	plic_write32(desc->irq, PLIC_EOIR);
 }
 
