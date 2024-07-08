@@ -20,6 +20,7 @@ struct init_info
 extern void init_IRQ(void);
 extern void plic_init(void);
 extern void prepare_sos_vm(void);
+extern void prepare_uos_vm(void);
 extern void init_trap(void);
 
 extern char _start[], _end[], start[], _boot[], _vboot[];
