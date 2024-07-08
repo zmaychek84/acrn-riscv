@@ -309,7 +309,7 @@ void vplic_accept_intr(struct acrn_vcpu *vcpu, uint32_t vector, bool level)
 	spin_unlock_irqrestore(&vplic->lock, flags);
 }
 
-void vcpu_inject_extint(__unused struct acrn_vcpu *vcpu)
+void vcpu_inject_extint(struct acrn_vcpu *vcpu)
 {
 	struct guest_cpu_context *ctx = &vcpu->arch.contexts[vcpu->arch.cur_context];
 	struct acrn_vplic *vplic = vcpu_vplic(vcpu);
@@ -343,7 +343,7 @@ int32_t vplic_access_handler(struct io_request *io_req, void *private_data)
 {
 	struct acrn_vplic *vplic = (struct acrn_vplic *)private_data;
 	struct acrn_mmio_request *mmio = &io_req->reqs.mmio_request;
-	uint32_t offset = mmio->address - vplic->plic_base;;
+	uint32_t offset = mmio->address - vplic->plic_base;
 	int32_t ret = 0;
 
 	if (mmio->size == 4) {

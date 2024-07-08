@@ -36,7 +36,7 @@ static void sbi_ecall_base_probe(unsigned long id, unsigned long *out_val)
 
 static void sbi_base_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
-	int *ret = &regs->a0;
+	unsigned long *ret = &regs->a0;
 	bool fail = false;
 	unsigned long funcid = regs->a6;
 	unsigned long *out_val = &regs->a1;
@@ -80,7 +80,7 @@ static void sbi_base_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 
 static void sbi_timer_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
-	int *ret = &regs->a0;
+	unsigned long *ret = &regs->a0;
 	unsigned long funcid = regs->a6;
 	struct run_context *ctx =
 		&vcpu->arch.contexts[vcpu->arch.cur_context].run_ctx;
@@ -124,9 +124,8 @@ static void send_vipi_mask(struct acrn_vcpu *vcpu, uint64_t mask, uint64_t base)
 
 static void sbi_ipi_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
-	int *ret = &regs->a0;
+	unsigned long *ret = &regs->a0;
 	unsigned long funcid = regs->a6;
-	unsigned long *out_val = &regs->a1;
 
 	if (funcid == SBI_TYPE_IPI_SEND_IPI) {
 		send_vipi_mask(vcpu, regs->a0, regs->a1);
@@ -181,9 +180,8 @@ static void sbi_rcall_fence_i(struct sbi_rfence_call *rcall)
 
 static void sbi_rfence_handler(struct acrn_vcpu *vcpu, struct cpu_regs *regs)
 {
-	int *ret = &regs->a0;
+	uint64_t *ret = &regs->a0;
 	uint64_t funcid = regs->a6;
-	uint64_t *out_val = &regs->a1;
 	uint64_t mask = regs->a0;
 	uint64_t base = regs->a1;
 	uint64_t rcall_mask = 0;
@@ -289,7 +287,7 @@ int sbi_ecall_handler(struct acrn_vcpu *vcpu)
 		&vcpu->arch.contexts[vcpu->arch.cur_context].run_ctx;
 	struct cpu_regs *regs = &ctx->cpu_gp_regs.regs;
 	uint32_t id = regs->a7;
-	struct sbi_ecall_dispatch *d = &sbi_dispatch_table[SBI_MAX_TYPES];
+	const struct sbi_ecall_dispatch *d = &sbi_dispatch_table[SBI_MAX_TYPES];
 
 	for (uint32_t i = 0; i < SBI_MAX_TYPES; i++) {
 		if (id == sbi_dispatch_table[i].ext_id) {

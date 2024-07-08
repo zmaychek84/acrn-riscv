@@ -7,6 +7,8 @@
 #ifndef UART16550_H
 #define UART16550_H
 
+#include<pci.h>
+
 /* Register / bit definitions for 16c550 uart */
 /*receive buffer register            | base+00h, dlab=0b r*/
 #define UART16550_RBR           0x00U
@@ -86,6 +88,8 @@
 #define LSR_OE		(1U << 1U)
 /* Readable received data is present */
 #define LSR_DR		(1U << 0U)
+/* All Errors that may trigger INT */
+#define LSR_INT_ANY	(LSR_OE | LSR_PE | LSR_FE | LSR_BI)
 
 /* definition for MCR */
 #define MCR_PRESCALE	(1U << 7U) /* only available on 16650 up */

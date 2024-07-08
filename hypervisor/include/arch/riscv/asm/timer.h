@@ -25,6 +25,7 @@ extern uint64_t boot_count;
 extern void udelay(uint32_t us);
 extern unsigned long get_tick(void);
 extern void preinit_timer(void);
+void update_physical_timer(struct per_cpu_timers *cpu_timer);
 
 #define CYCLES_PER_MS	us_to_ticks(1000U)
 

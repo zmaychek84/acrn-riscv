@@ -77,14 +77,14 @@
 
 #define ACRN_VIRT_START         _AT(uint64_t, 0x80000000)
 #ifdef CONFIG_MACRN
-#define ACRN_MSTACK_START       _AT(uint64_t, ACRN_VIRT_START + 0x800000)
+#define ACRN_MSTACK_TOP         _AT(uint64_t, ACRN_VIRT_START + 0x800000)
 #else
-#define ACRN_MSTACK_START       _AT(uint64_t, ACRN_VIRT_START + 0x80000)
+#define ACRN_MSTACK_TOP         _AT(uint64_t, ACRN_VIRT_START + 0x80000)
 #endif
 #define ACRN_MSTACK_SIZE        CONFIG_MSTACK_SIZE
-#define ACRN_STACK_START        _AT(uint64_t, ACRN_VIRT_START + 0x70000)
+#define ACRN_STACK_TOP          _AT(uint64_t, ACRN_VIRT_START + 0x70000)
 #define ACRN_STACK_SIZE         CONFIG_STACK_SIZE
-#define ACRN_VSTACK_START       _AT(uint64_t, ACRN_VIRT_START + 0x60000)
+#define ACRN_VSTACK_TOP         _AT(uint64_t, ACRN_VIRT_START + 0x60000)
 #define ACRN_VSTACK_SIZE        CONFIG_STACK_SIZE
 #define FIXMAP_ADDR(n)          (_AT(uint64_t, ACRN_VIRT_START+ CONFIG_TEXT_SIZE) + (n) * PAGE_SIZE)
 

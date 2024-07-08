@@ -6,6 +6,7 @@
 
 #include <asm/cpu.h>
 #include <asm/smp.h>
+#include <asm/irq.h>
 #include "uart.h"
 #include "trap.h"
 

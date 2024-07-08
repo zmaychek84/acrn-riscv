@@ -27,7 +27,7 @@
 */
 
 #include <errno.h>
-#include <ptdev.h>
+//#include <ptdev.h>
 #include <asm/guest/vm.h>
 #include <asm/guest/instr_emul.h>
 #include <asm/guest/vpci.h>

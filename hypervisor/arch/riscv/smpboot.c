@@ -11,6 +11,7 @@
 #include <asm/init.h>
 #include <asm/lib/bits.h>
 #include <asm/types.h>
+#include <asm/setup.h>
 #include <asm/smp.h>
 #include <asm/mem.h>
 #include <asm/cache.h>
@@ -18,7 +19,9 @@
 #include <asm/guest/vcpu.h>
 
 #include <errno.h>
+#include <debug/console.h>
 #include <debug/logmsg.h>
+#include <debug/shell.h>
 
 struct acrn_vcpu idle_vcpu[NR_CPUS];
 

@@ -121,9 +121,9 @@ static void vuart_console_rx_chars(struct acrn_vuart *vu)
 		console_vmid = ACRN_INVALID_VMID;
 		printf("\r\n\r\n ---Entering ACRN SHELL---\r\n");
 	}
-	if (ch != -1) {
-		vpci_vuart_putchar(vu, ch);
-		vpci_vuart_toggle_intr(vu);
+	if (ch != (char)(-1)) {
+		vuart_putchar(vu, ch);
+		vuart_toggle_intr(vu);
 	}
 
 }
@@ -133,11 +133,11 @@ static void vuart_console_rx_chars(struct acrn_vuart *vu)
  */
 static void vuart_console_tx_chars(struct acrn_vuart *vu)
 {
-	char c = vpci_vuart_getchar(vu);
+	char c = vuart_getchar(vu);
 
 	while(c != (char)(-1)) {
 		printf("%c", c);
-		c = vpci_vuart_getchar(vu);
+		c = vuart_getchar(vu);
 	}
 }
 

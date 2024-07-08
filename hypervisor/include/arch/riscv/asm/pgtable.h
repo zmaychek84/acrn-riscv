@@ -294,10 +294,7 @@ extern const uint64_t *lookup_address(uint64_t *vpn3_page, uint64_t addr, uint64
 #define pgtable_get_mfn(pte)	((pte).walk.base)
 #define pgtable_set_mfn(pte, mfn)  ((pte).walk.base = mfn)
 
-static uint64_t *satp_to_vpn3_page(uint64_t satp)
-{
-        return (uint64_t *)((satp & SATP_PPN_MASK) << 12);
-}
+uint64_t *satp_to_vpn3_page(uint64_t satp);
 
 extern const struct memory_ops ppt_mem_ops;
 extern uint64_t init_satp;

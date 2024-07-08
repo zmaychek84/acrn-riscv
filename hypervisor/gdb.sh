@@ -1,9 +1,16 @@
 #!/bin/bash
 
 set -x
+set -e
 
-#gdb build/hypervisor/acrn.out
-#gdb -tui build/hypervisor/acrn.out
-#gdb-multiarch -tui -x acrn.gdb -s build/acrn.elf
-#gdb-multiarch -tui -x acrn.gdb -s vmlinux.boot
-gdb-multiarch -tui -x acrn.gdb -s vmlinux
+DEFAULT_GDB=gdb-multiarch
+
+if [[ x"${GDB}" = x"" ]]; then
+    GDB=${DEFAULT_GDB}
+fi
+
+#${GDB} build/hypervisor/acrn.out
+#${GDB} -tui build/hypervisor/acrn.out
+#${GDB} -tui -x acrn.gdb -s build/acrn.elf
+#${GDB} -tui -x acrn.gdb -s vmlinux.boot
+${GDB} -tui -x acrn.gdb -s vmlinux

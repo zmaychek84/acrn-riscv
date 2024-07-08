@@ -120,14 +120,7 @@ static uint32_t plic_get_irq(void)
 
 static void plic_eoi_irq(struct irq_desc *desc)
 {
-	uint64_t flags;
-
 	plic_write32(desc->irq, PLIC_EOIR);
-}
-
-static bool plic_read_pending_state(struct irq_desc *desc)
-{
-	return (plic_read32(PLIC_IPER) & PLIC_IRQ_MASK);
 }
 
 struct acrn_irqchip_ops plic_ops = {
