@@ -40,6 +40,12 @@ struct acrn_vm_config vm_configs[CONFIG_MAX_VM_NUM] = {
 		.load_order = SERVICE_VM,
 		.severity = SEVERITY_STANDARD_VM,
 		.name = "RISC-V ACRN UOS",
+		.vuart[0] =
+                {
+			.type = VUART_MMIO,
+			.addr.base = CONFIG_UART_BASE,
+			.irq = UART_IRQ,
+		}
 	},
 };
 struct acrn_vm *sos_vm = &vm_array[0];
