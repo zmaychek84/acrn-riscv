@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /0.?/
+Disallow: /1.?/
+Disallow: /2.0/
+Disallow: /2.1/
+Disallow: /2.2/
+Disallow: /2.3/
+Disallow: /2.4/

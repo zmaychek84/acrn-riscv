@@ -1,0 +1,7 @@
+digraph G {
+   rankdir=LR;
+   bgcolor="transparent";
+   UEFI -> "GRUB" -> "acrn.bin" -> "Pre-launched\nVM Kernel"
+     "acrn.bin" -> "Service VM\nKernel" -> "ACRN\nDevice Model" ->
+"Virtual\nBootloader";
+}

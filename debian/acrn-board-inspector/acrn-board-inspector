@@ -1,0 +1,5 @@
+#!/bin/bash -e
+# wrapper to call board_inspector.py
+
+modprobe msr
+python3 -m acrn_board_inspector.board_inspector "$@"
