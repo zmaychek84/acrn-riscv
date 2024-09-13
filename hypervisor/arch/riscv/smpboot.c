@@ -168,7 +168,7 @@ void start_secondary(uint32_t cpu)
 	timer_init();
 	if (cpu == 4) {
 		shell_init();
-//		console_setup_timer();
+		console_setup_timer();
 	}
 	init_sched(cpu);
 
