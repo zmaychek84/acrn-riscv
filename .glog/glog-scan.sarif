@@ -1,0 +1,2592 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Glog.AI",
+          "organization": "Glog.AI",
+          "fullName": "Glog, Making software more secure",
+          "version": "1.0.0",
+          "semanticVersion": "1.0.0",
+          "informationUri": "https://www.glog.ai",
+          "rules": [
+            {
+              "id": "glog-a8ed36f7-1506-4a2f-91ba-e3116905ce0b",
+              "name": "OpensslDoNotHardcodeSsltlsVersionsWithinAnApplication",
+              "shortDescription": {
+                "text": "SSL/TLS version usage should be based on an OS or external configuration."
+              },
+              "fullDescription": {
+                "text": "OpenSSL: Do not hardcode SSL/TLS versions within an application.: SSL/TLS version usage should be based on an OS or external configuration."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS440000.md",
+              "help": {
+                "text": "SSL/TLS version usage should be based on an OS or external configuration.",
+                "markdown": "Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS440000.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS440000.md) for guidance on this issue."
+              },
+              "properties": {
+                "DevSkimSeverity": "Important",
+                "DevSkimConfidence": "High",
+                "precision": "high",
+                "problem.severity": "warning",
+                "tags": [
+                  "DS440010"
+                ]
+              }
+            },
+            {
+              "id": "glog-31dd0e05-dc1f-4dd0-9551-26866cf7510d",
+              "name": "OpensslDoNotHardcodeSsltlsVersionsWithinAnApplication",
+              "shortDescription": {
+                "text": "SSL/TLS version usage should be based on an OS or external configuration."
+              },
+              "fullDescription": {
+                "text": "OpenSSL: Do not hardcode SSL/TLS versions within an application.: SSL/TLS version usage should be based on an OS or external configuration."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "helpUri": "https://github.com/Microsoft/DevSkim/blob/main/guidance/DS440000.md",
+              "help": {
+                "text": "SSL/TLS version usage should be based on an OS or external configuration.",
+                "markdown": "Visit [https://github.com/Microsoft/DevSkim/blob/main/guidance/DS440000.md](https://github.com/Microsoft/DevSkim/blob/main/guidance/DS440000.md) for guidance on this issue."
+              },
+              "properties": {
+                "DevSkimSeverity": "Important",
+                "DevSkimConfidence": "High",
+                "precision": "high",
+                "problem.severity": "warning",
+                "tags": [
+                  "DS440010"
+                ]
+              }
+            },
+            {
+              "id": "glog-75a4a06d-5afa-455a-8a85-9c3bb6581565",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nIn Python, using `eval()` to execute dynamically generated expressions can lead to significant security vulnerabilities, especially if the input is not properly sanitized. The `eval()` function will execute arbitrary code, which can be exploited by an attacker to execute malicious code. This is particularly dangerous when the input to `eval()` is derived from user input or other untrusted sources.\n\nThe `ast.literal_eval()` function provides a safer alternative for evaluating strings containing Python literals. It only evaluates strings that contain Python literals such as strings, numbers, tuples, lists, dicts, booleans, and `None`. This makes it a more secure option when you need to evaluate a string representation of a Python literal.\n\n### General Mitigation Advice\n\n- Avoid using `eval()` with untrusted input.\n- Use `ast.literal_eval()` when you need to evaluate a string containing a Python literal.\n- Always validate and sanitize input data before processing it.\n\n### Source Code Fix Recommendation\n\nReplace the use of `eval()` with `ast.literal_eval()` to safely evaluate the string as a Python literal.\n\n```python\nimport ast\nimport re\n\n# Example input string\ninput_string = \"some string with (1, 2, 3) and other data\"\n\n# Regular expression to match the pattern\npattern = re.compile(r'\\((.*?)\\)')\n\n# Dictionary to store the results\nformats = {}\n\n# Find all matches and safely evaluate them\nfor m in pattern.finditer(input_string):\n    formats[str(ast.literal_eval(m.group(1)))] = m.group(2)\n\nprint(formats)\n```\n\n### Library Dependencies\n\n- `ast` (part of the Python Standard Library)\n- `re` (part of the Python Standard Library)\n\n### Relevant OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-94: Improper Control of Generation of Code ('Code Injection')](https://cwe.mitre.org/data/definitions/94.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B307"
+                ]
+              }
+            },
+            {
+              "id": "glog-1447274d-d003-44a3-9bb0-3aeeae3e00dd",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability associated with the `strlen` function in C++ arises when the function is used without proper validation of the input string. If `strlen` is called on a string that is not null-terminated, it can lead to undefined behavior, including buffer overflows, which can be exploited by attackers to execute arbitrary code or cause a denial of service.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Always validate input strings to ensure they are null-terminated before passing them to `strlen`.\n2. **Use Safer Alternatives**: Consider using safer string handling functions like `strnlen` which allows specifying a maximum length to prevent reading beyond the buffer.\n3. **Memory Management**: Ensure proper memory allocation and deallocation to avoid buffer overflows and memory leaks.\n4. **Static Analysis Tools**: Use static analysis tools to detect potential vulnerabilities in the code.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <iostream>\n#include <cstring> // Required for strlen and strnlen\n\nsize_t safe_strlen(const char* str, size_t max_len) {\n    if (str == nullptr) {\n        return 0;\n    }\n    return strnlen(str, max_len);\n}\n\nint main() {\n    const char* size_str = \"example\";\n    size_t max_len = 100; // Define a reasonable maximum length\n    size_t length = safe_strlen(size_str, max_len);\n    std::cout << \"Length of the string is: \" << length << std::endl;\n    return 0;\n}\n```\n\n### Library Dependencies\n\n- `<iostream>`: Required for input and output operations.\n- `<cstring>`: Required for `strlen` and `strnlen` functions.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)\n- [CWE-126: Buffer Over-read](https://cwe.mitre.org/data/definitions/126.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS140021"
+                ]
+              }
+            },
+            {
+              "id": "glog-436ac02b-c570-4401-ac0b-d3f7e967e3cc",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability \"Security Concern: Use of subprocess call with shell=True Detected\" in Python arises when the `subprocess` module is used with the `shell=True` argument. This can lead to command injection vulnerabilities, where an attacker can execute arbitrary commands on the host system. This is particularly dangerous if user input is used to construct the command string, as it can allow an attacker to execute malicious commands.\n\n### General Mitigation Advice\n\n1. **Avoid `shell=True`:** Use `shell=False` and pass the command and arguments as a list to avoid shell injection vulnerabilities.\n2. **Sanitize Inputs:** If user input must be used, ensure it is properly sanitized and validated.\n3. **Use `shlex.split`:** When dealing with complex command strings, use `shlex.split` to safely parse the command into a list.\n4. **Use High-Level Libraries:** Consider using higher-level libraries that abstract away the need to use `subprocess` directly.\n\n### Source Code Fix Recommendation\n\nHere is a fixed version of the code that avoids using `shell=True`:\n\n```python\nimport subprocess\n\n# Assuming cmd is a string, split it into a list\ncmd_list = cmd.split()  # or use shlex.split(cmd) for more complex cases\n\n# Execute the command without shell=True\noutput = subprocess.check_output(cmd_list, stderr=subprocess.DEVNULL).strip()\n```\n\n### Library Dependencies\n\nThe code example requires the following standard library modules to execute properly:\n\n- `subprocess`\n\n### Relevant Links\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B602"
+                ]
+              }
+            },
+            {
+              "id": "glog-9a10bc9a-1b60-4460-97af-3a0a06bf50b1",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability associated with the `strlen` function in C++ arises from its inability to handle non-null-terminated strings. If `strlen` is called on a string that is not properly null-terminated, it can lead to undefined behavior, including reading beyond the buffer's bounds, which can cause crashes or expose sensitive data. This is a common issue when dealing with raw character arrays or when interfacing with C-style strings in C++.\n\n### General Mitigation Advice\n\n1. **Ensure Null Termination**: Always ensure that strings are null-terminated before passing them to `strlen`.\n2. **Use Safer Alternatives**: Consider using safer alternatives like `std::string` in C++ which manages null-termination automatically.\n3. **Boundary Checks**: Implement boundary checks to ensure that the buffer is not read beyond its allocated size.\n4. **Static Analysis Tools**: Use static analysis tools to detect potential buffer overflows and other vulnerabilities.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <iostream>\n#include <cstring> // Required for strlen\n\nvoid safe_strlen(const char* elem, size_t buffer_size) {\n    if (elem == nullptr) {\n        std::cerr << \"Error: Null pointer provided to strlen.\" << std::endl;\n        return;\n    }\n\n    // Ensure the buffer is null-terminated within its bounds\n    if (std::memchr(elem, '\\0', buffer_size) == nullptr) {\n        std::cerr << \"Error: Buffer is not null-terminated.\" << std::endl;\n        return;\n    }\n\n    size_t length = strlen(elem);\n    std::cout << \"Length of the string is: \" << length << std::endl;\n}\n\nint main() {\n    const size_t buffer_size = 10;\n    char buffer[buffer_size] = \"Hello\";\n\n    // Ensure buffer is null-terminated\n    buffer[buffer_size - 1] = '\\0';\n\n    safe_strlen(buffer, buffer_size);\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\n- `<iostream>`: Required for input and output operations.\n- `<cstring>`: Required for using `strlen` and `memchr`.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-170: Improper Null Termination](https://cwe.mitre.org/data/definitions/170.html)\n- [CWE-126: Buffer Over-read](https://cwe.mitre.org/data/definitions/126.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS140021"
+                ]
+              }
+            },
+            {
+              "id": "glog-c39d27db-884e-44ab-b74a-529d797a83db",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ typically arises from improper handling of dynamic memory allocation using the `malloc` function. This can lead to various issues such as memory leaks, buffer overflows, or undefined behavior if the allocated memory is not properly managed. Specifically, using `malloc(RTCT_BUF_SIZE)` without ensuring that `RTCT_BUF_SIZE` is correctly defined and checked for validity can result in allocating insufficient or excessive memory, leading to potential security vulnerabilities.\n\n### General Mitigation Advice\n\n1. **Validate Input:** Ensure that `RTCT_BUF_SIZE` is properly defined and validated before using it in `malloc`.\n2. **Check Return Value:** Always check the return value of `malloc` to ensure that memory allocation was successful.\n3. **Use Safer Alternatives:** Consider using `new` in C++ for memory allocation, which throws an exception on failure, or use smart pointers like `std::unique_ptr` or `std::shared_ptr` to manage memory automatically.\n4. **Free Allocated Memory:** Ensure that any memory allocated with `malloc` is properly freed using `free` to prevent memory leaks.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <iostream>\n#include <cstdlib> // for malloc and free\n\n#define RTCT_BUF_SIZE 1024 // Ensure this is properly defined\n\nint main() {\n    // Check if RTCT_BUF_SIZE is valid\n    if (RTCT_BUF_SIZE <= 0) {\n        std::cerr << \"Invalid buffer size\" << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    // Allocate memory\n    char* buffer = static_cast<char*>(malloc(RTCT_BUF_SIZE));\n    if (buffer == nullptr) {\n        std::cerr << \"Memory allocation failed\" << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    // Use the buffer for some operations\n    // ...\n\n    // Free the allocated memory\n    free(buffer);\n\n    return EXIT_SUCCESS;\n}\n```\n\n### Library Dependencies\n\nTo execute the above code example, the following standard libraries are required:\n\n- `<iostream>`: For input and output operations.\n- `<cstdlib>`: For `malloc`, `free`, and `EXIT_FAILURE`/`EXIT_SUCCESS`.\n\n### Relevant Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration\n\n- [CWE-401: Improper Release of Memory Before Removing Last Reference ('Memory Leak')](https://cwe.mitre.org/data/definitions/401.html)\n- [CWE-122: Heap-based Buffer Overflow](https://cwe.mitre.org/data/definitions/122.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-27cb5080-956e-44ae-922c-7ad0b9919c3e",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability \"Security Concern: Use of subprocess call with shell=True Detected\" in Python arises when the `subprocess` module is used with the `shell=True` argument. This can lead to command injection vulnerabilities, where an attacker can execute arbitrary commands on the host system. This is particularly dangerous if user input is passed to the command being executed, as it can be exploited to run malicious code.\n\n### General Mitigation Advice\n\nTo mitigate this vulnerability, avoid using `shell=True` in the `subprocess` module. Instead, pass the command and its arguments as a list. This ensures that the command is executed without invoking the shell, thus reducing the risk of command injection.\n\n### Source Code Fix Recommendation\n\n#### Vulnerable Code\n\n```python\nimport subprocess\n\n# Vulnerable code: using shell=True\ncommand = \"ls -l\"\nsubprocess.call(command, shell=True)\n```\n\n#### Fixed Code\n\n```python\nimport subprocess\n\n# Fixed code: avoid using shell=True\ncommand = [\"ls\", \"-l\"]\nsubprocess.call(command)\n```\n\n### Library Dependencies\n\nThe code example provided requires the following library:\n\n- `subprocess` (This is a standard library in Python and does not require installation)\n\n### Relevant Resources\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B602"
+                ]
+              }
+            },
+            {
+              "id": "glog-ef27ba02-0446-4e2f-823a-04eda5246781",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability \"Initiating a Shell Process: Potential Injection and Security Concern Identified\" in Python arises when user input is directly passed to shell commands without proper validation or sanitization. This can lead to command injection attacks, where an attacker can execute arbitrary commands on the host system. The use of `os.system(cmd)` is particularly risky if `cmd` includes unsanitized user input.\n\n### General Mitigation Advice\n\n1. **Avoid Using `os.system`**: Prefer using higher-level libraries like `subprocess` which provide better control over shell execution.\n2. **Input Validation**: Always validate and sanitize user inputs to ensure they conform to expected formats.\n3. **Use Parameterized Functions**: When possible, use functions that allow parameterized inputs to avoid shell interpretation.\n4. **Least Privilege**: Run your application with the least privileges necessary to limit the impact of a potential compromise.\n\n### Source Code Fix Recommendation\n\nReplace `os.system(cmd)` with `subprocess.run()` or `subprocess.call()` using a list of arguments to avoid shell interpretation.\n\n#### Vulnerable Code\n\n```python\nimport os\n\ndef execute_command(user_input):\n    cmd = f\"echo {user_input}\"\n    os.system(cmd)\n```\n\n#### Fixed Code\n\n```python\nimport subprocess\n\ndef execute_command(user_input):\n    # Use a list to pass the command and arguments\n    cmd = [\"echo\", user_input]\n    subprocess.run(cmd, check=True)\n```\n\n### Library Dependencies\n\nThe code example requires the following standard library:\n\n- `subprocess`: This is part of the Python Standard Library and does not require additional installation.\n\n### Relevant Links\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B605"
+                ]
+              }
+            },
+            {
+              "id": "glog-87f752bc-3a76-4f9a-907d-cb3fab800d13",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability \"Initiating a Shell Process: Potential Injection and Security Concern Identified\" in Python arises when user input is directly passed to shell commands without proper validation or sanitization. This can lead to command injection attacks, where an attacker can execute arbitrary commands on the host system. The use of `os.system(cmd)` is particularly risky if `cmd` includes unsanitized user input.\n\n### General Mitigation Advice\n\n1. **Avoid Using `os.system`**: Prefer using higher-level libraries like `subprocess` which provide better control over shell execution.\n2. **Input Validation**: Always validate and sanitize user inputs to ensure they conform to expected formats.\n3. **Use Parameterized Functions**: When possible, use functions that allow parameterized inputs to avoid shell interpretation.\n4. **Least Privilege**: Run your application with the least privileges necessary to limit the impact of a potential compromise.\n\n### Source Code Fix Recommendation\n\nReplace `os.system(cmd)` with `subprocess.run()` or `subprocess.call()` using a list of arguments to avoid shell interpretation.\n\n#### Vulnerable Code\n\n```python\nimport os\n\ndef execute_command(user_input):\n    cmd = f\"echo {user_input}\"\n    os.system(cmd)\n```\n\n#### Fixed Code\n\n```python\nimport subprocess\n\ndef execute_command(user_input):\n    # Use a list to pass the command and arguments\n    cmd = [\"echo\", user_input]\n    subprocess.run(cmd, check=True)\n```\n\n### Library Dependencies\n\nThe code example requires the following standard library:\n\n- `subprocess`: This is part of the Python Standard Library and does not require additional installation.\n\n### Relevant Links\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B605"
+                ]
+              }
+            },
+            {
+              "id": "glog-45bc2be9-9cf4-4caa-8055-5845fb7c08d2",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Potential Attachment to All Interfaces\" vulnerability occurs when a Python application is configured to listen on all network interfaces (`0.0.0.0`). This can expose the application to the internet, making it accessible to anyone who can reach the server's IP address. This increases the risk of unauthorized access and potential attacks, especially if the application is not properly secured.\n\n### General Mitigation Advice\n\n1. **Restrict Binding**: Bind the application to `localhost` or a specific IP address to limit exposure.\n2. **Use a Firewall**: Implement firewall rules to restrict access to the application.\n3. **Authentication and Authorization**: Ensure proper authentication and authorization mechanisms are in place.\n4. **Secure Configuration**: Avoid running the application in debug mode in production, and ensure all configurations are secure.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, modify the `app.run()` method to bind to `localhost` or a specific IP address instead of `0.0.0.0`. Here's the updated code:\n\n```python\napp.run(host=\"127.0.0.1\", port=80, debug=False)\n```\n\n### Library Dependencies\n\nThe code example provided is a typical Flask application. The primary library dependency required is:\n\n- `Flask`\n\nYou can install it using pip:\n\n```bash\npip install Flask\n```\n\n### Relevant OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-200: Exposure of Sensitive Information to an Unauthorized Actor](https://cwe.mitre.org/data/definitions/200.html)\n- [CWE-284: Improper Access Control](https://cwe.mitre.org/data/definitions/284.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B104"
+                ]
+              }
+            },
+            {
+              "id": "glog-6f18685d-e57a-4aaa-abdd-920d4111daf8",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability associated with the `strlen` function in C++ arises from its inability to handle non-null-terminated strings. When `strlen` is used on a string that is not properly null-terminated, it can lead to undefined behavior, including buffer overflows, which can be exploited by attackers to execute arbitrary code or cause a denial of service. This issue is particularly prevalent when dealing with user input or data from untrusted sources.\n\n### General Mitigation Advice\n\n1. **Ensure Proper Null-Termination**: Always ensure that strings are null-terminated before passing them to `strlen`.\n2. **Use Safer Alternatives**: Consider using safer alternatives like `std::string` in C++ which automatically handle null-termination.\n3. **Input Validation**: Validate and sanitize all input data to ensure it conforms to expected formats and lengths.\n4. **Bounds Checking**: Implement bounds checking to prevent buffer overflows.\n\n### Source Code Fix Recommendation\n\nBelow is an example of how to safely use `strlen` by ensuring the string is null-terminated:\n\n```cpp\n#include <iostream>\n#include <cstring> // Required for strlen\n\nint main() {\n    char s_elem[100]; // Buffer with a fixed size\n    std::cin.getline(s_elem, sizeof(s_elem)); // Safely read input with null-termination\n\n    // Ensure the string is null-terminated\n    s_elem[sizeof(s_elem) - 1] = '\\0';\n\n    // Use strlen safely\n    size_t length = strlen(s_elem);\n    std::cout << \"Length of the string is: \" << length << std::endl;\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\nTo execute the above code example, the following standard libraries are required:\n\n- `<iostream>`: For input and output stream operations.\n- `<cstring>`: For using the `strlen` function.\n\n### Relevant Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration\n\n- [CWE-170: Improper Null Termination](https://cwe.mitre.org/data/definitions/170.html)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS140021"
+                ]
+              }
+            },
+            {
+              "id": "glog-715e9c01-a306-4911-a54c-8a74982a40c1",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability \"Initiating a Shell Process: Potential Injection and Security Concern Identified\" in Python arises when user input is directly passed to shell commands without proper validation or sanitization. This can lead to command injection attacks, where an attacker can execute arbitrary commands on the host system. The use of `os.system(cmd)` is particularly risky if `cmd` includes unsanitized user input.\n\n### General Mitigation Advice\n\n1. **Avoid Using `os.system`**: Prefer using higher-level libraries like `subprocess` which provide better control over shell execution.\n2. **Input Validation**: Always validate and sanitize user inputs to ensure they conform to expected formats.\n3. **Use Parameterized Functions**: When possible, use functions that allow parameterized inputs to avoid shell interpretation.\n4. **Least Privilege**: Run your application with the least privileges necessary to limit the impact of a potential compromise.\n\n### Source Code Fix Recommendation\n\nReplace `os.system(cmd)` with `subprocess.run()` or `subprocess.call()` using a list of arguments to avoid shell interpretation.\n\n#### Vulnerable Code\n\n```python\nimport os\n\ndef execute_command(user_input):\n    cmd = f\"echo {user_input}\"\n    os.system(cmd)\n```\n\n#### Fixed Code\n\n```python\nimport subprocess\n\ndef execute_command(user_input):\n    # Use a list to pass the command and arguments\n    cmd = [\"echo\", user_input]\n    subprocess.run(cmd, check=True)\n```\n\n### Library Dependencies\n\nThe code example requires the following standard library:\n\n- `subprocess`: This is part of the Python Standard Library and does not require additional installation.\n\n### Relevant Links\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B605"
+                ]
+              }
+            },
+            {
+              "id": "glog-9eafcc35-c07d-4405-83a7-d36dcb0ed3d9",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe use of the `strncpy` function in C++ can lead to vulnerabilities if not used carefully. `strncpy` is designed to copy a specified number of characters from one string to another. However, it does not guarantee null-termination of the destination string if the source string is longer than the specified number of characters. This can lead to buffer overflows, data corruption, and undefined behavior, which are common security vulnerabilities.\n\n### General Mitigation Advice\n\n1. **Use Safer Alternatives**: Consider using safer string handling functions like `strlcpy` or `snprintf` that ensure null-termination.\n2. **Manual Null-Termination**: Always manually null-terminate the destination buffer after using `strncpy`.\n3. **Buffer Size Management**: Ensure that the destination buffer is large enough to hold the copied string plus the null terminator.\n4. **Static Analysis Tools**: Use static analysis tools to detect unsafe string operations in your code.\n\n### Source Code Fix Recommendation\n\nFor the specific vulnerability sink:\n\n```cpp\n// Original code\nstrncpy(vrtct->asl_compiler_id, \"INTL\", 4);\n\n// Fixed code\nstrncpy(vrtct->asl_compiler_id, \"INTL\", 4);\nvrtct->asl_compiler_id[4] = '\\0'; // Ensure null-termination\n```\n\n### Library Dependencies\n\nThe code example provided does not require any additional library dependencies beyond the standard C++ libraries.\n\n### Relevant Resources\n\n- [OWASP C++ Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n- [Common Weakness Enumeration: CWE-120](https://cwe.mitre.org/data/definitions/120.html)\n\nThese links were verified to be active and accessible to anonymous users."
+              },
+              "properties": {
+                "tags": [
+                  "DS111237"
+                ]
+              }
+            },
+            {
+              "id": "glog-f6a5e192-34c2-4d44-8402-28c90e14ad2e",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Use of Prohibited C Function (strncpy)\" vulnerability arises when the `strncpy` function is used improperly, potentially leading to buffer overflows or data truncation. In C++, `strncpy` is often used to copy strings, but it does not guarantee null-termination if the source string is longer than the specified number of characters. This can result in undefined behavior when the destination buffer is used as a string.\n\n### General Mitigation Advice\n\n1. **Use Safer Alternatives**: Prefer using safer string handling functions like `strlcpy` or `snprintf` that ensure null-termination.\n2. **Manual Null-Termination**: If `strncpy` must be used, manually ensure that the destination buffer is null-terminated.\n3. **Buffer Size Awareness**: Always ensure that the destination buffer is large enough to hold the source string plus the null terminator.\n4. **Static Analysis Tools**: Use static analysis tools to detect and fix unsafe string operations.\n\n### Source Code Fix Recommendation\n\nFor the specific vulnerability sink:\n\n```cpp\n#include <cstring> // Required for strncpy\n\n// Original code\n// strncpy(vrtct->oem_table_id, \"EDK2\", 8);\n\n// Fixed code\nstrncpy(vrtct->oem_table_id, \"EDK2\", 8);\nvrtct->oem_table_id[7] = '\\0'; // Ensure null-termination\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library is required:\n\n- `<cstring>`: This library is required for using the `strncpy` function.\n\n### OWASP Resources\n\n- [OWASP C++ Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS111237"
+                ]
+              }
+            },
+            {
+              "id": "glog-92869844-224c-4de9-8eef-8bb4d0c27e7c",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability \"Initiating a Shell Process: Potential Injection and Security Concern Identified\" in Python arises when user input is directly passed to shell commands without proper validation or sanitization. This can lead to command injection attacks, where an attacker can execute arbitrary commands on the host system. The use of `os.system(cmd)` is particularly risky if `cmd` includes unsanitized user input.\n\n### General Mitigation Advice\n\n1. **Avoid Using `os.system`**: Prefer using higher-level libraries like `subprocess` which provide better control over shell execution.\n2. **Input Validation**: Always validate and sanitize user inputs to ensure they conform to expected formats.\n3. **Use Parameterized Functions**: When possible, use functions that allow parameterized inputs to avoid shell interpretation.\n4. **Least Privilege**: Run your application with the least privileges necessary to limit the impact of a potential compromise.\n\n### Source Code Fix Recommendation\n\nReplace `os.system(cmd)` with `subprocess.run()` or `subprocess.call()` using a list of arguments to avoid shell interpretation.\n\n#### Vulnerable Code\n\n```python\nimport os\n\ndef execute_command(user_input):\n    cmd = f\"echo {user_input}\"\n    os.system(cmd)\n```\n\n#### Fixed Code\n\n```python\nimport subprocess\n\ndef execute_command(user_input):\n    # Use a list to pass the command and arguments\n    cmd = [\"echo\", user_input]\n    subprocess.run(cmd, check=True)\n```\n\n### Library Dependencies\n\nThe code example requires the following standard library:\n\n- `subprocess`: This is part of the Python Standard Library and does not require additional installation.\n\n### Relevant Links\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B605"
+                ]
+              }
+            },
+            {
+              "id": "glog-e74d00e8-dfb7-45d9-b740-4e68843d0f45",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe use of `strncpy` in C++ can lead to vulnerabilities if not used carefully. `strncpy` is designed to copy a specified number of characters from one string to another. However, it does not guarantee null-termination of the destination string if the source string is longer than the specified number of characters. This can lead to buffer overflows, data corruption, and undefined behavior, which are common security vulnerabilities.\n\n### General Mitigation Advice\n\n1. **Use Safer Alternatives**: Consider using safer string handling functions like `strlcpy` or `snprintf` that ensure null-termination.\n2. **Manual Null-Termination**: Always manually null-terminate the destination string after using `strncpy`.\n3. **Bounds Checking**: Ensure that the destination buffer is large enough to hold the source string plus the null terminator.\n4. **Static Analysis Tools**: Use static analysis tools to detect unsafe string operations in your code.\n\n### Source Code Fix Recommendation\n\nTo fix the specific vulnerability sink:\n\n```cpp\n#include <cstring> // Required for strncpy\n\n// Assuming vrtct is a pointer to a struct with a char array member oem_id\n// and oem_id is large enough to hold the string \"INTEL\" plus a null terminator.\nstrncpy(vrtct->oem_id, \"INTEL\", 6);\nvrtct->oem_id[5] = '\\0'; // Ensure null-termination\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library is required:\n\n- `<cstring>`: This library is required for using `strncpy`.\n\n### Relevant Resources\n\n- [OWASP C++ Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n- [Common Weakness Enumeration: CWE-120](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS111237"
+                ]
+              }
+            },
+            {
+              "id": "glog-ec01240a-2a2a-4aff-88db-fcf820189b96",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detection of Prohibited C Function (strncpy)\" vulnerability arises when the `strncpy` function is used improperly, potentially leading to buffer overflows or data truncation. In C++, `strncpy` is often used to copy strings, but it does not guarantee null-termination if the source string is longer than the specified number of characters. This can result in undefined behavior when the destination buffer is used as a string.\n\n### Vulnerability Sink\n\nThe specific vulnerability sink in the code is:\n\n```cpp\nstrncpy(vrtct->signature, \"RTCT\", 4);\n```\n\nIn this case, the destination buffer `vrtct->signature` may not be null-terminated, which can lead to issues when the buffer is used as a string.\n\n### General Mitigation Advice\n\n1. **Use Safer Alternatives**: Prefer using safer string handling functions like `strlcpy` (if available) or C++ string classes that manage memory automatically.\n2. **Ensure Null-Termination**: Always ensure that the destination buffer is null-terminated after using `strncpy`.\n3. **Buffer Size Check**: Ensure that the destination buffer is large enough to hold the source string plus the null terminator.\n\n### Source Code Fix Recommendation\n\nTo fix the specific vulnerability, ensure that the destination buffer is null-terminated:\n\n```cpp\nstrncpy(vrtct->signature, \"RTCT\", 4);\nvrtct->signature[4] = '\\0'; // Ensure null-termination\n```\n\nAlternatively, consider using `std::string` for safer string handling:\n\n```cpp\n#include <string>\n#include <cstring>\n\nstd::string signature = \"RTCT\";\nstd::strncpy(vrtct->signature, signature.c_str(), sizeof(vrtct->signature) - 1);\nvrtct->signature[sizeof(vrtct->signature) - 1] = '\\0'; // Ensure null-termination\n```\n\n### Library Dependencies\n\nThe code example requires the following library dependencies to execute properly:\n\n- `<cstring>`: For `strncpy` function.\n- `<string>`: For using `std::string`.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)\n- [CWE-126: Buffer Over-read](https://cwe.mitre.org/data/definitions/126.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS111237"
+                ]
+              }
+            },
+            {
+              "id": "glog-a00fb3f9-e77d-4929-8051-0f1162f9cd1b",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ arises when the `malloc` function is used improperly, leading to potential memory allocation issues such as buffer overflows, memory leaks, or undefined behavior. This vulnerability typically occurs when the size parameter passed to `malloc` is incorrect, unchecked, or derived from untrusted sources, which can result in insufficient memory allocation or excessive memory consumption.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Always validate input sizes before using them in memory allocation functions.\n2. **Use Safer Alternatives**: Consider using C++ memory management features like `new` and `delete` or smart pointers (`std::unique_ptr`, `std::shared_ptr`) which provide automatic memory management.\n3. **Check Return Values**: Always check the return value of `malloc` to ensure that memory allocation was successful.\n4. **Limit Memory Usage**: Implement limits on the amount of memory that can be allocated to prevent excessive memory consumption.\n5. **Free Allocated Memory**: Ensure that all allocated memory is properly freed to prevent memory leaks.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <iostream>\n#include <cstdlib> // Required for malloc and free\n\nint main() {\n    size_t size = 10; // Example size, should be validated\n    if (size <= 0 || size > MAX_ALLOWED_SIZE) { // Validate size\n        std::cerr << \"Invalid size for memory allocation.\" << std::endl;\n        return 1;\n    }\n\n    int* ptr = (int*)malloc(size * sizeof(int));\n    if (ptr == nullptr) { // Check if malloc succeeded\n        std::cerr << \"Memory allocation failed.\" << std::endl;\n        return 1;\n    }\n\n    // Use the allocated memory\n    for (size_t i = 0; i < size; ++i) {\n        ptr[i] = i;\n    }\n\n    // Free the allocated memory\n    free(ptr);\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\n- `<iostream>`: For input and output operations.\n- `<cstdlib>`: For `malloc` and `free` functions.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-122: Heap-based Buffer Overflow](https://cwe.mitre.org/data/definitions/122.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)\n\nThese links are verified to be active and accessible to anonymous users."
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-73fb3ec0-b443-4b1c-a48e-11856834a44a",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability in question arises from the use of the `memcpy` function in C/C++ programming, which can lead to buffer overflow issues if not used carefully. The specific line of code:\n\n```cpp\nmemcpy((void *)rtct_entry, (void *)entry, entry->size);\n```\n\nis potentially dangerous because it copies `entry->size` bytes from `entry` to `rtct_entry` without checking if `rtct_entry` has enough space to accommodate the data. This can lead to memory corruption, crashes, or even arbitrary code execution if exploited by an attacker.\n\n### General Mitigation Advice\n\n1. **Bounds Checking**: Always ensure that the destination buffer is large enough to hold the data being copied.\n2. **Use Safer Functions**: Consider using safer alternatives like `memmove` or `strncpy` that include bounds checking.\n3. **Input Validation**: Validate the size of the data being copied to ensure it does not exceed the destination buffer's capacity.\n4. **Static Analysis Tools**: Use static analysis tools to detect potential buffer overflows in your code.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, ensure that the destination buffer is large enough before performing the copy operation. Here is a revised version of the code with added checks:\n\n```cpp\n#include <cstring> // Required for memcpy\n\n// Assuming rtct_entry_size is the size of the rtct_entry buffer\nsize_t rtct_entry_size = /* size of rtct_entry buffer */;\n\nif (entry->size <= rtct_entry_size) {\n    memcpy((void *)rtct_entry, (void *)entry, entry->size);\n} else {\n    // Handle error: entry size is too large for the destination buffer\n    // This could involve logging the error, returning an error code, etc.\n}\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library is required:\n\n- `<cstring>`: This library is required for the `memcpy` function.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            },
+            {
+              "id": "glog-6d2190a1-3c60-4d33-af16-891f9bec8cd9",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability associated with the use of the `memcpy` function in C++ arises from the potential for buffer overflows. The function `memcpy(block->buf, buf + buf_idx, d)` copies `d` bytes from the source buffer `buf + buf_idx` to the destination buffer `block->buf`. If `d` exceeds the size of the destination buffer or if `buf_idx + d` exceeds the size of the source buffer, it can lead to undefined behavior, including memory corruption, crashes, or security vulnerabilities such as arbitrary code execution.\n\n### General Mitigation Advice\n\n1. **Bounds Checking**: Always ensure that the size of the data being copied does not exceed the size of the destination buffer.\n2. **Use Safer Alternatives**: Consider using safer functions like `memmove` or `std::copy` which provide better safety guarantees.\n3. **Static Analysis Tools**: Use static analysis tools to detect potential buffer overflows.\n4. **Code Reviews**: Regularly perform code reviews to catch potential vulnerabilities.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, ensure that the size of the data being copied does not exceed the size of the destination buffer. Here is a fixed version of the code:\n\n```cpp\n#include <cstring> // Required for memcpy\n#include <algorithm> // Required for std::min\n\n// Assuming block->buf_size is the size of the destination buffer\nsize_t max_copy_size = std::min(d, block->buf_size);\nmemcpy(block->buf, buf + buf_idx, max_copy_size);\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library dependencies are required:\n\n- `<cstring>`: For the `memcpy` function.\n- `<algorithm>`: For the `std::min` function.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)\n- [CWE-787: Out-of-bounds Write](https://cwe.mitre.org/data/definitions/787.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            },
+            {
+              "id": "glog-8285802e-c756-491f-b904-3d2196f2b862",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ arises when the `malloc` function is used improperly, potentially leading to security issues such as buffer overflows, memory leaks, or undefined behavior. Specifically, using `malloc(file_state.st_size)` without proper validation can be dangerous if `file_state.st_size` is not properly checked for validity, as it could lead to allocating an incorrect amount of memory. This can result in memory corruption or other vulnerabilities.\n\n### General Mitigation Advice\n\n1. **Validate Input**: Always validate the size before using it in `malloc`. Ensure that the size is within expected bounds and is not negative or excessively large.\n2. **Check for NULL**: After calling `malloc`, always check if the returned pointer is `NULL` to ensure that memory allocation was successful.\n3. **Use Safer Alternatives**: Consider using safer alternatives like `calloc` which initializes the allocated memory to zero, or C++ constructs like `std::vector` or `std::unique_ptr` which manage memory automatically.\n4. **Free Memory**: Ensure that all allocated memory is properly freed to avoid memory leaks.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <iostream>\n#include <sys/stat.h>\n#include <cstdlib> // for malloc and free\n\nint main() {\n    struct stat file_state;\n    // Assume file_state is properly initialized and file_state.st_size is set\n\n    // Validate file_state.st_size\n    if (file_state.st_size <= 0 || file_state.st_size > MAX_ALLOWED_SIZE) {\n        std::cerr << \"Invalid file size\" << std::endl;\n        return -1;\n    }\n\n    // Allocate memory safely\n    char* buffer = (char*)malloc(file_state.st_size);\n    if (buffer == NULL) {\n        std::cerr << \"Memory allocation failed\" << std::endl;\n        return -1;\n    }\n\n    // Use the buffer...\n\n    // Free the allocated memory\n    free(buffer);\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\n- `<iostream>`: For input and output operations.\n- `<sys/stat.h>`: For file status information.\n- `<cstdlib>`: For memory allocation functions like `malloc` and `free`.\n\n### Relevant Links\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-cbc3c159-fd1a-4b49-b76b-bdf1b510695e",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (memcpy)\" vulnerability in C++ arises when the `memcpy` function is used improperly, potentially leading to buffer overflows, data corruption, or undefined behavior. This typically occurs when the destination buffer is not large enough to hold the data being copied, or when the size parameter (`sz`) is incorrect. Such vulnerabilities can be exploited to execute arbitrary code, cause a program crash, or leak sensitive information.\n\n### General Mitigation Advice\n\n1. **Validate Input Sizes**: Always ensure that the destination buffer is large enough to accommodate the data being copied.\n2. **Use Safer Alternatives**: Consider using safer functions like `memmove` or `std::copy` from the C++ Standard Library, which provide better safety guarantees.\n3. **Boundary Checks**: Implement boundary checks to ensure that the size of the data being copied does not exceed the size of the destination buffer.\n4. **Static Analysis Tools**: Use static analysis tools to detect potential buffer overflows and other vulnerabilities in your code.\n\n### Source Code Fix Recommendation\n\nHere is a fixed version of the code snippet using `std::copy`:\n\n```cpp\n#include <algorithm> // for std::copy\n#include <cstring>   // for std::memcpy\n#include <iostream>  // for std::cout\n#include <vector>    // for std::vector\n\nvoid safeCopy(char* value, const char* pv, size_t sz) {\n    // Ensure the destination buffer is large enough\n    if (value == nullptr || pv == nullptr) {\n        std::cerr << \"Null pointer provided!\" << std::endl;\n        return;\n    }\n\n    // Assuming value is a buffer of sufficient size\n    std::copy(pv, pv + sz, value);\n}\n\nint main() {\n    const size_t bufferSize = 10;\n    char source[bufferSize] = \"Hello\";\n    char destination[bufferSize];\n\n    safeCopy(destination, source, bufferSize);\n\n    std::cout << \"Copied string: \" << destination << std::endl;\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\nTo execute the above code example, the following standard libraries are required:\n\n- `<algorithm>`: Provides the `std::copy` function.\n- `<cstring>`: Provides the `std::memcpy` function.\n- `<iostream>`: Used for input and output operations.\n- `<vector>`: Used for dynamic array management (not directly used in the example but often relevant in similar contexts).\n\n### Relevant Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration\n\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            },
+            {
+              "id": "glog-fffc904f-5c41-45d3-afc6-75b430fb7dc0",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability in question arises from the use of the `memcpy` function in C/C++ programming, which can lead to buffer overflow issues if not used carefully. The specific line of code:\n\n```cpp\nmemcpy(&r->buffer[buf_idx], b->buf, b->blen);\n```\n\nis potentially dangerous because it does not check if the destination buffer has enough space to accommodate the data being copied from the source buffer. If `b->blen` is larger than the available space in `r->buffer` starting at `buf_idx`, this will result in a buffer overflow, which can lead to undefined behavior, including data corruption, crashes, or security vulnerabilities such as arbitrary code execution.\n\n### General Mitigation Advice\n\n1. **Bounds Checking**: Always ensure that the destination buffer is large enough to hold the data being copied. This can be done by checking the size of the destination buffer and the index at which data is being copied.\n\n2. **Use Safer Alternatives**: Consider using safer alternatives like `memmove` or `strncpy` if applicable, which provide additional safety checks.\n\n3. **Static Analysis Tools**: Use static analysis tools to detect potential buffer overflows in your code.\n\n4. **Code Reviews**: Regular code reviews can help catch potential vulnerabilities early in the development process.\n\n### Source Code Fix Recommendation\n\nTo fix the vulnerability, ensure that the destination buffer has enough space before performing the copy operation. Here is a revised version of the code with added bounds checking:\n\n```cpp\n#include <cstring> // Required for memcpy\n\n// Assuming r->buffer_size is the total size of the buffer\nif (buf_idx + b->blen <= r->buffer_size) {\n    memcpy(&r->buffer[buf_idx], b->buf, b->blen);\n} else {\n    // Handle error: buffer overflow risk\n    // This could be logging an error, throwing an exception, etc.\n}\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library dependency is required:\n\n- `<cstring>`: This header is required for using the `memcpy` function.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            },
+            {
+              "id": "glog-fcc5b2f1-d808-4b16-9d2b-10142ec5cd37",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ typically arises from improper use of the `malloc` function, which is used to allocate memory dynamically. In the provided code snippet, `malloc(vcpu_px_cnt * sizeof(struct acrn_pstate_data))`, the vulnerability may occur if `vcpu_px_cnt` is not properly validated. This can lead to several issues, such as integer overflow, buffer overflow, or memory allocation failures, which can be exploited to cause a denial of service or execute arbitrary code.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Ensure that `vcpu_px_cnt` is validated to be within a reasonable range before using it in `malloc`.\n2. **Check for Integer Overflow**: Before performing the multiplication, check if the multiplication of `vcpu_px_cnt` and `sizeof(struct acrn_pstate_data)` would result in an integer overflow.\n3. **Check for NULL**: Always check the return value of `malloc` to ensure that memory allocation was successful.\n4. **Use Safer Alternatives**: Consider using `calloc`, which initializes the allocated memory to zero and can help prevent some types of vulnerabilities.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <cstdlib>\n#include <iostream>\n\n// Assuming struct acrn_pstate_data is defined somewhere\nstruct acrn_pstate_data {\n    // struct members\n};\n\nbool is_safe_multiplication(size_t a, size_t b) {\n    return a == 0 || b <= SIZE_MAX / a;\n}\n\nint main() {\n    size_t vcpu_px_cnt = /* some value */;\n    \n    // Validate vcpu_px_cnt\n    if (vcpu_px_cnt == 0 || !is_safe_multiplication(vcpu_px_cnt, sizeof(struct acrn_pstate_data))) {\n        std::cerr << \"Invalid vcpu_px_cnt value or potential overflow detected.\" << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    struct acrn_pstate_data* data = (struct acrn_pstate_data*)malloc(vcpu_px_cnt * sizeof(struct acrn_pstate_data));\n    \n    if (data == nullptr) {\n        std::cerr << \"Memory allocation failed.\" << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    // Use the allocated memory\n\n    // Free the allocated memory\n    free(data);\n\n    return EXIT_SUCCESS;\n}\n```\n\n### Library Dependencies\n\n- `<cstdlib>`: Required for `malloc`, `free`, and `EXIT_FAILURE`.\n- `<iostream>`: Required for input/output operations.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-190: Integer Overflow or Wraparound](https://cwe.mitre.org/data/definitions/190.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-f637a0b0-489d-4022-9837-ee1bbda0dec7",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ typically arises from improper use of the `malloc` function, which is used to allocate memory dynamically. In the provided code snippet, the vulnerability is related to the expression `malloc(vcpu_cx_cnt * sizeof(struct acrn_cstate_data))`. This can lead to several issues, such as integer overflow, if `vcpu_cx_cnt` is not properly validated. An integer overflow can cause `malloc` to allocate less memory than intended, potentially leading to buffer overflows, memory corruption, or other undefined behaviors.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Ensure that `vcpu_cx_cnt` is validated to be within a safe range before using it in memory allocation.\n2. **Check for Integer Overflow**: Use safe multiplication functions or check for overflow conditions before performing the multiplication.\n3. **Check Return Value**: Always check the return value of `malloc` to ensure that memory allocation was successful.\n4. **Use Safer Alternatives**: Consider using `calloc`, which initializes the allocated memory to zero and can help prevent some types of vulnerabilities.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <iostream>\n#include <limits>\n#include <cstdlib>\n\nstruct acrn_cstate_data {\n    // Structure members\n};\n\nint main() {\n    size_t vcpu_cx_cnt = /* some value */;\n    \n    // Check for potential overflow\n    if (vcpu_cx_cnt > 0 && vcpu_cx_cnt <= std::numeric_limits<size_t>::max() / sizeof(struct acrn_cstate_data)) {\n        struct acrn_cstate_data* data = (struct acrn_cstate_data*)malloc(vcpu_cx_cnt * sizeof(struct acrn_cstate_data));\n        \n        if (data == nullptr) {\n            std::cerr << \"Memory allocation failed\" << std::endl;\n            return EXIT_FAILURE;\n        }\n        \n        // Use the allocated memory\n        \n        free(data);\n    } else {\n        std::cerr << \"Invalid vcpu_cx_cnt value\" << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    return EXIT_SUCCESS;\n}\n```\n\n### Library Dependencies\n\n- `<iostream>`: For input and output operations.\n- `<limits>`: To use `std::numeric_limits` for checking overflow conditions.\n- `<cstdlib>`: For `malloc`, `free`, and `EXIT_FAILURE`/`EXIT_SUCCESS`.\n\n### Relevant Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration\n\n- [CWE-190: Integer Overflow or Wraparound](https://cwe.mitre.org/data/definitions/190.html)\n- [CWE-787: Out-of-bounds Write](https://cwe.mitre.org/data/definitions/787.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-c2c15e9e-3840-4376-a916-1a81ee5459b3",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability in question arises from the use of the `memcpy` function in C/C++ programming, which can lead to buffer overflow issues if not used carefully. The specific code snippet:\n\n```cpp\nmemcpy(vcpu_px_data, pm_ioctl_buf, sizeof(struct acrn_pstate_data));\n```\n\nindicates that data is being copied from `pm_ioctl_buf` to `vcpu_px_data` with the size of `struct acrn_pstate_data`. If `vcpu_px_data` is not large enough to hold the data being copied, this can result in a buffer overflow, potentially leading to undefined behavior, data corruption, or security vulnerabilities such as arbitrary code execution.\n\n### General Mitigation Advice\n\n1. **Validate Buffer Sizes**: Ensure that the destination buffer is large enough to hold the data being copied. This can be done by comparing the size of the destination buffer with the size of the data being copied.\n\n2. **Use Safer Functions**: Consider using safer alternatives to `memcpy`, such as `memmove` or `std::copy` in C++, which provide additional safety checks.\n\n3. **Static Analysis Tools**: Utilize static analysis tools to detect potential buffer overflows and other vulnerabilities in the code.\n\n4. **Code Reviews**: Regularly conduct code reviews to catch potential vulnerabilities early in the development process.\n\n### Source Code Fix Recommendation\n\nTo mitigate the risk of buffer overflow in the given code, ensure that the destination buffer is adequately sized before performing the copy operation. Here is a revised version of the code with added checks:\n\n```cpp\n#include <cstring> // Required for memcpy\n\n// Assuming vcpu_px_data_size is the size of the destination buffer\nsize_t vcpu_px_data_size = sizeof(vcpu_px_data);\n\nif (vcpu_px_data_size >= sizeof(struct acrn_pstate_data)) {\n    memcpy(vcpu_px_data, pm_ioctl_buf, sizeof(struct acrn_pstate_data));\n} else {\n    // Handle error: destination buffer is too small\n    // Log an error, return an error code, or take other appropriate action\n}\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library dependencies are required:\n\n- `<cstring>`: This header is required for the `memcpy` function.\n\n### Relevant Resources\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            },
+            {
+              "id": "glog-a8231765-82af-4460-8c22-117458170180",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability in question is related to the use of the `memcpy` function in C/C++ programming. The specific issue arises when the size of the data being copied is not properly validated, which can lead to buffer overflows. In the provided code snippet, the `memcpy` function is used to copy data from `pm_ioctl_buf` to `vcpu_cx_data` using the size of `struct acrn_cstate_data`. If `pm_ioctl_buf` contains more data than `vcpu_cx_data` can hold, this can result in a buffer overflow, potentially leading to undefined behavior, data corruption, or security vulnerabilities such as arbitrary code execution.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Always validate the size of the input data before performing memory operations. Ensure that the destination buffer is large enough to hold the data being copied.\n\n2. **Use Safer Functions**: Consider using safer alternatives to `memcpy`, such as `memmove` or `strncpy`, which provide additional safety checks.\n\n3. **Bounds Checking**: Implement bounds checking to ensure that the size of the data being copied does not exceed the size of the destination buffer.\n\n4. **Static Analysis Tools**: Use static analysis tools to detect potential buffer overflow vulnerabilities in the code.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, ensure that the size of the data being copied does not exceed the size of the destination buffer. Here is a revised version of the code snippet with added checks:\n\n```cpp\n#include <cstring> // Required for memcpy\n\n// Assuming vcpu_cx_data and pm_ioctl_buf are defined and initialized elsewhere\n// Assuming sizeof_vcpu_cx_data is the size of the vcpu_cx_data buffer\n\nif (sizeof(pm_ioctl_buf) <= sizeof(vcpu_cx_data)) {\n    memcpy(vcpu_cx_data, pm_ioctl_buf, sizeof(struct acrn_cstate_data));\n} else {\n    // Handle error: source buffer is larger than destination buffer\n    // Log an error, return an error code, or take other appropriate action\n}\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library dependency is required:\n\n- `<cstring>`: This header is required for the `memcpy` function.\n\n### Relevant Resources\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            },
+            {
+              "id": "glog-6b14dfb3-5b48-4f1a-bb1e-11c16db63339",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Identified Issue with C Function (malloc)\" vulnerability in C++ arises when the `malloc` function is used improperly, potentially leading to memory allocation issues such as buffer overflows, memory leaks, or undefined behavior. This vulnerability typically occurs when the size of the memory allocation is not properly calculated or checked, leading to insufficient memory being allocated or excessive memory usage.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Always validate input sizes before using them in memory allocation functions.\n2. **Error Checking**: Check the return value of `malloc` to ensure that memory allocation was successful.\n3. **Use Safer Alternatives**: Consider using C++ standard library features like `std::vector` or `std::unique_ptr` which handle memory management more safely.\n4. **Boundary Checks**: Ensure that any operations on allocated memory do not exceed the allocated size.\n5. **Free Allocated Memory**: Always free memory that has been allocated with `malloc` to prevent memory leaks.\n\n### Source Code Fix Recommendation\n\nHere is a code example demonstrating a safer approach to using `malloc`:\n\n```cpp\n#include <iostream>\n#include <cstdlib> // for malloc and free\n\nint main() {\n    size_t kb_buf_size = 1024; // Example buffer size\n    void* buffer = malloc(kb_buf_size);\n\n    if (buffer == nullptr) {\n        std::cerr << \"Memory allocation failed\" << std::endl;\n        return 1;\n    }\n\n    // Use the buffer safely here\n\n    // Free the allocated memory\n    free(buffer);\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\nTo execute the above code example, the following standard libraries are required:\n\n- `<iostream>`: For input and output operations.\n- `<cstdlib>`: For `malloc` and `free` functions.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-8dd6b025-2b9d-4f62-851c-723aefe4cc7f",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ typically arises from improper use of the `malloc` function, which is used to allocate memory dynamically. This can lead to several issues, such as buffer overflows, memory leaks, or undefined behavior if the allocated memory is not properly managed. In the specific case of `malloc(sizeof(rpmb_block_t))`, the vulnerability may occur if `rpmb_block_t` is not properly defined, or if the size of the allocation does not match the intended use, leading to potential memory corruption or access violations.\n\n### General Mitigation Advice\n\n1. **Validate Input:** Ensure that all inputs used to determine the size of memory allocations are validated to prevent excessive or insufficient allocation.\n2. **Check Return Values:** Always check the return value of `malloc` to ensure that memory allocation was successful before using the allocated memory.\n3. **Use Safer Alternatives:** Consider using safer alternatives like `new` in C++ or smart pointers (e.g., `std::unique_ptr`, `std::shared_ptr`) to manage memory automatically.\n4. **Free Allocated Memory:** Ensure that all dynamically allocated memory is properly freed using `free` to prevent memory leaks.\n5. **Use Static Analysis Tools:** Employ static analysis tools to detect potential memory management issues in the code.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <cstdlib> // Required for malloc and free\n#include <iostream>\n\n// Assuming rpmb_block_t is defined as follows\nstruct rpmb_block_t {\n    // Members of the struct\n};\n\nint main() {\n    // Allocate memory for rpmb_block_t\n    rpmb_block_t* block = static_cast<rpmb_block_t*>(malloc(sizeof(rpmb_block_t)));\n    \n    // Check if malloc was successful\n    if (block == nullptr) {\n        std::cerr << \"Memory allocation failed\" << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    // Use the allocated memory\n    // ...\n\n    // Free the allocated memory\n    free(block);\n\n    return EXIT_SUCCESS;\n}\n```\n\n### Library Dependencies\n\n- `<cstdlib>`: Required for `malloc` and `free`.\n- `<iostream>`: Required for input and output operations.\n\n### Relevant Links\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-b808d28b-2dd5-41a8-96ff-eb53022bd4da",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ typically arises from improper use of the `malloc` function, which is used to allocate memory dynamically. This can lead to various issues such as memory leaks, buffer overflows, or undefined behavior if the allocated memory is not properly managed. In the specific case of `malloc(sizeof(struct acrn_pstate_data))`, the vulnerability may occur if the size of the structure is not correctly calculated or if the allocated memory is not properly initialized or freed.\n\n### General Mitigation Advice\n\n1. **Proper Size Calculation**: Ensure that the size passed to `malloc` is correct and accounts for the entire structure.\n2. **Memory Initialization**: Always initialize the allocated memory to prevent undefined behavior.\n3. **Error Checking**: Check the return value of `malloc` to ensure that memory allocation was successful.\n4. **Memory Deallocation**: Free the allocated memory when it is no longer needed to prevent memory leaks.\n5. **Use Safer Alternatives**: Consider using `new` in C++ for memory allocation, which automatically calls constructors and is type-safe.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <cstdlib>  // Required for malloc and free\n#include <cstring>  // Required for memset\n\nstruct acrn_pstate_data {\n    // Structure members\n};\n\nint main() {\n    // Allocate memory for the structure\n    struct acrn_pstate_data* pstate_data = (struct acrn_pstate_data*)malloc(sizeof(struct acrn_pstate_data));\n    \n    // Check if malloc was successful\n    if (pstate_data == nullptr) {\n        // Handle allocation failure\n        return -1;\n    }\n\n    // Initialize the allocated memory\n    memset(pstate_data, 0, sizeof(struct acrn_pstate_data));\n\n    // Use the allocated memory\n    // ...\n\n    // Free the allocated memory\n    free(pstate_data);\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\n- `<cstdlib>`: Required for `malloc` and `free`.\n- `<cstring>`: Required for `memset`.\n\n### Relevant Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration\n\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-d8f0b03c-2d84-4923-953c-7d8e0849f52d",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Detected Issue with C Function (malloc)\" vulnerability in C++ arises when the `malloc` function is used improperly, leading to potential memory allocation issues. In the provided code snippet, `malloc(sizeof(struct acrn_cstate_data))`, the vulnerability may occur if the size of the structure is not correctly calculated or if the allocation is not checked for success. This can lead to buffer overflows, memory leaks, or undefined behavior if the allocated memory is accessed without proper validation.\n\n### General Mitigation Advice\n\n1. **Check for Allocation Success**: Always verify that the memory allocation was successful by checking if the returned pointer is not `NULL`.\n2. **Use `sizeof` Correctly**: Ensure that the `sizeof` operator is used correctly to calculate the size of the data structure.\n3. **Initialize Allocated Memory**: Consider using `calloc` instead of `malloc` to allocate and initialize memory to zero.\n4. **Free Allocated Memory**: Ensure that all dynamically allocated memory is properly freed to prevent memory leaks.\n5. **Use Smart Pointers**: In C++, prefer using smart pointers (e.g., `std::unique_ptr`, `std::shared_ptr`) to manage dynamic memory automatically.\n\n### Source Code Fix Recommendation\n\n```cpp\n#include <cstdlib>  // Required for malloc and free\n#include <cstring>  // Required for memset\n\nstruct acrn_cstate_data {\n    // Structure members\n};\n\nint main() {\n    // Allocate memory for the structure\n    struct acrn_cstate_data* data = (struct acrn_cstate_data*)malloc(sizeof(struct acrn_cstate_data));\n    \n    // Check if allocation was successful\n    if (data == NULL) {\n        // Handle allocation failure\n        return -1;\n    }\n\n    // Initialize allocated memory (if needed)\n    memset(data, 0, sizeof(struct acrn_cstate_data));\n\n    // Use the allocated memory\n    // ...\n\n    // Free the allocated memory\n    free(data);\n\n    return 0;\n}\n```\n\n### Library Dependencies\n\n- `<cstdlib>`: Required for `malloc` and `free`.\n- `<cstring>`: Required for `memset`.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n- [CWE-401: Missing Release of Memory after Effective Lifetime](https://cwe.mitre.org/data/definitions/401.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS161085"
+                ]
+              }
+            },
+            {
+              "id": "glog-76338aed-82cd-4757-92ee-1ff492e4a99c",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe use of `strncpy` in C++ can lead to vulnerabilities if not handled correctly. `strncpy` is often used to copy strings with a specified maximum length to prevent buffer overflows. However, it does not guarantee null-termination of the destination string if the source string is longer than the specified length. This can lead to undefined behavior when the destination string is used, potentially causing security vulnerabilities such as buffer overflows or data leaks.\n\n### Vulnerability Sink\n\nIn the code snippet:\n\n```cpp\nstrncpy(kdev->name, name, VBS_NAME_LEN);\n```\n\nIf `name` is longer than `VBS_NAME_LEN`, `kdev->name` will not be null-terminated, which can lead to undefined behavior when `kdev->name` is used.\n\n### General Mitigation Advice\n\n1. **Ensure Null-Termination**: Always ensure that the destination buffer is null-terminated after using `strncpy`.\n2. **Use Safer Alternatives**: Consider using safer alternatives like `strlcpy` or `snprintf` if available, which guarantee null-termination.\n3. **Buffer Size Management**: Ensure that the destination buffer is large enough to hold the source string and the null terminator.\n\n### Source Code Fix Recommendation\n\nReplace the use of `strncpy` with a safer alternative or ensure null-termination:\n\n```cpp\n#include <cstring> // Required for strncpy\n\n// Ensure null-termination\nstrncpy(kdev->name, name, VBS_NAME_LEN - 1);\nkdev->name[VBS_NAME_LEN - 1] = '\\0';\n```\n\nOr use `strlcpy` if available:\n\n```cpp\n#include <bsd/string.h> // Required for strlcpy\n\nstrlcpy(kdev->name, name, VBS_NAME_LEN);\n```\n\n### Library Dependencies\n\nTo execute the code examples properly, the following libraries are required:\n\n- `<cstring>`: For `strncpy`.\n- `<bsd/string.h>`: For `strlcpy` (if available on your system).\n\n### Relevant Resources\n\n- [OWASP C++ Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n- [Common Weakness Enumeration: CWE-120](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS111237"
+                ]
+              }
+            },
+            {
+              "id": "glog-507587f8-fed6-4257-884f-3214b6a1695a",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe vulnerability associated with the C function `memcpy` arises from improper handling of memory operations, which can lead to buffer overflows. In the given code snippet:\n\n```cpp\nmemcpy(block_table->signature, BLOCK_BARA_SIGNATURE, SIGNATURE_LENGTH);\n```\n\nThe function `memcpy` copies `SIGNATURE_LENGTH` bytes from `BLOCK_BARA_SIGNATURE` to `block_table->signature`. If `SIGNATURE_LENGTH` exceeds the allocated size of `block_table->signature`, it can result in a buffer overflow, potentially leading to data corruption, crashes, or security vulnerabilities such as arbitrary code execution.\n\n### General Mitigation Advice\n\n1. **Bounds Checking**: Always ensure that the destination buffer is large enough to hold the data being copied.\n2. **Use Safer Functions**: Consider using safer alternatives like `memmove` or `strncpy` that include bounds checking.\n3. **Static Analysis Tools**: Utilize static analysis tools to detect potential buffer overflows.\n4. **Code Reviews**: Regularly perform code reviews to catch vulnerabilities early in the development process.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, ensure that the destination buffer is adequately sized before performing the `memcpy` operation. Here is a revised version of the code:\n\n```cpp\n#include <cstring> // Required for memcpy\n\n#define SIGNATURE_LENGTH 16 // Example length, adjust as necessary\n\nstruct BlockTable {\n    char signature[SIGNATURE_LENGTH];\n};\n\nvoid safe_memcpy(BlockTable* block_table, const char* source, size_t length) {\n    if (length <= SIGNATURE_LENGTH) {\n        memcpy(block_table->signature, source, length);\n    } else {\n        // Handle error: source length exceeds destination buffer size\n    }\n}\n\n// Usage\nBlockTable* block_table = new BlockTable();\nconst char BLOCK_BARA_SIGNATURE[SIGNATURE_LENGTH] = \"example_signature\";\nsafe_memcpy(block_table, BLOCK_BARA_SIGNATURE, SIGNATURE_LENGTH);\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library is required:\n\n- `<cstring>`: This library is required for the `memcpy` function.\n\n### Relevant Resources\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+              },
+              "properties": {
+                "tags": [
+                  "DS121708"
+                ]
+              }
+            }
+          ],
+          "language": "en-US",
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "isComprehensive": false
+        }
+      },
+      "language": "en-US",
+      "results": [
+        {
+          "ruleId": "glog-a8ed36f7-1506-4a2f-91ba-e3116905ce0b",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL: Do not hardcode SSL/TLS versions within an application."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "hypervisor/arch/x86/cpu_caps.c"
+                },
+                "region": {
+                  "startLine": 248,
+                  "startColumn": 53,
+                  "endLine": 248,
+                  "endColumn": 64,
+                  "charOffset": 6638,
+                  "charLength": 11,
+                  "snippet": {
+                    "text": "TLS_TPR_SHA",
+                    "rendered": {
+                      "text": "TLS_TPR_SHA",
+                      "markdown": "`TLS_TPR_SHA`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "Cryptography.Protocol.TLS.Hardcoded"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-31dd0e05-dc1f-4dd0-9551-26866cf7510d",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL: Do not hardcode SSL/TLS versions within an application."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "hypervisor/arch/x86/cpu_caps.c"
+                },
+                "region": {
+                  "startLine": 61,
+                  "startColumn": 75,
+                  "endLine": 61,
+                  "endColumn": 86,
+                  "charOffset": 2058,
+                  "charLength": 11,
+                  "snippet": {
+                    "text": "TLS_TPR_SHA",
+                    "rendered": {
+                      "text": "TLS_TPR_SHA",
+                      "markdown": "`TLS_TPR_SHA`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "Cryptography.Protocol.TLS.Hardcoded"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-75a4a06d-5afa-455a-8a85-9c3bb6581565",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Use of possibly insecure function - consider using safer ast.literal_eval."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "misc/debug_tools/acrn_trace/scripts/acrntrace_format.py"
+                },
+                "region": {
+                  "startLine": 57,
+                  "startColumn": 21,
+                  "endLine": 57,
+                  "endColumn": 37,
+                  "snippet": {
+                    "text": "        formats[str(eval(m.group(1)))] = m.group(2)\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 56,
+                  "endLine": 58,
+                  "snippet": {
+                    "text": "\n        formats[str(eval(m.group(1)))] = m.group(2)\n\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "MEDIUM",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-1447274d-d003-44a3-9bb0-3aeeae3e00dd",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (strlen)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1459,
+                  "startColumn": 6,
+                  "endLine": 1459,
+                  "endColumn": 22,
+                  "charOffset": 36978,
+                  "charLength": 16,
+                  "snippet": {
+                    "text": "strlen(size_str)",
+                    "rendered": {
+                      "text": "strlen(size_str)",
+                      "markdown": "`strlen(size_str)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If a string is missing a null terminator, strlen will read past the end of the buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 36978,
+                        "charLength": 16
+                      },
+                      "insertedContent": {
+                        "text": "strlen_s(size_str, <size of size_str>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "If a string is missing a null terminator, strlen will read past the end of the buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 36978,
+                        "charLength": 16
+                      },
+                      "insertedContent": {
+                        "text": "strnlen(size_str, <size of size_str>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-436ac02b-c570-4401-ac0b-d3f7e967e3cc",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "subprocess call with shell=True identified, security issue."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "doc/extensions/link_roles.py"
+                },
+                "region": {
+                  "startLine": 20,
+                  "startColumn": 22,
+                  "endLine": 20,
+                  "endColumn": 78,
+                  "snippet": {
+                    "text": "            output = subprocess.check_output(cmd, stderr=devnull, shell=True).strip()\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 19,
+                  "endLine": 21,
+                  "snippet": {
+                    "text": "        with open(os.devnull, 'w') as devnull:\n            output = subprocess.check_output(cmd, stderr=devnull, shell=True).strip()\n    except subprocess.CalledProcessError as e:\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-9a10bc9a-1b60-4460-97af-3a0a06bf50b1",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (strlen)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1410,
+                  "startColumn": 6,
+                  "endLine": 1410,
+                  "endColumn": 18,
+                  "charOffset": 35704,
+                  "charLength": 12,
+                  "snippet": {
+                    "text": "strlen(elem)",
+                    "rendered": {
+                      "text": "strlen(elem)",
+                      "markdown": "`strlen(elem)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If a string is missing a null terminator, strlen will read past the end of the buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 35704,
+                        "charLength": 12
+                      },
+                      "insertedContent": {
+                        "text": "strlen_s(elem, <size of elem>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "If a string is missing a null terminator, strlen will read past the end of the buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 35704,
+                        "charLength": 12
+                      },
+                      "insertedContent": {
+                        "text": "strnlen(elem, <size of elem>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-c39d27db-884e-44ab-b74a-529d797a83db",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1152,
+                  "startColumn": 9,
+                  "endLine": 1152,
+                  "endColumn": 30,
+                  "charOffset": 29263,
+                  "charLength": 21,
+                  "snippet": {
+                    "text": "malloc(RTCT_BUF_SIZE)",
+                    "rendered": {
+                      "text": "malloc(RTCT_BUF_SIZE)",
+                      "markdown": "`malloc(RTCT_BUF_SIZE)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 29263,
+                        "charLength": 21
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-27cb5080-956e-44ae-922c-7ad0b9919c3e",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "subprocess call with shell=True identified, security issue."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "doc/extensions/last_updated.py"
+                },
+                "region": {
+                  "startLine": 75,
+                  "startColumn": 28,
+                  "endLine": 76,
+                  "endColumn": 55,
+                  "snippet": {
+                    "text": "                    # folder on the list\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 76,
+                  "endLine": 80,
+                  "snippet": {
+                    "text": "                        f'git --no-pager log -1 --date=format:\"{time_format}\" --pretty=\"format:%cd\" {new_path}',\n                        shell=True, cwd=git_repo_path)\n            except:\n                    # Could not get git info for an existing file, try the next\n                    # folder on the list\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-ef27ba02-0446-4e2f-823a-04eda5246781",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Starting a process with a shell, possible injection detected, security issue."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "misc/packaging/compile_iasl.py"
+                },
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 1,
+                  "endLine": 18,
+                  "endColumn": 15,
+                  "snippet": {
+                    "text": "os.system(cmd)\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 17,
+                  "endLine": 19,
+                  "snippet": {
+                    "text": "cmd = \"cd iasl_build\" + \"&&\" +\"tar zxvf acpica-unix-20191018.tar.gz\"\nos.system(cmd)\n\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-87f752bc-3a76-4f9a-907d-cb3fab800d13",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Starting a process with a shell, possible injection detected, security issue."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "misc/packaging/compile_iasl.py"
+                },
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 1,
+                  "endLine": 15,
+                  "endColumn": 15,
+                  "snippet": {
+                    "text": "os.system(cmd)\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 14,
+                  "endLine": 16,
+                  "snippet": {
+                    "text": "cmd = \"cd iasl_build\" + \"&&\" +\"wget https://acpica.org/sites/acpica/files/acpica-unix-20191018.tar.gz\"\nos.system(cmd)\n\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-45bc2be9-9cf4-4caa-8055-5845fb7c08d2",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Possible binding to all interfaces."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "misc/sample_application/uservm/histapp.py"
+                },
+                "region": {
+                  "startLine": 95,
+                  "startColumn": 15,
+                  "endLine": 95,
+                  "endColumn": 24,
+                  "snippet": {
+                    "text": "\tapp.run(host=\"0.0.0.0\", port=80, debug=False)\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 94,
+                  "endLine": 95,
+                  "snippet": {
+                    "text": "\t#Run the webserver\n\tapp.run(host=\"0.0.0.0\", port=80, debug=False)\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "MEDIUM",
+            "issue_confidence": "MEDIUM"
+          }
+        },
+        {
+          "ruleId": "glog-6f18685d-e57a-4aaa-abdd-920d4111daf8",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (strlen)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1439,
+                  "startColumn": 7,
+                  "endLine": 1439,
+                  "endColumn": 21,
+                  "charOffset": 36522,
+                  "charLength": 14,
+                  "snippet": {
+                    "text": "strlen(s_elem)",
+                    "rendered": {
+                      "text": "strlen(s_elem)",
+                      "markdown": "`strlen(s_elem)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If a string is missing a null terminator, strlen will read past the end of the buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 36522,
+                        "charLength": 14
+                      },
+                      "insertedContent": {
+                        "text": "strlen_s(s_elem, <size of s_elem>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "If a string is missing a null terminator, strlen will read past the end of the buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 36522,
+                        "charLength": 14
+                      },
+                      "insertedContent": {
+                        "text": "strnlen(s_elem, <size of s_elem>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-715e9c01-a306-4911-a54c-8a74982a40c1",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Starting a process with a shell, possible injection detected, security issue."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "misc/packaging/compile_iasl.py"
+                },
+                "region": {
+                  "startLine": 21,
+                  "startColumn": 1,
+                  "endLine": 21,
+                  "endColumn": 15,
+                  "snippet": {
+                    "text": "os.system(cmd)\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 20,
+                  "endLine": 22,
+                  "snippet": {
+                    "text": "cmd = \"cd iasl_build/acpica-unix-20191018\" + \"&&\" +\"make clean\"\nos.system(cmd)\n\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-9eafcc35-c07d-4405-83a7-d36dcb0ed3d9",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (strncpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1023,
+                  "startColumn": 1,
+                  "endLine": 1023,
+                  "endColumn": 43,
+                  "charOffset": 25837,
+                  "charLength": 42,
+                  "snippet": {
+                    "text": "strncpy(vrtct->asl_compiler_id, \"INTL\", 4)",
+                    "rendered": {
+                      "text": "strncpy(vrtct->asl_compiler_id, \"INTL\", 4)",
+                      "markdown": "`strncpy(vrtct->asl_compiler_id, \"INTL\", 4)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25837,
+                        "charLength": 42
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(vrtct->asl_compiler_id,  4,  \"INTL\")"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25837,
+                        "charLength": 42
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(vrtct->asl_compiler_id,  \"INTL\",  4)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-f6a5e192-34c2-4d44-8402-28c90e14ad2e",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (strncpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1021,
+                  "startColumn": 1,
+                  "endLine": 1021,
+                  "endColumn": 40,
+                  "charOffset": 25767,
+                  "charLength": 39,
+                  "snippet": {
+                    "text": "strncpy(vrtct->oem_table_id, \"EDK2\", 8)",
+                    "rendered": {
+                      "text": "strncpy(vrtct->oem_table_id, \"EDK2\", 8)",
+                      "markdown": "`strncpy(vrtct->oem_table_id, \"EDK2\", 8)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25767,
+                        "charLength": 39
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(vrtct->oem_table_id,  8,  \"EDK2\")"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25767,
+                        "charLength": 39
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(vrtct->oem_table_id,  \"EDK2\",  8)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-92869844-224c-4de9-8eef-8bb4d0c27e7c",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Starting a process with a shell, possible injection detected, security issue."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "misc/packaging/compile_iasl.py"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 1,
+                  "endLine": 24,
+                  "endColumn": 15,
+                  "snippet": {
+                    "text": "os.system(cmd)\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 23,
+                  "endLine": 25,
+                  "snippet": {
+                    "text": "cmd = \"cd iasl_build/acpica-unix-20191018\" + \"&&\" +\"make iasl\"\nos.system(cmd)\n\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-e74d00e8-dfb7-45d9-b740-4e68843d0f45",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (strncpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1020,
+                  "startColumn": 1,
+                  "endLine": 1020,
+                  "endColumn": 35,
+                  "charOffset": 25730,
+                  "charLength": 34,
+                  "snippet": {
+                    "text": "strncpy(vrtct->oem_id, \"INTEL\", 6)",
+                    "rendered": {
+                      "text": "strncpy(vrtct->oem_id, \"INTEL\", 6)",
+                      "markdown": "`strncpy(vrtct->oem_id, \"INTEL\", 6)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25730,
+                        "charLength": 34
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(vrtct->oem_id,  6,  \"INTEL\")"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25730,
+                        "charLength": 34
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(vrtct->oem_id,  \"INTEL\",  6)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-ec01240a-2a2a-4aff-88db-fcf820189b96",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (strncpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 1017,
+                  "startColumn": 1,
+                  "endLine": 1017,
+                  "endColumn": 37,
+                  "charOffset": 25621,
+                  "charLength": 36,
+                  "snippet": {
+                    "text": "strncpy(vrtct->signature, \"RTCT\", 4)",
+                    "rendered": {
+                      "text": "strncpy(vrtct->signature, \"RTCT\", 4)",
+                      "markdown": "`strncpy(vrtct->signature, \"RTCT\", 4)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25621,
+                        "charLength": 36
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(vrtct->signature,  4,  \"RTCT\")"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 25621,
+                        "charLength": 36
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(vrtct->signature,  \"RTCT\",  4)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-a00fb3f9-e77d-4929-8051-0f1162f9cd1b",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                },
+                "region": {
+                  "startLine": 352,
+                  "startColumn": 16,
+                  "endLine": 352,
+                  "endColumn": 28,
+                  "charOffset": 8341,
+                  "charLength": 12,
+                  "snippet": {
+                    "text": "malloc(size)",
+                    "rendered": {
+                      "text": "malloc(size)",
+                      "markdown": "`malloc(size)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 8341,
+                        "charLength": 12
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-73fb3ec0-b443-4b1c-a48e-11856834a44a",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                },
+                "region": {
+                  "startLine": 138,
+                  "startColumn": 1,
+                  "endLine": 138,
+                  "endColumn": 55,
+                  "charOffset": 3116,
+                  "charLength": 54,
+                  "snippet": {
+                    "text": "memcpy((void *)rtct_entry, (void *)entry, entry->size)",
+                    "rendered": {
+                      "text": "memcpy((void *)rtct_entry, (void *)entry, entry->size)",
+                      "markdown": "`memcpy((void *)rtct_entry, (void *)entry, entry->size)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/vssram/vssram.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 3116,
+                        "charLength": 54
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s((void *)rtct_entry, <size of (void *)rtct_entry>,  (void *)entry,  entry->size)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-6d2190a1-3c60-4d33-af16-891f9bec8cd9",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                },
+                "region": {
+                  "startLine": 279,
+                  "startColumn": 5,
+                  "endLine": 279,
+                  "endColumn": 41,
+                  "charOffset": 6882,
+                  "charLength": 36,
+                  "snippet": {
+                    "text": "memcpy(block->buf, buf + buf_idx, d)",
+                    "rendered": {
+                      "text": "memcpy(block->buf, buf + buf_idx, d)",
+                      "markdown": "`memcpy(block->buf, buf + buf_idx, d)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 6882,
+                        "charLength": 36
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s(block->buf, <size of block->buf>,  buf + buf_idx,  d)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-8285802e-c756-491f-b904-3d2196f2b862",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_parser.c"
+                },
+                "region": {
+                  "startLine": 133,
+                  "startColumn": 34,
+                  "endLine": 133,
+                  "endColumn": 60,
+                  "charOffset": 3727,
+                  "charLength": 26,
+                  "snippet": {
+                    "text": "malloc(file_state.st_size)",
+                    "rendered": {
+                      "text": "malloc(file_state.st_size)",
+                      "markdown": "`malloc(file_state.st_size)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_parser.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 3727,
+                        "charLength": 26
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-cbc3c159-fd1a-4b49-b76b-bdf1b510695e",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                },
+                "region": {
+                  "startLine": 1198,
+                  "startColumn": 2,
+                  "endLine": 1198,
+                  "endColumn": 23,
+                  "charOffset": 28404,
+                  "charLength": 21,
+                  "snippet": {
+                    "text": "memcpy(value, pv, sz)",
+                    "rendered": {
+                      "text": "memcpy(value, pv, sz)",
+                      "markdown": "`memcpy(value, pv, sz)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 28404,
+                        "charLength": 21
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s(value, <size of value>,  pv,  sz)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-fffc904f-5c41-45d3-afc6-75b430fb7dc0",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                },
+                "region": {
+                  "startLine": 835,
+                  "startColumn": 4,
+                  "endLine": 835,
+                  "endColumn": 48,
+                  "charOffset": 19636,
+                  "charLength": 44,
+                  "snippet": {
+                    "text": "memcpy(&r->buffer[buf_idx], b->buf, b->blen)",
+                    "rendered": {
+                      "text": "memcpy(&r->buffer[buf_idx], b->buf, b->blen)",
+                      "markdown": "`memcpy(&r->buffer[buf_idx], b->buf, b->blen)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/usb_pmapper.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 19636,
+                        "charLength": 44
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s(&r->buffer[buf_idx], <size of &r->buffer[buf_idx]>,  b->buf,  b->blen)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-fcc5b2f1-d808-4b16-9d2b-10142ec5cd37",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                },
+                "region": {
+                  "startLine": 272,
+                  "startColumn": 16,
+                  "endLine": 272,
+                  "endColumn": 68,
+                  "charOffset": 6512,
+                  "charLength": 52,
+                  "snippet": {
+                    "text": "malloc(vcpu_px_cnt * sizeof(struct acrn_pstate_data)",
+                    "rendered": {
+                      "text": "malloc(vcpu_px_cnt * sizeof(struct acrn_pstate_data)",
+                      "markdown": "`malloc(vcpu_px_cnt * sizeof(struct acrn_pstate_data)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 6512,
+                        "charLength": 52
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-f637a0b0-489d-4022-9837-ee1bbda0dec7",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                },
+                "region": {
+                  "startLine": 158,
+                  "startColumn": 16,
+                  "endLine": 158,
+                  "endColumn": 68,
+                  "charOffset": 3330,
+                  "charLength": 52,
+                  "snippet": {
+                    "text": "malloc(vcpu_cx_cnt * sizeof(struct acrn_cstate_data)",
+                    "rendered": {
+                      "text": "malloc(vcpu_cx_cnt * sizeof(struct acrn_cstate_data)",
+                      "markdown": "`malloc(vcpu_cx_cnt * sizeof(struct acrn_cstate_data)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 3330,
+                        "charLength": 52
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-c2c15e9e-3840-4376-a916-1a81ee5459b3",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                },
+                "region": {
+                  "startLine": 69,
+                  "startColumn": 1,
+                  "endLine": 70,
+                  "endColumn": 34,
+                  "charOffset": 1564,
+                  "charLength": 69,
+                  "snippet": {
+                    "text": "memcpy(vcpu_px_data, pm_ioctl_buf,\n\t\t\tsizeof(struct acrn_pstate_data)",
+                    "rendered": {
+                      "text": "memcpy(vcpu_px_data, pm_ioctl_buf,\n\t\t\tsizeof(struct acrn_pstate_data)",
+                      "markdown": "`memcpy(vcpu_px_data, pm_ioctl_buf,\n\t\t\tsizeof(struct acrn_pstate_data)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 1564,
+                        "charLength": 69
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s(vcpu_px_data, <size of vcpu_px_data>,  pm_ioctl_buf, \n\t\t\tsizeof(struct acrn_pstate_data)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-a8231765-82af-4460-8c22-117458170180",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                },
+                "region": {
+                  "startLine": 98,
+                  "startColumn": 1,
+                  "endLine": 99,
+                  "endColumn": 34,
+                  "charOffset": 2282,
+                  "charLength": 69,
+                  "snippet": {
+                    "text": "memcpy(vcpu_cx_data, pm_ioctl_buf,\n\t\t\tsizeof(struct acrn_cstate_data)",
+                    "rendered": {
+                      "text": "memcpy(vcpu_cx_data, pm_ioctl_buf,\n\t\t\tsizeof(struct acrn_cstate_data)",
+                      "markdown": "`memcpy(vcpu_cx_data, pm_ioctl_buf,\n\t\t\tsizeof(struct acrn_cstate_data)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 2282,
+                        "charLength": 69
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s(vcpu_cx_data, <size of vcpu_cx_data>,  pm_ioctl_buf, \n\t\t\tsizeof(struct acrn_cstate_data)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-6b14dfb3-5b48-4f1a-bb1e-11c16db63339",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/pci/virtio/virtio_rpmb.c"
+                },
+                "region": {
+                  "startLine": 514,
+                  "startColumn": 21,
+                  "endLine": 514,
+                  "endColumn": 40,
+                  "charOffset": 13107,
+                  "charLength": 19,
+                  "snippet": {
+                    "text": "malloc(kb_buf_size)",
+                    "rendered": {
+                      "text": "malloc(kb_buf_size)",
+                      "markdown": "`malloc(kb_buf_size)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/pci/virtio/virtio_rpmb.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 13107,
+                        "charLength": 19
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-8dd6b025-2b9d-4f62-851c-723aefe4cc7f",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/pci/virtio/virtio_rpmb.c"
+                },
+                "region": {
+                  "startLine": 486,
+                  "startColumn": 15,
+                  "endLine": 486,
+                  "endColumn": 42,
+                  "charOffset": 12369,
+                  "charLength": 27,
+                  "snippet": {
+                    "text": "malloc(sizeof(rpmb_block_t)",
+                    "rendered": {
+                      "text": "malloc(sizeof(rpmb_block_t)",
+                      "markdown": "`malloc(sizeof(rpmb_block_t)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/pci/virtio/virtio_rpmb.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 12369,
+                        "charLength": 27
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-b808d28b-2dd5-41a8-96ff-eb53022bd4da",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                },
+                "region": {
+                  "startLine": 53,
+                  "startColumn": 16,
+                  "endLine": 53,
+                  "endColumn": 54,
+                  "charOffset": 1163,
+                  "charLength": 38,
+                  "snippet": {
+                    "text": "malloc(sizeof(struct acrn_pstate_data)",
+                    "rendered": {
+                      "text": "malloc(sizeof(struct acrn_pstate_data)",
+                      "markdown": "`malloc(sizeof(struct acrn_pstate_data)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 1163,
+                        "charLength": 38
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-d8f0b03c-2d84-4923-953c-7d8e0849f52d",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (malloc)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                },
+                "region": {
+                  "startLine": 82,
+                  "startColumn": 16,
+                  "endLine": 82,
+                  "endColumn": 54,
+                  "charOffset": 1881,
+                  "charLength": 38,
+                  "snippet": {
+                    "text": "malloc(sizeof(struct acrn_cstate_data)",
+                    "rendered": {
+                      "text": "malloc(sizeof(struct acrn_cstate_data)",
+                      "markdown": "`malloc(sizeof(struct acrn_cstate_data)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "If the value provided to malloc is the result of unsafe integer math, it can result in an exploitable condition. "
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/platform/acpi/acpi_pm.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 1881,
+                        "charLength": 38
+                      },
+                      "insertedContent": {
+                        "text": "calloc(<number of elements>, <size of each element>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-76338aed-82cd-4757-92ee-1ff492e4a99c",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Banned C function detected (strncpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/pci/virtio/virtio_audio.c"
+                },
+                "region": {
+                  "startLine": 123,
+                  "startColumn": 1,
+                  "endLine": 123,
+                  "endColumn": 40,
+                  "charOffset": 3465,
+                  "charLength": 39,
+                  "snippet": {
+                    "text": "strncpy(kdev->name, name, VBS_NAME_LEN)",
+                    "rendered": {
+                      "text": "strncpy(kdev->name, name, VBS_NAME_LEN)",
+                      "markdown": "`strncpy(kdev->name, name, VBS_NAME_LEN)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/pci/virtio/virtio_audio.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 3465,
+                        "charLength": 39
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(kdev->name,  VBS_NAME_LEN,  name)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strncpy is dangerous, as if the source contains 'n' or more characters, it will not null terminate the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/pci/virtio/virtio_audio.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 3465,
+                        "charLength": 39
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(kdev->name,  name,  VBS_NAME_LEN)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "glog-507587f8-fed6-4257-884f-3214b6a1695a",
+          "kind": "fail",
+          "level": "note",
+          "message": {
+            "text": "Problematic C function detected (memcpy)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "devicemodel/hw/pci/virtio/virtio_rpmb.c"
+                },
+                "region": {
+                  "startLine": 462,
+                  "startColumn": 1,
+                  "endLine": 462,
+                  "endColumn": 71,
+                  "charOffset": 11621,
+                  "charLength": 70,
+                  "snippet": {
+                    "text": "memcpy(block_table->signature, BLOCK_BARA_SIGNATURE, SIGNATURE_LENGTH)",
+                    "rendered": {
+                      "text": "memcpy(block_table->signature, BLOCK_BARA_SIGNATURE, SIGNATURE_LENGTH)",
+                      "markdown": "`memcpy(block_table->signature, BLOCK_BARA_SIGNATURE, SIGNATURE_LENGTH)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "There are a number of conditions in which memcpy can introduce a vulnerability (mismatched buffer sizes, null pointers, etc.). More secure alternitives perform additional validation of the source and destination buffer"
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "devicemodel/hw/pci/virtio/virtio_rpmb.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 11621,
+                        "charLength": 70
+                      },
+                      "insertedContent": {
+                        "text": "memcpy_s(block_table->signature, <size of block_table->signature>,  BLOCK_BARA_SIGNATURE,  SIGNATURE_LENGTH)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "BestPractice",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.ProblematicFunction"
+            ]
+          }
+        }
+      ],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ]
+    }
+  ]
+}
